@@ -49,6 +49,10 @@ class Shooter:
     def get_outer_error(self) -> float:
         return self.outer_rpm - self.outer_encoder.getVelocity()
 
+    def set_motor_rpm(self, v_outer, v_centre) -> None:
+        self.centre_rpm = v_centre
+        self.outer_rpm = v_outer
+
 
 
 
