@@ -12,8 +12,8 @@ class Shooter:
     #outer_rpm = tunable(0)
     #centre_rpm = tunable(0)
     def __init__(self):
-        self.outer_rpm = -3000
-        self.centre_rpm = -3000
+        self.outer_rpm = -5000
+        self.centre_rpm = -5000
 
     def on_enable(self) -> None:
         self.centre_motor.stopMotor()
