@@ -20,7 +20,8 @@ class MyRobot(magicbot.MagicRobot):
         """Robot initialization function"""
 
         # object that handles basic drive operations
-        self.joystick = wpilib.Joystick(0)
+        self.joystick_left = wpilib.Joystick(0)
+        self.joystick_right = wpilib.Joystick(1)
 
         self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
         self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless) 
@@ -40,12 +41,20 @@ class MyRobot(magicbot.MagicRobot):
     def teleopPeriodic(self):
         """Runs the motors with tank steering"""
 
-        wpilib.SmartDashboard.putNumber("outerVelocity", self.shooter.get_outer_error())
-        wpilib.SmartDashboard.putNumber("centreVelocity", self.shooter.get_centre_error())
+        outer_throttle = ((-self.joystick_left.getThrottle() +1)/2)* 5000
+        inner_throttle = -((-self.joystick_right.getThrottle() +1)/2)* 5000
 
-        if self.joystick.getRawButtonPressed(11):
+        self.shooter.set_motor_rpm(outer_throttle,inner_throttle)
+
+        wpilib.SmartDashboard.putNumber("outerError", self.shooter.get_outer_error())
+        wpilib.SmartDashboard.putNumber("centreError", self.shooter.get_centre_error())
+
+        wpilib.SmartDashboard.putNumber("outerVelocity", outer_throttle)
+        wpilib.SmartDashboard.putNumber("centreVelocity", inner_throttle)
+
+        if self.joystick_left.getRawButtonPressed(11):
             self.loading_piston.set(wpilib.DoubleSolenoid.Value.kForward)
-        if self.joystick.getRawButtonPressed(12):
+        if self.joystick_left.getRawButtonPressed(12):
             self.loading_piston.set(wpilib.DoubleSolenoid.Value.kReverse)
 
 
