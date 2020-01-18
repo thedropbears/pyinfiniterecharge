@@ -1,0 +1,3 @@
+pyfrc >= 2020.0.0b2
+robotpy-rev ~= 2020.0.0
+robotpy-rev-color ~= 2020.0.1
