@@ -18,18 +18,18 @@ from components.shooter import Shooter
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
     indexer: Indexer
-    # shooter: Shooter
+    shooter: Shooter
 
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
-        # self.joystick_left = wpilib.Joystick(0)
-        # self.joystick_right = wpilib.Joystick(1)
+        self.joystick_left = wpilib.Joystick(0)
+        self.joystick_right = wpilib.Joystick(1)
 
-        # self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
-        # self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
+        self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
+        self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
 
-        # self.loading_piston = wpilib.DoubleSolenoid(0, 1)
+        self.loading_piston = wpilib.DoubleSolenoid(0, 1)
 
         self.indexer_motors = [wpilib.Spark(1), wpilib.Spark(0)]
         self.indexer_switches = [wpilib.DigitalInput(8), wpilib.DigitalInput(9)]
