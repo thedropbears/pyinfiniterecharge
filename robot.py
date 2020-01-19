@@ -65,6 +65,7 @@ class MyRobot(magicbot.MagicRobot):
         if self.joystick_left.getRawButtonPressed(12):
             self.loading_piston.set(wpilib.DoubleSolenoid.Value.kReverse)
 
+        self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
 
     def handle_indexer_inputs(self, joystick):
