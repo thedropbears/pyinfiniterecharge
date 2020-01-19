@@ -7,24 +7,30 @@
 
 import wpilib
 import rev
+import rev.color
 
 import magicbot
 
 from controllers.shooter import ShooterController
+from controllers.spinner import SpinnerController
 from components.indexer import Indexer
 from components.shooter import Shooter
+from components.spinner import Spinner
 
 
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
+    spinner_controller: SpinnerController
     indexer: Indexer
     shooter: Shooter
+    spinner: Spinner
 
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
         self.joystick_left = wpilib.Joystick(0)
         self.joystick_right = wpilib.Joystick(1)
+        self.spinner_joystick = wpilib.Joystick(2)
 
         self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
         self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
@@ -33,6 +39,10 @@ class MyRobot(magicbot.MagicRobot):
 
         self.indexer_motors = [wpilib.Spark(1), wpilib.Spark(0)]
         self.indexer_switches = [wpilib.DigitalInput(8), wpilib.DigitalInput(9)]
+
+        self.spinner_motor = wpilib.Spark(2)
+        self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
+        self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -54,6 +64,22 @@ class MyRobot(magicbot.MagicRobot):
             self.loading_piston.set(wpilib.DoubleSolenoid.Value.kForward)
         if self.joystick_left.getRawButtonPressed(12):
             self.loading_piston.set(wpilib.DoubleSolenoid.Value.kReverse)
+
+        self.handle_spinner_inputs(self.spinner_joystick)
+
+    def handle_spinner_inputs(self, joystick):
+        if joystick.getRawButtonPressed(7):
+            self.spinner_controller.run(test=True, task="position")
+            print(f"Spinner Running")
+        if joystick.getRawButtonPressed(9):
+            self.spinner.piston_up()
+            print("Spinner Piston Up")
+        if joystick.getRawButtonPressed(10):
+            self.spinner.piston_down()
+            print("Spinner Piston Down")
+        if joystick.getRawButtonPressed(8):
+            print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
+            print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
 
 if __name__ == "__main__":
