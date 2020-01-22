@@ -11,10 +11,10 @@ class Turret:
 
     def reset_ticks(self) -> None:
         # prototype starts at full speed 
-        self.motor_speed = 1.0
+        self.motor_speed = 0.2
         self.seeking = False
         self.tick_count = 0
-        self.starting_max_ticks = 2
+        self.starting_max_ticks = 10
         self.max_ticks = self.starting_max_ticks
         self.max_ticks_factor = -2
         self.tick_increment = 1
@@ -27,8 +27,10 @@ class Turret:
         pass
 
     def execute(self) -> None:
+
         # Are we there yet? If so, stop the motor and stop seeking
-        if self.centre_index.get(): 
+        val = self.centre_index.get()
+        if val == 1:
             self.logger.info("Yep, we are there!!!")
             self.motor.stopMotor()
             self.reset_ticks()
