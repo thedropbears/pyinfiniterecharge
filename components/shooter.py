@@ -69,9 +69,11 @@ class Shooter:
         """
         Returns true if the shooter is attempting a shot.
 
-        set to true when the injector piston is fired returned to false after a drop in the motors velocity
+        based off of the pistons current state
         """
-        pass
+        return not self.loading_piston.get()
+
+
 
     def fire(self) -> None:
         """
