@@ -2,7 +2,7 @@ import wpilib
 import rev
 import rev.color
 
-class Colour:
+class Colour: #class for storing rgb colours
     def __init__(self, red: float, green: float, blue: float):
         self.red = red
         self.green = green
@@ -22,7 +22,7 @@ class Spinner:
 	MAX_COLOUR_DIST = 0.2  # Chosen without experimentation, should be tuned
 	COLOUR_OFFSET = 1  # The offset of the colour sensor, in 45 degree increments
 
-	WHEEL_COLOURS = {
+	WHEEL_COLOURS = { #Colours read in real world
 		"R": Colour(82 / 255, 116 / 255, 55 / 255),
 		"B": Colour(55 / 255, 120 / 255, 80 / 255),
 		"G": Colour(61 / 255, 126 / 255, 66 / 255),
@@ -41,7 +41,7 @@ class Spinner:
 
 	def on_enable(self):
 		self.spinner_motor.stopMotor()
-		self.spinner_solenoid.set(False)
+		self.spinner_solenoid.set(True)
 		self.rotation = 0
 		self.state = None
 		self.lastCol = None
@@ -50,16 +50,16 @@ class Spinner:
 
 
 
-	# Methods
+	# Methods to be called by controller
 	def is_complete(self):
 		return self.state == None
-	def do_rotation_control(self):
+	def do_rotation_control(self): # to start the rotation routine
 		self.state = "rotation"
 		self.rotations = 0
 		self.lastCol = None
 		self.piston_down()
 
-	def go_to_colour(self, colour):
+	def go_to_colour(self, colour): # to start the position routine
 		self.state = "position"
 		self.required_colour = colour
 		self.piston_down()
@@ -68,7 +68,7 @@ class Spinner:
 
 
 
-	def piston_up(self):
+	def piston_up(self): #as functions to make swapping easier
 		self.spinner_solenoid.set(True)
 	def piston_down(self):
 		self.spinner_solenoid.set(False)
@@ -76,7 +76,7 @@ class Spinner:
 	def read_colour(self):
 		return (self.colour_sensor.getColor(), self.colour_sensor.getIR())
 
-	def get_wheel_dist(self):
+	def get_wheel_dist(self): #finds the colour wheels distance from required colour in segments
 		current_colour = self.get_current_colour()
 		if current_colour == None:
 			return 0
@@ -89,7 +89,7 @@ class Spinner:
 			return distance - 4
 		return distance
 
-	def get_current_colour(self):
+	def get_current_colour(self): #gets colour as a letter ("R", "Y", "B", "G")
 		sensed_colour, _ = self.read_colour()
 
 		distances = {}
@@ -103,8 +103,8 @@ class Spinner:
 			return min(distances, key=lambda col: distances[col])
 
 
-	def run_rotation(self):
-		self.spinner_motor.set(1-self.rotations/6)
+	def run_rotation(self): #rotation control to be called every 20ms
+		self.spinner_motor.set(1-self.rotations/6) #speed slows down as it gets closer to required revolutions
 		current_colour = self.get_current_colour()
 		if(self.lastCol != current_colour):
 			self.rotations += 1/8
@@ -114,7 +114,7 @@ class Spinner:
 			self.spinner_motor.set(0)
 			self.piston_up()
 
-	def run_position(self):
+	def run_position(self): #position control to be called every 20ms
 		distance = self.get_wheel_dist()
 		self.spinner_motor.set(distance * self.WHEEL_SPIN_FACTOR)
 		if distance == 0  and self.read_colour()[1] > 35:
@@ -127,3 +127,4 @@ class Spinner:
 		if self.state == "position":
 			self.run_position()
 		wpilib.SmartDashboard.putString("Read Colour", str(self.lastCol))
+		wpilib.SmartDashboard.putString("Colour wheel state", str(self.state)) #convert to string beacuse it is None sometimes

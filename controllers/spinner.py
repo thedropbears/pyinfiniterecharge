@@ -8,13 +8,13 @@ class SpinnerController:
 	spinner: Spinner
 
 
-	def run(self, test=False, task=None):
+	def run(self, test=False, task=None): #ran when 
 		self.test = test
 		self.task = task
-		if self.spinner.is_complete():
+		if self.spinner.is_complete(): # if not currently running start running
 			self.state = "select_task"
 		else:
-			self.spinner.state = None
+			self.spinner.state = None # if currently running stop
 		self.select_task()
 
 	def setup(self):
@@ -34,13 +34,10 @@ class SpinnerController:
 			self.required_colour = "R"
 			self.state = "position"
 			self.spinner.go_to_colour("R")
-			# self.next_state("position")
 
 		elif self.task == "rotation":
 			self.state = "rotation"
 			self.spinner.do_rotation_control()
-			# self.next_state("rotation")
-
 
 	def execute(self):
 		pass
