@@ -95,19 +95,18 @@ class MyRobot(magicbot.MagicRobot):
     def handle_spinner_inputs(self, joystick):
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
-            print(f"Spinner Running")
+            print(f"Position Control")
         if joystick.getRawButtonPressed(8):
             self.spinner_controller.run(test=True, task="rotation")
-            print(f"Spinner Running")
+            print(f"Rotation Control")
+
+        # only needed for testing
         if joystick.getRawButtonPressed(12):
             self.spinner.piston_up()
             print("Spinner Piston Up")
         if joystick.getRawButtonPressed(11):
             self.spinner.piston_down()
             print("Spinner Piston Down")
-        if joystick.getRawButtonPressed(9):
-            print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
-            print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
     def handle_chassis_inputs(self, joystick):
         scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
