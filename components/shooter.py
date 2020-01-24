@@ -17,9 +17,7 @@ class Shooter:
         self.outer_rpm = 4400
         self.centre_rpm = -3700
 
-        self.loops_since_inject = 0
-        self.inject = 0
-        self.last_shot_time = None
+        self.inject = False
         self.velocity_tolerance = 50 # rpm
 
     def on_enable(self) -> None:
