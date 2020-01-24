@@ -37,18 +37,44 @@ class Shooter:
             pid.setFF(0.000156)
 
     def execute(self) -> None:
-        # self.outer_rpm = 0
-        # self.centre_rpm = 0
         self.centre_pid.setReference(self.centre_rpm, rev.ControlType.kVelocity)
         self.outer_pid.setReference(self.outer_rpm, rev.ControlType.kVelocity)
+    
+    def set_range(self, range: float) -> None:
+        """
+        Set the target range for the shooter, this will be converted into target speeds for the flywheels
+        range: planar distance from the power port
+        """
+        pass
 
-    def get_centre_error(self) -> float:
-        return self.centre_rpm - self.centre_encoder.getVelocity()
+    def is_ready(self) -> bool:
+        """
+        Returns true if the shooter is able to make a successful shot with the currently set range.
 
-    def get_outer_error(self) -> float:
-        return self.outer_rpm - self.outer_encoder.getVelocity()
+        Considers the rotation rates of the flywheels compared with their setpoints
+        """
+        pass
 
-    def set_motor_rpm(self, v_outer, v_centre) -> None:
-        self.centre_rpm = v_centre
-        self.outer_rpm = v_outer
+    def is_firing(self) -> bool:
+        """
+        Returns true if the shooter is attempting a shot.
 
+        set to true when the injector piston is fired returned to false after a drop in the motors velocity
+        """
+        pass
+
+    def fire(self) -> None:
+        """
+        Inject a ball into the shooter
+        """
+        pass
+
+    # def get_centre_error(self) -> float:
+    #     return self.centre_rpm - self.centre_encoder.getVelocity()
+
+    # def get_outer_error(self) -> float:
+    #     return self.outer_rpm - self.outer_encoder.getVelocity()
+
+    # def set_motor_rpm(self, v_outer, v_centre) -> None:
+    #     self.centre_rpm = v_centre
+    #     self.outer_rpm = v_outer
