@@ -7,7 +7,7 @@ from magicbot import tunable
 class Shooter:
     outer_motor: rev.CANSparkMax
     centre_motor: rev.CANSparkMax
-    loading_piston: wpilib.DoubleSolenoid
+    loading_piston: wpilib.Solenoid
 
     # outer_rpm = tunable(0)
     # centre_rpm = tunable(0)

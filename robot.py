@@ -35,7 +35,7 @@ class MyRobot(magicbot.MagicRobot):
         self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
         self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
 
-        self.loading_piston = wpilib.DoubleSolenoid(0, 1)
+        self.loading_piston = wpilib.Solenoid(0)
 
         self.indexer_motors = [wpilib.Spark(1), wpilib.Spark(0)]
         self.indexer_switches = [wpilib.DigitalInput(8), wpilib.DigitalInput(9)]
@@ -61,9 +61,9 @@ class MyRobot(magicbot.MagicRobot):
         wpilib.SmartDashboard.putNumber("centreVelocity", inner_throttle)
 
         if self.joystick_left.getRawButtonPressed(11):
-            self.loading_piston.set(wpilib.DoubleSolenoid.Value.kForward)
+            self.loading_piston.set(True)
         if self.joystick_left.getRawButtonPressed(12):
-            self.loading_piston.set(wpilib.DoubleSolenoid.Value.kReverse)
+            self.loading_piston.set(False)
 
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
