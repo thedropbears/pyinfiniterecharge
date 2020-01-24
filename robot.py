@@ -55,7 +55,7 @@ class MyRobot(magicbot.MagicRobot):
         ]
 
         self.spinner_motor = wpilib.Spark(2)
-        self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
+        self.spinner_solenoid = wpilib.Solenoid(2)
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
 
@@ -73,11 +73,8 @@ class MyRobot(magicbot.MagicRobot):
         """Executed at the start of teleop mode"""
 
     def teleopPeriodic(self):
+
         """Executed every cycle"""
-
-        self.handle_spinner_inputs(self.spinner_joystick)
-        self.handle_chassis_inputs(self.joystick_left)
-
         pov = self.turret_joystick.getPOV(0)
         about_five_degrees = 0.087  # radians
         if pov != -1:
@@ -99,13 +96,16 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
             print(f"Spinner Running")
-        if joystick.getRawButtonPressed(9):
+        if joystick.getRawButtonPressed(8):
+            self.spinner_controller.run(test=True, task="rotation")
+            print(f"Spinner Running")
+        if joystick.getRawButtonPressed(12):
             self.spinner.piston_up()
             print("Spinner Piston Up")
-        if joystick.getRawButtonPressed(10):
+        if joystick.getRawButtonPressed(11):
             self.spinner.piston_down()
             print("Spinner Piston Down")
-        if joystick.getRawButtonPressed(8):
+        if joystick.getRawButtonPressed(9):
             print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
