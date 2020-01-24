@@ -1,3 +1,5 @@
+import time
+
 import wpilib
 import rev
 
@@ -14,6 +16,10 @@ class Shooter:
     def __init__(self):
         self.outer_rpm = 4400
         self.centre_rpm = -3700
+
+        self.loops_since_inject = 0
+        self.inject = 0
+        self.last_shot_time = None
 
     def on_enable(self) -> None:
         self.centre_motor.stopMotor()
@@ -39,6 +45,13 @@ class Shooter:
     def execute(self) -> None:
         self.centre_pid.setReference(self.centre_rpm, rev.ControlType.kVelocity)
         self.outer_pid.setReference(self.outer_rpm, rev.ControlType.kVelocity)
+
+        if self.inject:
+            self.loading_piston.set(self.inject)
+            self.loops_since_inject += 1
+        
+        if self.loops_since_inject >= 10:
+            self.inject = False
     
     def set_range(self, range: float) -> None:
         """
@@ -67,7 +80,8 @@ class Shooter:
         """
         Inject a ball into the shooter
         """
-        pass
+        self.inject = True
+        self.last_shot_time = time.monotonic()
 
     # def get_centre_error(self) -> float:
     #     return self.centre_rpm - self.centre_encoder.getVelocity()
