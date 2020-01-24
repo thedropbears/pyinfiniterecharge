@@ -41,13 +41,14 @@ class MyRobot(magicbot.MagicRobot):
         self.indexer_switches = [wpilib.DigitalInput(8), wpilib.DigitalInput(9)]
 
         self.spinner_motor = wpilib.Spark(2)
-        self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
+        self.spinner_solenoid = wpilib.Solenoid(2)
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
 
     def teleopPeriodic(self):
+
         """Executed every cycle"""
         outer_throttle = ((-self.joystick_left.getThrottle() + 1) / 2) * 5000
         inner_throttle = -((-self.joystick_right.getThrottle() + 1) / 2) * 5000
@@ -60,11 +61,12 @@ class MyRobot(magicbot.MagicRobot):
         wpilib.SmartDashboard.putNumber("outerVelocity", outer_throttle)
         wpilib.SmartDashboard.putNumber("centreVelocity", inner_throttle)
 
-        if self.joystick_left.getRawButtonPressed(11):
-            self.loading_piston.set(wpilib.DoubleSolenoid.Value.kForward)
-        if self.joystick_left.getRawButtonPressed(12):
-            self.loading_piston.set(wpilib.DoubleSolenoid.Value.kReverse)
+        #if self.joystick_left.getRawButtonPressed(11):
+        #    self.loading_piston.set(wpilib.DoubleSolenoid.Value.kForward)
+        #if self.joystick_left.getRawButtonPressed(12):
+        #    self.loading_piston.set(wpilib.DoubleSolenoid.Value.kReverse)
 
+        #wpilib.SmartDashboard.putString("Colour wheel state", self.spinner_controller.state)
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
 
@@ -83,13 +85,16 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
             print(f"Spinner Running")
-        if joystick.getRawButtonPressed(9):
+        if joystick.getRawButtonPressed(8):
+            self.spinner_controller.run(test=True, task="rotation")
+            print(f"Spinner Running")
+        if joystick.getRawButtonPressed(12):
             self.spinner.piston_up()
             print("Spinner Piston Up")
-        if joystick.getRawButtonPressed(10):
+        if joystick.getRawButtonPressed(11):
             self.spinner.piston_down()
             print("Spinner Piston Down")
-        if joystick.getRawButtonPressed(8):
+        if joystick.getRawButtonPressed(9):
             print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
