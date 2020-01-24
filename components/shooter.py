@@ -20,6 +20,7 @@ class Shooter:
         self.outer_motor.stopMotor()
 
     def setup(self) -> None:
+        self.loading_piston.setPulseDuration(0.5)
         self.outer_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
         self.centre_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
 

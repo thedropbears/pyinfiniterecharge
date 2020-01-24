@@ -61,9 +61,7 @@ class MyRobot(magicbot.MagicRobot):
         wpilib.SmartDashboard.putNumber("centreVelocity", inner_throttle)
 
         if self.joystick_left.getRawButtonPressed(11):
-            self.loading_piston.set(True)
-        if self.joystick_left.getRawButtonPressed(12):
-            self.loading_piston.set(False)
+            self.loading_piston.startPulse()
 
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
