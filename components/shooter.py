@@ -47,10 +47,7 @@ class Shooter:
         self.outer_pid.setReference(self.outer_rpm, rev.ControlType.kVelocity)
 
         if self.inject:
-            self.loading_piston.set(self.inject)
-            self.loops_since_inject += 1
-        
-        if self.loops_since_inject >= 10:
+            self.loading_piston.startPulse()
             self.inject = False
     
     def set_range(self, range: float) -> None:
@@ -81,7 +78,6 @@ class Shooter:
         Inject a ball into the shooter
         """
         self.inject = True
-        self.last_shot_time = time.monotonic()
 
     # def get_centre_error(self) -> float:
     #     return self.centre_rpm - self.centre_encoder.getVelocity()
