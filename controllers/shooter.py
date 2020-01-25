@@ -1,15 +1,17 @@
 from magicbot import StateMachine, state
 
-from components.turret import Turret
 from components.indexer import Indexer
 from components.shooter import Shooter
+from components.turret import Turret
+from components.vision import Vision
 
 class ShooterController(StateMachine):
     """Statemachine for high level control of the shooter and injector"""
 
-    turret: Turret
     indexer: Indexer
     shooter: Shooter
+    turret: Turret
+    vision: Vision
 
     @state
     def searching(self):
