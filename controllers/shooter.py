@@ -15,9 +15,9 @@ class ShooterController(StateMachine):
 
     def __init__(self):
         self.is_aimed = False
-        super.__init__()
+        super().__init__()
 
-    @state
+    @state(first=True)
     def searching(self):
         """
         The vision system does not have a target, we try to find one using odometry
