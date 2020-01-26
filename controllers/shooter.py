@@ -23,7 +23,7 @@ class ShooterController(StateMachine):
         The vision system does not have a target, we try to find one using odometry
         """
         # currently just waits for vision
-        if self.vision.get_vision_data() is not None:
+        if self.vision.get_vision_data()[0] != -1:  # -1 means no data is available
             self.next_state("tracking")
 
     @state
@@ -32,7 +32,7 @@ class ShooterController(StateMachine):
         Aiming towards a vision target and spining up flywheels
         """
         dist, delta_angle, timestamp  = self.vision.get_vision_data() # collect data only once per loop
-        if dist is None:
+        if dist != -1:
             self.next_state("seaching")
         else:
             self.shooter.set_range(dist)
