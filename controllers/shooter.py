@@ -33,7 +33,7 @@ class ShooterController(StateMachine):
         """
         dist, delta_angle, timestamp  = self.vision.get_vision_data() # collect data only once per loop
         if dist != -1:
-            self.next_state("seaching")
+            self.next_state("searching")
         else:
             self.shooter.set_range(dist)
             self.turret.slew(delta_angle, self.__turret_aimed)
