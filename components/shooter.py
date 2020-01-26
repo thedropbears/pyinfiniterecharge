@@ -2,7 +2,7 @@ import time
 
 import wpilib
 import rev
-
+from numpy imoprt interp
 from magicbot import tunable
 
 
@@ -10,6 +10,9 @@ class Shooter:
     outer_motor: rev.CANSparkMax
     centre_motor: rev.CANSparkMax
     loading_piston: wpilib.Solenoid
+
+    ranges = (7, 8, 9, 10, 11)
+    centre_rpms = (880, 1120, 1500, 2150, 2400)
 
     # outer_rpm = tunable(0)
     # centre_rpm = tunable(0)
@@ -54,7 +57,9 @@ class Shooter:
         Set the target range for the shooter, this will be converted into target speeds for the flywheels
         range: planar distance from the power port
         """
-        pass
+        if 7 <= range <= 11:
+            self.centre_rpm = interp(range, ranges, centre_rpms)
+            self.outer_rpm = 5000
 
     def is_ready(self) -> bool:
         """
