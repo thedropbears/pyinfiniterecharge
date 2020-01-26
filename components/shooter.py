@@ -2,7 +2,7 @@ import time
 
 import wpilib
 import rev
-from numpy imoprt interp
+from numpy import interp
 from magicbot import tunable
 
 
@@ -52,18 +52,18 @@ class Shooter:
             self.loading_piston.startPulse()
             self.inject = False
     
-    def set_range(self, range: float) -> None:
+    def set_range(self, dist: float) -> None:
         """
         Set the target range for the shooter, this will be converted into target speeds for the flywheels
-        range: planar distance from the power port
+        dist: planar distance from the power port
         """
-        if 7 <= range <= 11:
-            self.centre_rpm = interp(range, ranges, centre_rpms)
+        if 7 <= dist <= 11:
+            self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
             self.outer_rpm = 5000
 
     def is_ready(self) -> bool:
         """
-        Returns true if the shooter is able to make a successful shot with the currently set range.
+        Returns true if the shooter is able to make a successful shot with the currently set dist.
 
         Considers the rotation rates of the flywheels compared with their setpoints
         """
