@@ -95,6 +95,7 @@ class MyRobot(magicbot.MagicRobot):
                 self.indexer.enable_indexing()
 
         self.handle_spinner_inputs(self.spinner_joystick)
+        self.handle_shooter_inputs(self.joystick_left)
 
     def handle_spinner_inputs(self, joystick):
         if joystick.getRawButtonPressed(7):
@@ -109,6 +110,12 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(8):
             print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
+    
+    def handle_shooter_inputs(self, joystick: wpilib.Joystick):
+        if joystick.getTriggerPressed():
+            self.shooter_controller.driver_input(True)
+        if joystick.getTriggerReleased():
+            self.shooter_controller.driver_input(False)
 
 
 if __name__ == "__main__":
