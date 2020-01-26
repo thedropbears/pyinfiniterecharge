@@ -64,7 +64,7 @@ class MyRobot(magicbot.MagicRobot):
         if self.joystick_left.getRawButtonPressed(11):
             self.loading_piston.startPulse()
 
-        #wpilib.SmartDashboard.putString("Colour wheel state", self.spinner_controller.state)
+        # wpilib.SmartDashboard.putString("Colour wheel state", self.spinner_controller.state)
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
 
