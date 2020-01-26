@@ -22,11 +22,11 @@ class Indexer:
                     motor_states[i] = False
 
             # Set all motors to required states
-            for i in range(len(motor_states)):
-                if motor_states[i]:
-                    self.indexer_motors[i].set(1)
+            for motor_state, motor in zip(motor_states, self.indexer_motors):
+                if motor_state:
+                    motor.set(1)
                 else:
-                    self.indexer_motors[i].stopMotor()
+                    motor.stopMotor()
         else:
             for motor in self.indexer_motors:
                 motor.stopMotor()
