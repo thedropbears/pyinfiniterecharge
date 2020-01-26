@@ -13,23 +13,53 @@ class ShooterController(StateMachine):
     turret: Turret
     vision: Vision
 
+    def __init__(self):
+        self.is_aimed = False
+        super.__init__()
+
     @state
     def searching(self):
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        pass
+        # currently just waits for vision
+        if self.vision.get_vision_data() is not None:
+            self.next_state("tracking")
 
     @state
     def tracking(self):
         """
         Aiming towards a vision target and spining up flywheels
         """
-        pass
+        dist, delta_angle, timestamp  = self.vision.get_vision_data() # collect data only once per loop
+        if dist is None:
+            self.next_state("seaching")
+        else:
+            self.shooter.set_range(dist)
+            self.turret.slew(delta_angle, self.__turret_aimed)
+            # if self.turret.is_aimed() # use this if not using callback method
+            if self.is_aimed() and self.shooter.is_ready() and self.indexer.is_ball_ready() and self.input_command:
+                self.next_state("firing")
+
 
     @state
     def firing(self):
         """
         Positioned to fire, inject and expel a single ballball
         """
-        pass
+        self.shooter.fire()
+        self.next_state("tracking")
+
+
+    def __turret_aimed(self):
+        """
+        Callback function to pass to turret
+        """
+        self.is_aimed = True
+    
+    def driver_input(self, command: bool):
+        """
+        Called by robot.py to indicate the fire button has been pressed
+        """
+        self.input_command = command
+
