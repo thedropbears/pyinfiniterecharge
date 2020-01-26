@@ -39,8 +39,12 @@ class MyRobot(magicbot.MagicRobot):
 
         self.loading_piston = wpilib.Solenoid(0)
 
-        self.indexer_motors = [wpilib.Spark(1), wpilib.Spark(0)]
-        self.indexer_switches = [wpilib.DigitalInput(8), wpilib.DigitalInput(9)]
+        self.indexer_motors = [wpilib.Spark(9), wpilib.Spark(8), wpilib.Spark(7)]
+        self.indexer_switches = [
+            wpilib.DigitalInput(9),
+            wpilib.DigitalInput(8),
+            wpilib.DigitalInput(7),
+        ]
 
         self.spinner_motor = wpilib.Spark(2)
         self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
@@ -71,19 +75,14 @@ class MyRobot(magicbot.MagicRobot):
         if self.joystick_left.getRawButtonPressed(11):
             self.loading_piston.startPulse()
 
-        self.handle_indexer_inputs(self.joystick_left)
-        self.handle_spinner_inputs(self.spinner_joystick)
+        if self.joystick_left.getRawButtonPressed(7):
+            if self.indexer.indexing:
+                self.indexer.disable_indexing()
+            else:
+                self.indexer.enable_indexing()
 
-    def handle_indexer_inputs(self, joystick):
-        if joystick.getTrigger():
-            # self.shooter_controller.next_state("eject_cells")
-            self.shooter_controller.eject_cells()
-        if joystick.getRawButtonPressed(3):
-            # self.shooter_controller.next_state("shoot_cells")
-            self.shooter_controller.shoot_cells()
-        if joystick.getRawButtonPressed(4):
-            # self.shooter_controller.next_state("intake_cells")
-            self.shooter_controller.intake_cells()
+
+        self.handle_spinner_inputs(self.spinner_joystick)
 
     def handle_spinner_inputs(self, joystick):
         if joystick.getRawButtonPressed(7):
