@@ -24,8 +24,12 @@ class MyRobot(magicbot.MagicRobot):
     indexer: Indexer
     shooter: Shooter
     spinner: Spinner
-
     turret: Turret
+    
+    def turret_done(self):
+        self.logger.info("Turret command done")
+        self.turret_active = False
+        
     
     def createObjects(self):
         """Robot initialization function"""
@@ -33,6 +37,7 @@ class MyRobot(magicbot.MagicRobot):
         self.joystick_left = wpilib.Joystick(0)
         self.joystick_right = wpilib.Joystick(1)
         self.spinner_joystick = wpilib.Joystick(2)
+        self.turret_joystick = wpilib.Joystick(3)
 
         self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
         self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
@@ -47,10 +52,11 @@ class MyRobot(magicbot.MagicRobot):
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
 
-        self.turret_motor = wpilib.Spark(3)
+        #self.turret_motor = wpilib.Spark(3)
         self.turret_left_index = wpilib.DigitalInput (1)
         self.turret_centre_index = wpilib.DigitalInput (0)
         self.turret_right_index = wpilib.DigitalInput (2)
+        self.turret_active = False
     
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -73,6 +79,16 @@ class MyRobot(magicbot.MagicRobot):
 
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
+        
+        if self.turret_active == False:
+            pov = self.turret_joystick.getPOV(0)
+            about_twenty_degrees = 0.349 # radians
+            if pov != -1:
+                self.turret_active = True
+                if pov < 180:
+                    self.turret.slew(about_twenty_degrees, self.turret_done)
+                else:
+                    self.turret.slew(-about_twenty_degrees, self.turret_done)
 
     def handle_indexer_inputs(self, joystick):
         if joystick.getTrigger():
