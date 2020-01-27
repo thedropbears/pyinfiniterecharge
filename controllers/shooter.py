@@ -6,7 +6,8 @@ from components.turret import Turret
 from components.vision import Vision
 
 
-class ShooterController(StateMachine):
+# class ShooterController(StateMachine):
+class ShooterController:
     """Statemachine for high level control of the shooter and injector"""
 
     indexer: Indexer
@@ -15,18 +16,27 @@ class ShooterController(StateMachine):
     vision: Vision
 
     def __init__(self):
-        super().__init__()
+        # super().__init__()
+        self.state = self.searching
+    
+    def run(self):
+        """
+        tempoary replacement of magicbot statemachine
+        """
+        self.state()
 
-    @state(first=True)
+
+    # @state(first=True)
     def searching(self):
         """
         The vision system does not have a target, we try to find one using odometry
         """
         # currently just waits for vision
         if self.vision.get_vision_data()[0] != -1:  # -1 means no data is available
-            self.next_state("tracking")
+            # self.next_state("tracking")
+            self.state = self.tracking
 
-    @state
+    # @state
     def tracking(self):
         """
         Aiming towards a vision target and spining up flywheels
@@ -37,7 +47,8 @@ class ShooterController(StateMachine):
             timestamp,
         ) = self.vision.get_vision_data()  # collect data only once per loop
         if dist != -1:
-            self.next_state("searching")
+            # self.next_state("searching")
+            self.state = self.searching
         else:
             self.shooter.set_range(dist)
             self.turret.slew(delta_angle)
@@ -48,15 +59,17 @@ class ShooterController(StateMachine):
                 and self.input_command
                 and self.turret.is_aimed()
             ):
-                self.next_state("firing")
+                # self.next_state("firing")
+                self.state = self.firing
 
-    @state
+    # @state
     def firing(self):
         """
         Positioned to fire, inject and expel a single ball
         """
         self.shooter.fire()
-        self.next_state("tracking")
+        # self.next_state("tracking")
+        self.state = self.tracking
 
     def driver_input(self, command: bool):
         """
