@@ -73,10 +73,11 @@ class Shooter:
 
         Considers the rotation rates of the flywheels compared with their setpoints
         """
-        return abs(
-            self.centre_rpm - self.centre_encoder.getVelocity()
-        ) <= self.velocity_tolerance and abs(
-            self.outer_rpm - self.outer_encoder.getVelocity() <= self.velocity_tolerance
+        return (
+            abs(self.centre_rpm - self.centre_encoder.getVelocity())
+            <= self.velocity_tolerance
+            and abs(self.outer_rpm - self.outer_encoder.getVelocity())
+            <= self.velocity_tolerance
         )
 
     def is_firing(self) -> bool:
