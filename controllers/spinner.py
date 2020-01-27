@@ -22,20 +22,12 @@ class SpinnerController:
         self.task = "position"
         self.required_colour = "R"
 
-    # @state(first=True)
     def select_task(self):
-        if not self.test:
-            self.task = "position"  # TODO Implement FMS Connection
-            self.required_colour = "R"
-
-        elif self.task == "position":
+        if self.task == "position":
             self.required_colour = "R"
             self.state = "position"
             self.spinner.go_to_colour("R")
 
-        elif self.task == "rotation":
+        else self.task == "rotation":
             self.state = "rotation"
             self.spinner.do_rotation_control()
-
-    def execute(self):
-        pass

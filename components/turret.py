@@ -1,16 +1,15 @@
 import wpilib
 import magicbot
 
+
 class Turret:
     motor: wpilib.Spark
     left_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
     right_index: wpilib.DigitalInput
-    
-  
 
     def reset_ticks(self) -> None:
-        # prototype starts at full speed 
+        # prototype starts at full speed
         self.motor_speed = 0.2
         self.seeking = False
         self.tick_count = 0
@@ -35,7 +34,7 @@ class Turret:
             self.motor.stopMotor()
             self.reset_ticks()
             return
-        
+
         # Start seeking right
         if self.seeking == False:
             self.logger.info("starting to seek")
@@ -44,7 +43,7 @@ class Turret:
             self.max_ticks = self.starting_max_ticks
             self.seeking = True
             return
-        
+
         self.tick_count = self.tick_count + self.tick_increment
         if self.tick_count == self.max_ticks:
             self.logger.info("hitting the limit, turning around")
@@ -53,7 +52,3 @@ class Turret:
             self.motor.set(self.motor_speed)
             self.tick_increment = self.tick_increment * -1
             self.max_ticks = self.max_ticks * self.max_ticks_factor
-        
-        
-             
-        

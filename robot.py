@@ -18,6 +18,7 @@ from components.shooter import Shooter
 from components.spinner import Spinner
 from components.turret import Turret
 
+
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
     spinner_controller: SpinnerController
@@ -26,7 +27,7 @@ class MyRobot(magicbot.MagicRobot):
     spinner: Spinner
 
     turret: Turret
-    
+
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
@@ -52,10 +53,10 @@ class MyRobot(magicbot.MagicRobot):
         self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
 
         self.turret_motor = wpilib.Spark(3)
-        self.turret_left_index = wpilib.DigitalInput (1)
-        self.turret_centre_index = wpilib.DigitalInput (0)
-        self.turret_right_index = wpilib.DigitalInput (2)
-    
+        self.turret_left_index = wpilib.DigitalInput(1)
+        self.turret_centre_index = wpilib.DigitalInput(0)
+        self.turret_right_index = wpilib.DigitalInput(2)
+
     def teleopInit(self):
         """Executed at the start of teleop mode"""
 

@@ -51,4 +51,3 @@ class Shooter:
     def set_motor_rpm(self, v_outer, v_centre) -> None:
         self.centre_rpm = v_centre
         self.outer_rpm = v_outer
-
