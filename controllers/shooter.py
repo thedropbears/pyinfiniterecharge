@@ -50,13 +50,7 @@ class ShooterController:
         else:
             self.shooter.set_range(dist)
             self.turret.slew(delta_angle)
-            if (
-                self.shooter.is_ready()
-                and self.shooter.is_in_range()
-                and self.indexer.is_ball_ready()
-                and self.input_command
-                and self.turret.isReady()
-            ):
+            if self.ready_to_fire() and self.input_command:
                 # self.next_state("firing")
                 self.state = self.firing
 
@@ -74,3 +68,11 @@ class ShooterController:
         Called by robot.py to indicate the fire button has been pressed
         """
         self.input_command = command
+
+    def ready_to_fire(self):
+        return (
+            self.shooter.is_ready()
+            and self.shooter.is_in_range()
+            and self.indexer.is_ball_ready()
+            and self.turret.isReady()
+        )
