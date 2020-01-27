@@ -9,7 +9,7 @@ class Colour:  # class for storing rgb colours
         self.green = green
         self.blue = blue
 
-    def dist(self, c: Colour) -> int:
+    def dist(self, c: "Colour") -> int:
         return (
             abs(self.red - c.red) + abs(self.green - c.green) + abs(self.blue - c.blue)
         )
