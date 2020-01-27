@@ -1,9 +1,7 @@
-import time
-
 import wpilib
 import rev
 from numpy import interp
-from magicbot import tunable
+# from magicbot import tunable
 
 
 class Shooter:

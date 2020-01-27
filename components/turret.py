@@ -1,6 +1,5 @@
 import wpilib
 import ctre
-import magicbot
 import math
 
 

@@ -1,6 +1,3 @@
-import wpilib
-
-
 class Indexer:
     indexer_motors: list
     indexer_switches: list
