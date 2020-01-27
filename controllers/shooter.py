@@ -57,7 +57,7 @@ class ShooterController:
                 and self.shooter.is_in_range()
                 and self.indexer.is_ball_ready()
                 and self.input_command
-                and self.turret.is_aimed()
+                and self.turret.isReady()
             ):
                 # self.next_state("firing")
                 self.state = self.firing
