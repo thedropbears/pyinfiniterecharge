@@ -26,11 +26,6 @@ class MyRobot(magicbot.MagicRobot):
     spinner: Spinner
     turret: Turret
     
-    def turret_done(self):
-        self.logger.info("Turret command done")
-        self.turret_active = False
-        
-    
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
@@ -56,7 +51,6 @@ class MyRobot(magicbot.MagicRobot):
         self.turret_left_index = wpilib.DigitalInput (1)
         self.turret_centre_index = wpilib.DigitalInput (0)
         self.turret_right_index = wpilib.DigitalInput (2)
-        self.turret_active = False
     
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -80,15 +74,14 @@ class MyRobot(magicbot.MagicRobot):
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
         
-        if self.turret_active == False:
-            pov = self.turret_joystick.getPOV(0)
-            about_twenty_degrees = 0.349 # radians
-            if pov != -1:
-                self.turret_active = True
-                if pov < 180:
-                    self.turret.slew(about_twenty_degrees, self.turret_done)
-                else:
-                    self.turret.slew(-about_twenty_degrees, self.turret_done)
+        pov = self.turret_joystick.getPOV(0)
+        about_five_degrees = 0.087 # radians
+        if pov != -1:
+            self.turret_active = True
+            if pov < 180:
+                self.turret.slew(about_five_degrees)
+            else:
+                self.turret.slew(-about_five_degrees)
 
     def handle_indexer_inputs(self, joystick):
         if joystick.getTrigger():

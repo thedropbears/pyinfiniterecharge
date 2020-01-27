@@ -21,124 +21,135 @@ class Turret:
     GEAR_REDUCTION = 160/12
     COUNTS_PER_TURRET_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION
     COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
-        
+
+    STARTING_MAX_TICKS = 10
+
     def __init__(self):
         self.motor = ctre.WPI_TalonSRX(10)            
-        # Note that we don't know where the turret actually is.
-        self.current_azimuth: int # in encoder counts off the centre_index
+        # Note that we don't know where the turret actually is until we've 
+        # run the indexing.
+        self.current_azimuth: int
         # TODO: do we need to invert the encoder?
 
-    def reset_ticks(self) -> None:
-        self.motor_speed = 0.2
+    # The indexing does not use the encoder at all right now. It just counts
+    # the times it's called, incrementing (or decrementing) a tick count each 
+    # time. This method resets the counting mechanism.
+    def _reset_ticks(self) -> None:
+        self.motor_speed = 0.2 # Flips when seeking, so not a constant
         self.seeking = False
         self.tick_count = 0
-        self.starting_max_ticks = 10
-        self.max_ticks = self.starting_max_ticks
+        self.max_ticks = self.STARTING_MAX_TICKS
         self.max_ticks_factor = -2
         self.tick_increment = 1
 
     def on_enable(self) -> None:
         self.motor.stopMotor()
-        self.reset_ticks()
-        self.current_state = self.FINDING_INDEX 
+        self._reset_ticks()
+        self.run_indexing() 
 
     def setup(self) -> None:
         err = self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         ) 
         if err != ctre.ErrorCode.OK:
-            self.logger.error(f'Error configuring encoder: {err}')
-            raise EnvironmentError("Couldn't configure encoder")
+            self.logger.warning(f'Error configuring encoder: {err}')
 
-    # Slew to the given angle (in radians) off the baseline.
-    # Calls callback when done
-    def slew_to_azimuth(self, angle: float, callback) -> None:
-        self.target_count = angle * self.COUNTS_PER_TURRET_RADIAN
-        self.start_slew(callback)
-        
-    # adjust relative angle (in radians)
-    # Calls callback when done
-    def slew(self, angle: float, callback) -> None:
-        delta = angle * self.COUNTS_PER_TURRET_RADIAN
+    # Slew to the given absolute angle (in radians). An angle of 0 corresponds
+    # to the centre index point.
+    def slew_to_azimuth(self, angle: float) -> None:
+        self._slew_to_count(angle * self.COUNTS_PER_TURRET_RADIAN - self.baseline_azimuth)
+             
+    # Slew the given angle (in radians) from the current position
+    def slew(self, angle: float) -> None:
+        self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+        self._slew_to_count(self.current_azimuth + angle * self.COUNTS_PER_TURRET_RADIAN)
+
+    # Slew to the given absolute position, given as an encoder count
+    # This should change to use the Talon Absolute Position mode
+    def _slew_to_count(self, count: int) -> None:
+        self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+        delta = count - self.current_azimuth
         self.target_count = self.current_azimuth + delta
-        self.logger.info(f'slewing delta: {delta}, current_azimuth: {self.current_azimuth}')
-        self.start_slew(callback)
-
-    def start_slew(self, callback):
-        self.callback = callback
         self.incrementing = True
         if self.target_count < self.current_azimuth:
             self.incrementing = False
-        self.logger.info(f'starting slewing target count: {self.target_count}, incrementing: {self.incrementing}')
         self.current_state = self.SLEWING
-        
+
     # Find the nearest index and reset the encoder
-    def run_indexing(self, callback) -> None:
-        self.callback = callback
+    def run_indexing(self) -> None:
         self.current_state = self.FINDING_INDEX
+
+    def isReady(self) -> bool:
+        if self.current_state == self.IDLE:
+            return True
+        if self.current_state == self.SLEWING:
+            self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+            if ((self.incrementing and self.current_azimuth >= self.target_count) or
+            (not self.incrementing and self.current_azimuth <= self.target_count)):
+                return True
+            else:
+                return False
+        # state must be FINDING_INDEX. Return False until it's done.
+        return False
 
     def execute(self) -> None:
         if self.current_state == self.FINDING_INDEX:
-            # TODO: this currently uses only the centre index; it should use
-            # All three hall-effect sensors and the two limit switches
-            # Are we there yet? If so, stop the motor and stop seeking
-            val = self.centre_index.get()
-            if val == self.HALL_EFFECT_CLOSED:
-                self.logger.info("Yep, we are there!!!")
-                self.motor.stopMotor()
-                self.reset_ticks()
-                self.current_azimuth = 0
-                err = self.motor.setSelectedSensorPosition(0)
-                if err != ctre.ErrorCode.OK:
-                    self.logger.error(f'Error zeroing encoder: {err}')
-                    raise EnvironmentError("Couldn't zero encoder")
-                self.current_state = self.IDLE
-                if hasattr(self, "callback"):
-                    self.callback()
-                return
-            
-            # Start seeking right
-            if self.seeking == False:
-                self.logger.info("starting to seek")
-                self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
-                self.tick_count = 0
-                self.max_ticks = self.starting_max_ticks
-                self.seeking = True
-                return
-            
-            self.tick_count = self.tick_count + self.tick_increment
-            if self.tick_count == self.max_ticks:
-                self.logger.info("hitting the limit, turning around")
-                self.motor.stopMotor()
-                self.motor_speed = -self.motor_speed
-                self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
-                self.tick_increment = self.tick_increment * -1
-                self.max_ticks = self.max_ticks * self.max_ticks_factor
-                return
-                
-            # Just keep the motor running
-            self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
-        
+            self._do_indexing()
+            return
         if self.current_state == self.SLEWING:
-            # Are we there yet?
-            self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-            self.tick_count += 1
-            if self.tick_count % 25 == 0:
-                self.logger.info(f'current sensor reading: {self.current_azimuth}')
-            if ((self.incrementing and self.current_azimuth >= self.target_count) or
-            (not self.incrementing and self.current_azimuth <= self.target_count)):
-                self.motor.stopMotor()
-                self.current_state = self.IDLE
-                self.target_count = 0
-                self.tick_count = 0
-                self.logger.info("Done slewing. We are there!!!")
-                self.callback()
-                return
-            
-            # Not there, so keep the motor running
-            speed = self.motor_speed
-            if self.target_count < self.current_azimuth:
-                speed = -speed
-            self.motor.set(ctre.ControlMode.PercentOutput, speed)
+            self._do_slewing()
+            return
+        # state must be IDLE
+        return
 
+    def _do_indexing(self):
+        # TODO: this currently uses only the centre index; it should use
+        # All three hall-effect sensors and the two limit switches
+        # Are we there yet? If so, greb the encoder value, stop the motor,
+        # and stop seeking
+        val = self.centre_index.get()
+        if val == self.HALL_EFFECT_CLOSED:
+            self.baseline_azimuth = self.motor.getSelectedSensorPosition(0)
+            self.motor.stopMotor()
+            self._reset_ticks()
+            self.current_state = self.IDLE
+            #self.logger.info("Found the sensor")
+            return
         
+        # If we haven't started yet, start seeking clockwise
+        if self.seeking == False:
+            self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
+            self.tick_count = 0
+            self.max_ticks = self.STARTING_MAX_TICKS
+            self.seeking = True
+            #self.logger.info("starting to seek")
+            return
+        
+        self.tick_count = self.tick_count + self.tick_increment
+        if self.tick_count == self.max_ticks:
+            self.motor.stopMotor()
+            self.motor_speed = -self.motor_speed
+            self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
+            self.tick_increment = self.tick_increment * -1
+            self.max_ticks = self.max_ticks * self.max_ticks_factor
+            return
+            
+        # Currently running and haven't hit the limit nor found an index.
+        # Just keep the motor running
+        self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
+    
+    def _do_slewing(self):
+        # The following will have to change to use the Talon Absolute Position mode
+        # Are we there yet?
+        if self.isReady():
+            self.motor.stopMotor()
+            self.current_state = self.IDLE
+            self.target_count = 0
+            self.tick_count = 0
+            return
+        
+        # Not there, so keep the motor running
+        speed = self.motor_speed
+        if self.target_count < self.current_azimuth:
+            speed = -speed
+        self.motor.set(ctre.ControlMode.PercentOutput, speed)
