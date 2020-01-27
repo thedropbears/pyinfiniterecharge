@@ -12,4 +12,4 @@ class Vision:
         """Returns a tuple containing the distance (metres), angle (radians), and timestamp (time.monotonic)
         If it can't get info, it returns [-1.0, -1.0, -1.0]
         """
-        return self.entry.getDoubleArray([-1.0, -1.0, -1.0])
+        return self.entry.getDoubleArray([None, None, None])
