@@ -17,6 +17,7 @@ from components.indexer import Indexer
 from components.shooter import Shooter
 from components.spinner import Spinner
 from components.chassis import Chassis
+from components.hang import Hang
 
 
 class MyRobot(magicbot.MagicRobot):
@@ -26,6 +27,7 @@ class MyRobot(magicbot.MagicRobot):
     shooter: Shooter
     spinner: Spinner
     chassis: Chassis
+    hang: Hang
 
     def createObjects(self):
         """Robot initialization function"""

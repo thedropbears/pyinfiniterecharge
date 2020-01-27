@@ -1,4 +1,7 @@
 class Hang:
+    def execute(self) -> None:
+        pass
+
     def raise_hook(self) -> None:
         pass
 
