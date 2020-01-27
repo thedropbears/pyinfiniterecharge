@@ -2,20 +2,24 @@ import ctre
 import wpilib
 
 
-class TalonSRXEncoder(wpilib.Sendable):
-    """Wrapper around a Talon SRX selected sensor, mimicking wpilib.Encoder."""
+class TalonEncoder(wpilib.Sendable):
+    """Wrapper around a Talon SRX/FX selected sensor."""
 
     __slots__ = ("talon", "pid_loop_idx", "distance_per_pulse")
 
     def __init__(
-        self, talon: ctre.TalonSRX, pid_loop_idx: int = 0, distance_per_pulse: float = 1
+        self,
+        talon: ctre.BaseTalon,
+        pid_loop_idx: int = 0,
+        distance_per_pulse: float = 1,
     ):
         super().__init__()
         self.talon = talon
         self.pid_loop_idx = pid_loop_idx
         self.distance_per_pulse = distance_per_pulse
+
         wpilib.SendableRegistry.getInstance().add(
-            self, "TalonSRX Encoder", talon.getDeviceID(), pid_loop_idx
+            self, "Talon Encoder", talon.getDeviceID(), pid_loop_idx
         )
 
     def getDistancePerPulse(self) -> float:
