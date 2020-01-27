@@ -28,6 +28,6 @@ class SpinnerController:
             self.state = "position"
             self.spinner.go_to_colour("R")
 
-        else self.task == "rotation":
+        elif self.task == "rotation":
             self.state = "rotation"
             self.spinner.do_rotation_control()

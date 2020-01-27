@@ -76,7 +76,7 @@ class Spinner:
 
     def read_colour(self) -> tuple:
         col, ir = self.colour_sensor.getColor()
-        if ir > MAX_SENSOR_RANGE: #currently redudndant check to see if in range
+        if ir > MAX_SENSOR_RANGE:  # currently redudndant check to see if in range
             return col
         else:
             return col
