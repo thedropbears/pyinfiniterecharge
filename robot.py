@@ -16,9 +16,11 @@ from controllers.spinner import SpinnerController
 from components.indexer import Indexer
 from components.shooter import Shooter
 from components.spinner import Spinner
+from components.chassis import Chassis
+from components.hang import Hang
 from components.vision import Vision
 from components.turret import Turret
-
+from utilities.scale_value import scale_value
 
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
@@ -26,8 +28,10 @@ class MyRobot(magicbot.MagicRobot):
     indexer: Indexer
     shooter: Shooter
     spinner: Spinner
+    chassis: Chassis
+    hang: Hang
     turret: Turret
-
+      
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
@@ -58,13 +62,17 @@ class MyRobot(magicbot.MagicRobot):
 
         self.turret_centre_index = wpilib.DigitalInput(0)
 
+        self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
+        self.chassis_left_front = rev.CANSparkMax(5, rev.MotorType.kBrushless)
+        self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
+        self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
+
     def teleopInit(self):
         """Executed at the start of teleop mode"""
 
     def teleopPeriodic(self):
 
         """Executed every cycle"""
-
 
         pov = self.turret_joystick.getPOV(0)
         about_five_degrees = 0.087 # radians
@@ -90,6 +98,12 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(8):
             self.spinner_controller.run(test=True, task="rotation")
             print(f"Rotation Control")
+
+    def handle_chassis_inputs(self, joystick):
+        scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
+        vx = scale_value(joystick.getY(), 1, -1, -1, 1, 2) * scaled_throttle
+        vz = scale_value(joystick.getX(), 1, -1, -1, 1, 2) * scaled_throttle
+        self.chassis.drive(vx, vz)
 
     def handle_shooter_inputs(self, joystick: wpilib.Joystick):
         if joystick.getTriggerPressed():

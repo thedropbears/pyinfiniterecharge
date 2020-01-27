@@ -87,7 +87,7 @@ class Turret:
     def run_indexing(self) -> None:
         self.current_state = self.FINDING_INDEX
 
-    def isReady(self) -> bool:
+    def is_ready(self) -> bool:
         if self.current_state == self.IDLE:
             return True
         if self.current_state == self.SLEWING:
@@ -153,7 +153,7 @@ class Turret:
     def _do_slewing(self):
         # The following will have to change to use the Talon Absolute Position mode
         # Are we there yet?
-        if self.isReady():
+        if self.is_ready():
             self.motor.stopMotor()
             self.current_state = self.IDLE
             self.target_count = 0
