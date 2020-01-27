@@ -74,5 +74,5 @@ class ShooterController:
             self.shooter.is_ready()
             and self.shooter.is_in_range()
             and self.indexer.is_ball_ready()
-            and self.turret.isReady()
+            and self.turret.is_ready()
         )
