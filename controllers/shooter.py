@@ -14,7 +14,6 @@ class ShooterController(StateMachine):
     vision: Vision
 
     def __init__(self):
-        self.is_aimed = False
         super().__init__()
 
     @state(first=True)
@@ -36,9 +35,8 @@ class ShooterController(StateMachine):
             self.next_state("searching")
         else:
             self.shooter.set_range(dist)
-            self.turret.slew(delta_angle, self.__turret_aimed)
-            # if self.turret.is_aimed() # use this if not using callback method
-            if self.is_aimed() and self.shooter.is_ready() and self.indexer.is_ball_ready() and self.input_command:
+            self.turret.slew(delta_angle)
+            if self.shooter.is_ready() and self.indexer.is_ball_ready() and self.input_command and self.turret.is_aimed():
                 self.next_state("firing")
 
 
@@ -49,13 +47,6 @@ class ShooterController(StateMachine):
         """
         self.shooter.fire()
         self.next_state("tracking")
-
-
-    def __turret_aimed(self):
-        """
-        Callback function to pass to turret
-        """
-        self.is_aimed = True
     
     def driver_input(self, command: bool):
         """
