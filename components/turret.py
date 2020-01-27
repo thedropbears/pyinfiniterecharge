@@ -118,7 +118,7 @@ class Turret:
             #self.logger.info("Found the sensor")
             return
         
-        # If we haven't started yet, start seeking clockwise
+        # If we haven't started yet, start seeking
         if self.seeking == False:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
             self.tick_count = 0
