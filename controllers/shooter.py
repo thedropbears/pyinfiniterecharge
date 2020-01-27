@@ -19,7 +19,7 @@ class ShooterController:
         # super().__init__()
         self.state = self.searching
     
-    def run(self):
+    def execute(self):
         """
         tempoary replacement of magicbot statemachine
         """
@@ -32,7 +32,8 @@ class ShooterController:
         The vision system does not have a target, we try to find one using odometry
         """
         # currently just waits for vision
-        if self.vision.get_vision_data()[0] != -1:  # -1 means no data is available
+        if self.vision.get_vision_data()[2] != -1:  # -1 means no data is available
+            # print(f"searching -> tracking {self.vision.get_vision_data()}")
             # self.next_state("tracking")
             self.state = self.tracking
 
@@ -46,8 +47,9 @@ class ShooterController:
             delta_angle,
             timestamp,
         ) = self.vision.get_vision_data()  # collect data only once per loop
-        if dist != -1:
+        if timestamp == -1:
             # self.next_state("searching")
+            # print(f"tracking -> searching {self.vision.get_vision_data()}")
             self.state = self.searching
         else:
             self.shooter.set_range(dist)
