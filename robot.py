@@ -83,7 +83,6 @@ class MyRobot(magicbot.MagicRobot):
         pov = self.turret_joystick.getPOV(0)
         about_five_degrees = 0.087 # radians
         if pov != -1:
-            self.turret_active = True
             if pov < 180:
                 self.turret.slew(about_five_degrees)
             else:

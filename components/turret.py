@@ -57,12 +57,14 @@ class Turret:
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point.
     def slew_to_azimuth(self, angle: float) -> None:
-        self._slew_to_count(angle * self.COUNTS_PER_TURRET_RADIAN - self.baseline_azimuth)
+        if self.current_state != self.FINDING_INDEX:
+            self._slew_to_count(angle * self.COUNTS_PER_TURRET_RADIAN - self.baseline_azimuth)
              
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
-        self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-        self._slew_to_count(self.current_azimuth + angle * self.COUNTS_PER_TURRET_RADIAN)
+        if self.current_state != self.FINDING_INDEX:
+            self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+            self._slew_to_count(self.current_azimuth + angle * self.COUNTS_PER_TURRET_RADIAN)
 
     # Slew to the given absolute position, given as an encoder count
     # This should change to use the Talon Absolute Position mode
