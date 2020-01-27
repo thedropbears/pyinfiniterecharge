@@ -16,6 +16,7 @@ from controllers.spinner import SpinnerController
 from components.indexer import Indexer
 from components.shooter import Shooter
 from components.spinner import Spinner
+from components.vision import Vision
 from components.turret import Turret
 
 
@@ -25,13 +26,12 @@ class MyRobot(magicbot.MagicRobot):
     indexer: Indexer
     shooter: Shooter
     spinner: Spinner
-
     turret: Turret
 
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
-
+        
         self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
         self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
 
@@ -49,12 +49,12 @@ class MyRobot(magicbot.MagicRobot):
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
 
-        self.joysticks = joystick_handlers()
+        self.vision = Vision()
 
-        self.turret_motor = wpilib.Spark(3)
-        self.turret_left_index = wpilib.DigitalInput(1)
-        self.turret_centre_index = wpilib.DigitalInput(0)
-        self.turret_right_index = wpilib.DigitalInput(2)
+        #self.turret_motor = wpilib.Spark(3)
+        self.turret_left_index = wpilib.DigitalInput (1)
+        self.turret_centre_index = wpilib.DigitalInput (0)
+        self.turret_right_index = wpilib.DigitalInput (2)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -72,6 +72,22 @@ class MyRobot(magicbot.MagicRobot):
             joystick=self.joysticks.spinner_joystick,
             spinner_controller=self.spinner_controller,
         )
+        
+        pov = self.turret_joystick.getPOV(0)
+        about_five_degrees = 0.087 # radians
+        if pov != -1:
+            if pov < 180:
+                self.turret.slew(about_five_degrees)
+            else:
+                self.turret.slew(-about_five_degrees)
+         
+        if self.joystick_left.getRawButtonPressed(7):
+            if self.indexer.indexing:
+                self.indexer.disable_indexing()
+            else:
+                self.indexer.enable_indexing()
+
+        self.handle_spinner_inputs(self.spinner_joystick)
 
 
 class joystick_handlers:
