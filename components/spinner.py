@@ -74,7 +74,7 @@ class Spinner:
         self.spinner_solenoid.set(False)
         self.pistonState = "down"
 
-    def read_colour(self) -> tuple:
+    def read_colour(self):
         col, ir = self.colour_sensor.getColor()
         if ir > MAX_SENSOR_RANGE:  # currently redudndant check to see if in range
             return col
@@ -83,7 +83,8 @@ class Spinner:
 
     def get_wheel_dist(
         self,
-    ) -> int:  # finds the colour wheels distance from required colour in segments
+    ) -> int:
+        # finds the colour wheels distance from required colour in segments
         current_colour = self.get_current_colour()
         if current_colour == None:
             return 0
@@ -105,11 +106,12 @@ class Spinner:
         for col_name, col_value in self.WHEEL_COLOURS.items():
             distances[col_name] = col_value.dist(sensed_colour)
 
+        minDist = min(distances, key=lambda col: distances[col])
         if (
-            distances[min(distances, key=lambda col: distances[col])]
+            distances[minDist]
             < self.MAX_COLOUR_DIST
         ):
-            return min(distances, key=lambda col: distances[col])
+            return minDist
 
     def run_rotation(self) -> None:  # rotation control to be called every 20ms
         self.spinner_motor.set(
