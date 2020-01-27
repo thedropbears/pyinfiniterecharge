@@ -121,12 +121,9 @@ class MyRobot(magicbot.MagicRobot):
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
     def handle_chassis_inputs(self, joystick):
-        vx = scale_value(joystick.getY(), (1, -1), (-1, 1), 2) * scale_value(
-            joystick.getThrottle(), (1, -1), (0, 1)
-        )
-        vz = scale_value(joystick.getX(), (1, -1), (1, -1), 2) * scale_value(
-            joystick.getThrottle(), (1, -1), (0, 1)
-        )
+        scaled_throttle = scale_value(joystick.getThrottle(), (1, -1), (0, 1))
+        vx = scale_value(joystick.getY(), (1, -1), (-1, 1), 2) * scaled_throttle
+        vz = scale_value(joystick.getX(), (1, -1), (1, -1), 2) * scaled_throttle
         self.chassis.drive(vx, vz)
 
 
