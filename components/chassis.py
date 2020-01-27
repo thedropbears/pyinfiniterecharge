@@ -31,7 +31,7 @@ class Chassis:
             vx: Forward is positive.
             vz: Clockwise is negative
         """
-        self.vx, self.vz = vx, vz
+        self.vx, self.vz = vx, -vz
 
     def get_heading(self) -> float:
         # TODO
