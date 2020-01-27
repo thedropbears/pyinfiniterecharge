@@ -18,13 +18,12 @@ class ShooterController:
     def __init__(self):
         # super().__init__()
         self.state = self.searching
-    
+
     def execute(self):
         """
         tempoary replacement of magicbot statemachine
         """
         self.state()
-
 
     # @state(first=True)
     def searching(self):
@@ -42,11 +41,8 @@ class ShooterController:
         """
         Aiming towards a vision target and spining up flywheels
         """
-        (
-            dist,
-            delta_angle,
-            timestamp,
-        ) = self.vision.get_vision_data()  # collect data only once per loop
+        dist, delta_angle, timestamp = self.vision.get_vision_data()
+        # collect data only once per loop
         if timestamp == -1:
             # self.next_state("searching")
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
