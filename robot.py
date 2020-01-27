@@ -65,19 +65,6 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         """Executed every cycle"""
-        outer_throttle = ((-self.joystick_left.getThrottle() + 1) / 2) * 5000
-        inner_throttle = -((-self.joystick_right.getThrottle() + 1) / 2) * 5000
-
-        self.shooter.set_motor_rpm(outer_throttle, inner_throttle)
-
-        wpilib.SmartDashboard.putNumber("outerError", self.shooter.get_outer_error())
-        wpilib.SmartDashboard.putNumber("centreError", self.shooter.get_centre_error())
-
-        wpilib.SmartDashboard.putNumber("outerVelocity", outer_throttle)
-        wpilib.SmartDashboard.putNumber("centreVelocity", inner_throttle)
-
-        if self.joystick_left.getRawButtonPressed(11):
-            self.loading_piston.startPulse()
 
         self.handle_spinner_inputs(self.spinner_joystick)
         
