@@ -18,6 +18,7 @@ from components.shooter import Shooter
 from components.spinner import Spinner
 from components.turret import Turret
 
+
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
     spinner_controller: SpinnerController
@@ -26,7 +27,7 @@ class MyRobot(magicbot.MagicRobot):
     spinner: Spinner
 
     turret: Turret
-    
+
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
@@ -51,9 +52,9 @@ class MyRobot(magicbot.MagicRobot):
         self.joysticks = joystick_handlers()
 
         self.turret_motor = wpilib.Spark(3)
-        self.turret_left_index = wpilib.DigitalInput (1)
-        self.turret_centre_index = wpilib.DigitalInput (0)
-        self.turret_right_index = wpilib.DigitalInput (2)
+        self.turret_left_index = wpilib.DigitalInput(1)
+        self.turret_centre_index = wpilib.DigitalInput(0)
+        self.turret_right_index = wpilib.DigitalInput(2)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -61,8 +62,16 @@ class MyRobot(magicbot.MagicRobot):
     def teleopPeriodic(self):
         """Executed every cycle"""
 
-        self.joysticks.handle_indexer_inputs(joysticks = [self.joysticks.joystick_left, self.joysticks.joystick_right], shooter_controller = self.shooter_controller, shooter = self.shooter, loading_piston = self.loading_piston)
-        self.joysticks.handle_spinner_inputs(joystick = self.joysticks.spinner_joystick, spinner_controller = self.spinner_controller)
+        self.joysticks.handle_indexer_inputs(
+            joysticks=[self.joysticks.joystick_left, self.joysticks.joystick_right],
+            shooter_controller=self.shooter_controller,
+            shooter=self.shooter,
+            loading_piston=self.loading_piston,
+        )
+        self.joysticks.handle_spinner_inputs(
+            joystick=self.joysticks.spinner_joystick,
+            spinner_controller=self.spinner_controller,
+        )
 
 
 class joystick_handlers:
@@ -71,7 +80,9 @@ class joystick_handlers:
         self.joystick_right = wpilib.Joystick(1)
         self.spinner_joystick = wpilib.Joystick(2)
 
-    def handle_indexer_inputs(self, joysticks = [], shooter_controller = None, shooter = None, loading_piston = None): #will eventually just take controllers but for the moment takes some components to test
+    def handle_indexer_inputs(
+        self, joysticks=[], shooter_controller=None, shooter=None, loading_piston=None
+    ):  # will eventually just take controllers but for the moment takes some components to test
         if joysticks[0].getTrigger():
             shooter_controller.eject_cells()
 
@@ -81,7 +92,7 @@ class joystick_handlers:
         if joysticks[0].getRawButtonPressed(11):
             loading_piston.startPulse()
 
-    def handle_spinner_inputs(self, joystick = None, spinner_controller = None):
+    def handle_spinner_inputs(self, joystick=None, spinner_controller=None):
         if joystick.getRawButtonPressed(7):
             spinner_controller.run(test=True, task="position")
             print(f"Position Control")

@@ -1,5 +1,6 @@
 from components.indexer import Indexer
 
+
 class ShooterController:
     """Class to control the entire shooter conglomerate"""
 
