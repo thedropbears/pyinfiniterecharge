@@ -36,7 +36,7 @@ class ShooterController(StateMachine):
         else:
             self.shooter.set_range(dist)
             self.turret.slew(delta_angle)
-            if self.shooter.is_ready() and self.indexer.is_ball_ready() and self.input_command and self.turret.is_aimed():
+            if self.shooter.is_ready() and self.shooter.is_in_range() and self.indexer.is_ball_ready() and self.input_command and self.turret.is_aimed():
                 self.next_state("firing")
 
 

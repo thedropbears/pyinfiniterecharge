@@ -21,6 +21,7 @@ class Shooter:
         self.centre_rpm = -3700
 
         self.inject = False
+        self.in_range = False
         self.velocity_tolerance = 50 # rpm
 
     def on_enable(self) -> None:
@@ -57,9 +58,15 @@ class Shooter:
         Set the target range for the shooter, this will be converted into target speeds for the flywheels
         dist: planar distance from the power port
         """
-        if 7 <= dist <= 11:
-            self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
-            self.outer_rpm = 5000
+        if self.ranges[0] <= dist <= self.ranges[-1]:
+            self.in_range = True
+        else:
+            # clamp the range between our minimum and maximum
+            dist = min(self.ranges[-1], max(dist, self.ranges[0]))
+            self.in_range = False
+        self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
+        self.outer_rpm = 5000
+
 
     def is_ready(self) -> bool:
         """
@@ -78,7 +85,12 @@ class Shooter:
         """
         return not self.loading_piston.get()
 
-
+    def is_in_range(self) -> bool:
+        """
+        Returns true if the current target of the shooter is within range
+        Returns false if the range has been clamped 
+        """
+        return self.in_range
 
     def fire(self) -> None:
         """
