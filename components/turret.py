@@ -127,7 +127,7 @@ class Turret:
         # Start seeking right
 
         # If we haven't started yet, start seeking clockwise
-
+    
         if self.seeking == False:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
             self.tick_count = 0
