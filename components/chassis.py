@@ -16,14 +16,12 @@ class Chassis:
         self.chassis_right_rear.setInverted(False)
         self.chassis_right_front.setInverted(False)
 
-        self.left = wpilib.SpeedControllerGroup(
-            self.chassis_left_front, self.chassis_left_rear
-        )
-        self.right = wpilib.SpeedControllerGroup(
-            self.chassis_right_front, self.chassis_right_rear
-        )
+        self.chassis_left_rear.follow(self.chassis_left_front)
+        self.chassis_right_rear.follow(self.chassis_right_front)
 
-        self.diff_drive = DifferentialDrive(self.left, self.right)
+        self.diff_drive = DifferentialDrive(
+            self.chassis_left_front, self.chassis_right_front
+        )
 
     def execute(self) -> None:
         self.diff_drive.arcadeDrive(self.vx, self.vz)
