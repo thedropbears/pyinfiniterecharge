@@ -1,6 +1,7 @@
 import rev
 import wpilib
 from wpilib.drive import DifferentialDrive
+from typing import Tuple
 
 
 class Chassis:
@@ -38,6 +39,6 @@ class Chassis:
         # TODO
         return 0.0
 
-    def get_position(self) -> tuple:
+    def get_position(self) -> Tuple[float, float]:
         # TODO
         return (0.0, 0.0)
