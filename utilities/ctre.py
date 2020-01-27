@@ -34,7 +34,7 @@ class TalonEncoder(wpilib.Sendable):
         self.talon.setSelectedSensorPosition(0, self.pid_loop_idx)
 
     def getDistance(self) -> float:
-        """Get the distance driven as scaled by :meth:`setDistancePerPulse`."""
+        """Get the distance driven as scaled by `distance_per_pulse`."""
         return (
             self.talon.getSelectedSensorPosition(self.pid_loop_idx)
             * self.distance_per_pulse
@@ -42,7 +42,8 @@ class TalonEncoder(wpilib.Sendable):
 
     def getRate(self) -> float:
         """Get the current rate of the encoder.
-        Units are distance per second as scaled by :meth:`setDistancePerPulse`.
+
+        Units are distance per second as scaled by `distance_per_pulse`.
         """
         return (
             self.talon.getSelectedSensorVelocity(self.pid_loop_idx)
