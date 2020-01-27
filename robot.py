@@ -48,16 +48,13 @@ class MyRobot(magicbot.MagicRobot):
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
 
-<<<<<<< HEAD
         self.joysticks = joystick_handlers()
 
-=======
         self.turret_motor = wpilib.Spark(3)
         self.turret_left_index = wpilib.DigitalInput (1)
         self.turret_centre_index = wpilib.DigitalInput (0)
         self.turret_right_index = wpilib.DigitalInput (2)
-    
->>>>>>> origin/master
+
     def teleopInit(self):
         """Executed at the start of teleop mode"""
 
@@ -80,11 +77,6 @@ class joystick_handlers:
 
         if joysticks[0].getRawButtonPressed(3):
             shooter_controller.shoot_cells()
-
-        self.handle_indexer_inputs(self.joystick_left)
-        self.handle_spinner_inputs(self.spinner_joystick)
-
-        self.handle_spinner_inputs(self.spinner_joystick)
 
         if joysticks[0].getRawButtonPressed(11):
             loading_piston.startPulse()
