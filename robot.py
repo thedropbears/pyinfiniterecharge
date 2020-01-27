@@ -49,9 +49,8 @@ class MyRobot(magicbot.MagicRobot):
     def teleopPeriodic(self):
         """Executed every cycle"""
 
-        self.joysticks.handle_indexer_inputs(joystick = self.joysticks.joystick_left, index_controller = self.indexer)
-        self.joysticks.handle_spinner_inputs(joystick = self.joysticks.spinner_joystick, spinner_controller = self.spinner)
-        self.joysticks.handle_shooter_inputs(joystick_left = self.joysticks.joystick_left, joystick_right = self.joysticks.joystick_right)
+        self.joysticks.handle_indexer_inputs(joysticks = [self.joysticks.joystick_left, self.joysticks.joystick_right], shooter_controller = self.shooter_controller, shooter = self.shooter, loading_piston = self.loading_piston)
+        self.joysticks.handle_spinner_inputs(joystick = self.joysticks.spinner_joystick, spinner_controller = self.spinner_controller)
 
 
 class joystick_handlers:
@@ -60,15 +59,23 @@ class joystick_handlers:
         self.joystick_right = wpilib.Joystick(1)
         self.spinner_joystick = wpilib.Joystick(2)
 
-    def handle_indexer_inputs(self, joystick = None, shooter_controller = None, indexer_controller = None):
-        if joystick.getTrigger():
+    def handle_indexer_inputs(self, joysticks = [], shooter_controller = None, shooter = None, loading_piston = None): #will eventually just take controllers but for the moment takes some components to test
+        if joysticks[0].getTrigger():
             shooter_controller.eject_cells()
 
-        if joystick.getRawButtonPressed(3):
+        if joysticks[0].getRawButtonPressed(3):
             shooter_controller.shoot_cells()
 
-        if joystick.getRawButtonPressed(4):
+        if joysticks[0].getRawButtonPressed(4):
             shooter_controller.intake_cells()
+
+        outer_throttle = ((-joysticks[0].getThrottle() + 1) / 2) * 5000
+        inner_throttle = -((-joysticks[1].getThrottle() + 1) / 2) * 5000
+        if loading_piston != None:
+            shooter.set_motor_rpm(outer_throttle, inner_throttle)
+
+        if joysticks[0].getRawButtonPressed(11):
+            loading_piston.startPulse()
 
     def handle_spinner_inputs(self, joystick = None, spinner_controller = None):
         if joystick.getRawButtonPressed(7):
@@ -78,15 +85,6 @@ class joystick_handlers:
         if joystick.getRawButtonPressed(8):
             spinner_controller.run(test=True, task="rotation")
             print(f"Rotation Control")
-    
-    def handle_shooter_inputs(self, joystick_left = None, joystick_right = None, loading_piston = None, shooter = None):
-        outer_throttle = ((-self.joystick_left.getThrottle() + 1) / 2) * 5000
-        inner_throttle = -((-self.joystick_right.getThrottle() + 1) / 2) * 5000
-        if loading_piston != None:
-            shooter.set_motor_rpm(outer_throttle, inner_throttle)
-
-        if joystick_left.getRawButtonPressed(11):
-            loading_piston.startPulse()
 
 
 if __name__ == "__main__":
