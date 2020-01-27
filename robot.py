@@ -79,7 +79,6 @@ class MyRobot(magicbot.MagicRobot):
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
 
-
         self.handle_spinner_inputs(self.spinner_joystick)
 
     def handle_spinner_inputs(self, joystick):
