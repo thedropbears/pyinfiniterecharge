@@ -1,4 +1,5 @@
 from networktables import NetworkTables
+from typing import Tuple
 
 
 class Vision:
@@ -8,7 +9,7 @@ class Vision:
         self.entry = self.table.getEntry("data")
         self.nt.setUpdateRate(1)
 
-    def get_vision_data(self) -> tuple:
+    def get_vision_data(self) -> Tuple[float, float, float]:
         """Returns a tuple containing the distance (metres), angle (radians), and timestamp (time.monotonic)
         If it can't get info, it returns [-1.0, -1.0, -1.0]
         """
