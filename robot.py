@@ -16,6 +16,7 @@ from controllers.spinner import SpinnerController
 from components.indexer import Indexer
 from components.shooter import Shooter
 from components.spinner import Spinner
+from components.chassis import Chassis
 
 
 class MyRobot(magicbot.MagicRobot):
@@ -24,6 +25,7 @@ class MyRobot(magicbot.MagicRobot):
     indexer: Indexer
     shooter: Shooter
     spinner: Spinner
+    chassis: Chassis
 
     def createObjects(self):
         """Robot initialization function"""
@@ -43,6 +45,11 @@ class MyRobot(magicbot.MagicRobot):
         self.spinner_motor = wpilib.Spark(2)
         self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
+
+        self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
+        self.chassis_left_front = rev.CANSparkMax(5, rev.MotorType.kBrushless)
+        self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
+        self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -65,6 +72,7 @@ class MyRobot(magicbot.MagicRobot):
 
         self.handle_indexer_inputs(self.joystick_left)
         self.handle_spinner_inputs(self.spinner_joystick)
+        self.handle_chassis_inputs(self.joystick_left)
 
     def handle_indexer_inputs(self, joystick):
         if joystick.getTrigger():
@@ -90,6 +98,27 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(8):
             print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
+
+    def scale_value(
+        self, value: float, input_range: tuple, output_range: tuple
+    ) -> float:
+        """Scales a value based on the input range and output range.
+        For example, to scale a joystick throttle (1 to -1) to 0-1, we would:
+            self.scale_value(joystick.getThrottle(), (1, -1), (0, 1))
+        """
+        input_distance = input_range[1] - input_range[0]
+        output_distance = output_range[1] - output_range[0]
+        ratio = (value - input_range[0]) / input_distance
+        return ratio * output_distance + output_range[0]
+
+    def handle_chassis_inputs(self, joystick):
+        vx = -joystick.getY() * self.scale_value(
+            joystick.getThrottle(), (1, -1), (0, 1)
+        )
+        vz = max(
+            (-joystick.getTwist(), -joystick.getX()), key=lambda x: abs(x)
+        ) * self.scale_value(joystick.getThrottle(), (1, -1), (0, 1))
+        self.chassis.drive(vx, vz)
 
 
 if __name__ == "__main__":
