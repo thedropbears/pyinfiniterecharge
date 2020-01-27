@@ -3,6 +3,7 @@ import ctre
 import math
 
 
+
 class Turret:
     # TODO - There should be 5 indexes total: left, right, centre, and two
     # limit switches. Right now there is only one in the centre.
@@ -129,9 +130,16 @@ class Turret:
             # self.logger.info("Found the sensor")
             return
 
+<<<<<<< HEAD
         # If we haven't started yet, start seeking
         if not self.seeking:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
+=======
+        # Start seeking right
+        if self.seeking == False:
+            self.logger.info("starting to seek")
+            self.motor.set(self.motor_speed)
+>>>>>>> checks if piston down, uses two buttons rather than fms
             self.tick_count = 0
             self.max_ticks = self.STARTING_MAX_TICKS
             self.seeking = True
@@ -145,6 +153,7 @@ class Turret:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
             self.tick_increment = self.tick_increment * -1
             self.max_ticks = self.max_ticks * self.max_ticks_factor
+<<<<<<< HEAD
             return
 
         # Currently running and haven't hit the limit nor found an index.
@@ -166,3 +175,5 @@ class Turret:
         if self.target_count < self.current_azimuth:
             speed = -speed
         self.motor.set(ctre.ControlMode.PercentOutput, speed)
+=======
+>>>>>>> checks if piston down, uses two buttons rather than fms

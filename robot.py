@@ -24,6 +24,7 @@ from components.turret import Turret
 from utilities.scale_value import scale_value
 
 
+
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
     spinner_controller: SpinnerController

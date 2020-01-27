@@ -34,15 +34,18 @@ class Spinner:
 
     WHEEL_SPIN_FACTOR = 0.3
 
+    MAX_SESNOR_RANGE = 40
+
     def __init__(self) -> None:
         self.rotations = 0
         self.state = None
         self.lastCol = None
         self.required_colour = None
+        self.pistonState = "up"
 
     def on_enable(self) -> None:
         self.spinner_motor.stopMotor()
-        self.spinner_solenoid.set(True)
+        self.piston_up()
         self.rotation = 0
         self.state = None
         self.lastCol = None
@@ -65,12 +68,18 @@ class Spinner:
 
     def piston_up(self) -> None:  # as functions to make swapping easier
         self.spinner_solenoid.set(True)
+        self.pistonState = "up"
 
     def piston_down(self) -> None:
         self.spinner_solenoid.set(False)
+        self.pistonState = "down"
 
     def read_colour(self) -> tuple:
-        return (self.colour_sensor.getColor(), self.colour_sensor.getIR())
+        col, ir = self.colour_sensor.getColor()
+        if ir > MAX_SENSOR_RANGE: #currently redudndant check to see if in range
+            return col
+        else:
+            return col
 
     def get_wheel_dist(
         self,
@@ -110,7 +119,7 @@ class Spinner:
         if self.lastCol != current_colour:
             self.rotations += 1 / 8
         self.lastCol = current_colour
-        if self.rotations >= 3.5 and self.read_colour()[1] > 35:
+        if self.rotations >= 3.5 and self.pistonState == "down":
             self.state = None
             self.spinner_motor.set(0)
             self.piston_up()
@@ -118,7 +127,7 @@ class Spinner:
     def run_position(self) -> None:  # position control to be called every 20ms
         distance = self.get_wheel_dist()
         self.spinner_motor.set(distance * self.WHEEL_SPIN_FACTOR)
-        if distance == 0 and self.read_colour()[1] > 35:
+        if distance == 0 and self.pistonState == "down":
             self.state = None
             self.piston_up()
 
