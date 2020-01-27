@@ -53,7 +53,7 @@ class ShooterController(StateMachine):
     @state
     def firing(self):
         """
-        Positioned to fire, inject and expel a single ballball
+        Positioned to fire, inject and expel a single ball
         """
         self.shooter.fire()
         self.next_state("tracking")
