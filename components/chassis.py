@@ -10,10 +10,10 @@ class Chassis:
     chassis_right_front: rev.CANSparkMax
 
     def setup(self) -> None:
-        self.chassis_left_rear.setInverted(True)
-        self.chassis_left_front.setInverted(True)
-        self.chassis_right_rear.setInverted(True)
-        self.chassis_right_front.setInverted(True)
+        self.chassis_left_rear.setInverted(False)
+        self.chassis_left_front.setInverted(False)
+        self.chassis_right_rear.setInverted(False)
+        self.chassis_right_front.setInverted(False)
 
         self.left = wpilib.SpeedControllerGroup(
             self.chassis_left_front, self.chassis_left_rear
@@ -25,14 +25,14 @@ class Chassis:
         self.diff_drive = DifferentialDrive(self.left, self.right)
 
     def execute(self) -> None:
-        pass
+        self.diff_drive.arcadeDrive(self.vx, self.vz)
 
     def drive(self, vx: float, vz: float) -> None:
         """Drive the robot with forwards velocity and rotational velocity
             vx: Forward is positive.
-            vz: Clockwise is negative, inverted below because arcadeDrive's positive is clockwise.
+            vz: Clockwise is negative
         """
-        self.diff_drive.arcadeDrive(-vx, vz)
+        self.vx, self.vz = vx, vz
 
     def get_heading(self) -> float:
         # TODO

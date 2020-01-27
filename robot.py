@@ -117,9 +117,7 @@ class MyRobot(magicbot.MagicRobot):
         vx = -joystick.getY() * self.scale_value(
             joystick.getThrottle(), (1, -1), (0, 1)
         )
-        vz = max(
-            (-joystick.getTwist(), -joystick.getX()), key=lambda x: abs(x)
-        ) * self.scale_value(joystick.getThrottle(), (1, -1), (0, 1))
+        vz = joystick.getX() * self.scale_value(joystick.getThrottle(), (1, -1), (0, 1))
         self.chassis.drive(vx, vz)
 
 
