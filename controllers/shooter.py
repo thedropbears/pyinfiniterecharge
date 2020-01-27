@@ -1,55 +1,78 @@
-# from magicbot import StateMachine, state
+from magicbot import StateMachine, state
+
 from components.indexer import Indexer
+from components.shooter import Shooter
+from components.turret import Turret
+from components.vision import Vision
 
 
 # class ShooterController(StateMachine):
 class ShooterController:
-    """Class to control the entire shooter conglomerate"""
+    """Statemachine for high level control of the shooter and injector"""
 
     indexer: Indexer
+    shooter: Shooter
+    turret: Turret
+    vision: Vision
 
     def __init__(self) -> None:
-        self.state = "intake_cells"
+        # super().__init__()
+        self.state = self.searching
 
     def execute(self) -> None:
-        """Executed every cycle"""
-        if self.state == "intake_cells":
-            self.intake_cells()
-        elif self.state == "eject_cells":
-            self.eject_cells()
-        elif self.state == "shoot_cells":
-            self.shoot_cells()
-
-    # @state()
-    def eject_cells(self) -> None:
-        """Powers all motors in reverse to eject all cells out front"""
-        for motor in self.indexer.indexer_motors:
-            motor.set(-1)
-
-    # @state()
-    def shoot_cells(self) -> None:
-        """Powers all motors to eject all cells into the shooter"""
-        for motor in self.indexer.indexer_motors:
-            motor.set(1)
+        """
+        tempoary replacement of magicbot statemachine
+        """
+        self.state()
 
     # @state(first=True)
-    def intake_cells(self) -> None:
-        """Powers motors based on the limit switches to intake and store balls at the back of the indexer"""
-        motor_states = [True] * len(self.indexer.indexer_motors)
-        switch_results = [switch.get() for switch in self.indexer.indexer_switches]
-        if not switch_results[
-            0
-        ]:  # Test the back switch (because all others require 2 switches)
-            motor_states[0] = False
+    def searching(self) -> None:
+        """
+        The vision system does not have a target, we try to find one using odometry
+        """
+        # currently just waits for vision
+        if self.vision.get_vision_data()[2] != -1:  # -1 means no data is available
+            # print(f"searching -> tracking {self.vision.get_vision_data()}")
+            # self.next_state("tracking")
+            self.state = self.tracking
 
-        for i in range(
-            1, len(motor_states)
-        ):  # Disable motor if switch and previous switch are pressed
-            if not switch_results[i] and not switch_results[i - 1]:
-                motor_states[i] = False
+    # @state
+    def tracking(self) -> None:
+        """
+        Aiming towards a vision target and spining up flywheels
+        """
+        dist, delta_angle, timestamp = self.vision.get_vision_data()
+        # collect data only once per loop
+        if timestamp == -1:
+            # self.next_state("searching")
+            # print(f"tracking -> searching {self.vision.get_vision_data()}")
+            self.state = self.searching
+        else:
+            self.shooter.set_range(dist)
+            self.turret.slew(delta_angle)
+            if self.ready_to_fire() and self.input_command:
+                # self.next_state("firing")
+                self.state = self.firing
 
-        for i in range(len(motor_states)):  # Set all motors to required states
-            if motor_states[i]:
-                self.indexer.indexer_motors[i].set(1)
-            else:
-                self.indexer.indexer_motors[i].stopMotor()
+    # @state
+    def firing(self) -> None:
+        """
+        Positioned to fire, inject and expel a single ball
+        """
+        self.shooter.fire()
+        # self.next_state("tracking")
+        self.state = self.tracking
+
+    def driver_input(self, command: bool) -> None:
+        """
+        Called by robot.py to indicate the fire button has been pressed
+        """
+        self.input_command = command
+
+    def ready_to_fire(self) -> bool:
+        return (
+            self.shooter.is_ready()
+            and self.shooter.is_in_range()
+            and self.indexer.is_ball_ready()
+            and self.turret.is_ready()
+        )
