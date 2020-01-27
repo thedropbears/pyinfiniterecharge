@@ -130,7 +130,7 @@ class Turret:
             return
 
         # If we haven't started yet, start seeking
-        if self.seeking == False:
+        if not self.seeking:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
             self.tick_count = 0
             self.max_ticks = self.STARTING_MAX_TICKS
