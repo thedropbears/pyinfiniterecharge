@@ -24,7 +24,7 @@ class Chassis:
         )
 
     def execute(self) -> None:
-        self.diff_drive.arcadeDrive(self.vx, self.vz)
+        self.diff_drive.arcadeDrive(self.vx, self.vz, squareInputs = False)
 
     def drive(self, vx: float, vz: float) -> None:
         """Drive the robot with forwards velocity and rotational velocity
