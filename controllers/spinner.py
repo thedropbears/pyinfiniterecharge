@@ -31,3 +31,6 @@ class SpinnerController:
         elif self.task == "rotation":
             self.state = "rotation"
             self.spinner.do_rotation_control()
+
+    def execute():
+        pass #needed beacuse it a magicbot component
