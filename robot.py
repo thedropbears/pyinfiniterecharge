@@ -19,6 +19,7 @@ from components.spinner import Spinner
 from components.vision import Vision
 from components.turret import Turret
 
+
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
     spinner_controller: SpinnerController
@@ -26,7 +27,7 @@ class MyRobot(magicbot.MagicRobot):
     shooter: Shooter
     spinner: Spinner
     turret: Turret
-    
+
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
@@ -54,10 +55,10 @@ class MyRobot(magicbot.MagicRobot):
 
         self.vision = Vision()
 
-        #self.turret_motor = wpilib.Spark(3)
-        self.turret_left_index = wpilib.DigitalInput (1)
-        self.turret_centre_index = wpilib.DigitalInput (0)
-        self.turret_right_index = wpilib.DigitalInput (2)
+        self.turret_motor = wpilib.Spark(3)
+        self.turret_left_index = wpilib.DigitalInput(1)
+        self.turret_centre_index = wpilib.DigitalInput(0)
+        self.turret_right_index = wpilib.DigitalInput(2)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -110,7 +111,7 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(8):
             print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
-    
+
     def handle_shooter_inputs(self, joystick: wpilib.Joystick):
         if joystick.getTriggerPressed():
             self.shooter_controller.driver_input(True)

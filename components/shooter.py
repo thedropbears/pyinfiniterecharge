@@ -22,7 +22,7 @@ class Shooter:
 
         self.inject = False
         self.in_range = False
-        self.velocity_tolerance = 50 # rpm
+        self.velocity_tolerance = 50  # rpm
 
     def on_enable(self) -> None:
         self.centre_motor.stopMotor()
@@ -52,7 +52,7 @@ class Shooter:
         if self.inject:
             self.loading_piston.startPulse()
             self.inject = False
-    
+
     def set_range(self, dist: float) -> None:
         """
         Set the target range for the shooter, this will be converted into target speeds for the flywheels
@@ -67,15 +67,17 @@ class Shooter:
         self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
         self.outer_rpm = 5000
 
-
     def is_ready(self) -> bool:
         """
         Returns true if the shooter is able to make a successful shot with the currently set dist.
 
         Considers the rotation rates of the flywheels compared with their setpoints
         """
-        return (abs(self.centre_rpm - self.centre_encoder.getVelocity()) <= self.velocity_tolerance 
-                and abs(self.outer_rpm - self.outer_encoder.getVelocity() <= self.velocity_tolerance))
+        return abs(
+            self.centre_rpm - self.centre_encoder.getVelocity()
+        ) <= self.velocity_tolerance and abs(
+            self.outer_rpm - self.outer_encoder.getVelocity() <= self.velocity_tolerance
+        )
 
     def is_firing(self) -> bool:
         """
