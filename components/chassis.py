@@ -32,7 +32,7 @@ class Chassis:
             vx: Forward is positive.
             vz: Clockwise is negative, inverted below because arcadeDrive's positive is clockwise.
         """
-        self.diff_drive.arcadeDrive(vx, -vz)
+        self.diff_drive.arcadeDrive(-vx, vz)
 
     def get_heading(self) -> float:
         # TODO
