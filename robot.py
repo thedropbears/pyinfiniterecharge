@@ -16,7 +16,7 @@ from controllers.spinner import SpinnerController
 from components.indexer import Indexer
 from components.shooter import Shooter
 from components.spinner import Spinner
-
+from components.turret import Turret
 
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
@@ -25,6 +25,8 @@ class MyRobot(magicbot.MagicRobot):
     shooter: Shooter
     spinner: Spinner
 
+    turret: Turret
+    
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
@@ -34,15 +36,28 @@ class MyRobot(magicbot.MagicRobot):
 
         self.loading_piston = wpilib.Solenoid(0)
 
-        self.indexer_motors = [wpilib.Spark(1), wpilib.Spark(0)]
-        self.indexer_switches = [wpilib.DigitalInput(8), wpilib.DigitalInput(9)]
+        self.indexer_motors = [wpilib.Spark(9), wpilib.Spark(8), wpilib.Spark(7)]
+        self.indexer_switches = [
+            wpilib.DigitalInput(9),
+            wpilib.DigitalInput(8),
+            wpilib.DigitalInput(7),
+        ]
 
         self.spinner_motor = wpilib.Spark(2)
         self.spinner_solenoid = wpilib.Solenoid(2)
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
+        self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
 
+<<<<<<< HEAD
         self.joysticks = joystick_handlers()
 
+=======
+        self.turret_motor = wpilib.Spark(3)
+        self.turret_left_index = wpilib.DigitalInput (1)
+        self.turret_centre_index = wpilib.DigitalInput (0)
+        self.turret_right_index = wpilib.DigitalInput (2)
+    
+>>>>>>> origin/master
     def teleopInit(self):
         """Executed at the start of teleop mode"""
 
@@ -66,13 +81,10 @@ class joystick_handlers:
         if joysticks[0].getRawButtonPressed(3):
             shooter_controller.shoot_cells()
 
-        if joysticks[0].getRawButtonPressed(4):
-            shooter_controller.intake_cells()
+        self.handle_indexer_inputs(self.joystick_left)
+        self.handle_spinner_inputs(self.spinner_joystick)
 
-        outer_throttle = ((-joysticks[0].getThrottle() + 1) / 2) * 5000
-        inner_throttle = -((-joysticks[1].getThrottle() + 1) / 2) * 5000
-        if loading_piston != None:
-            shooter.set_motor_rpm(outer_throttle, inner_throttle)
+        self.handle_spinner_inputs(self.spinner_joystick)
 
         if joysticks[0].getRawButtonPressed(11):
             loading_piston.startPulse()
