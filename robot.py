@@ -16,6 +16,7 @@ from controllers.spinner import SpinnerController
 from components.indexer import Indexer
 from components.shooter import Shooter
 from components.spinner import Spinner
+from components.vision import Vision
 
 
 class MyRobot(magicbot.MagicRobot):
@@ -47,6 +48,8 @@ class MyRobot(magicbot.MagicRobot):
         self.spinner_motor = wpilib.Spark(2)
         self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
+
+        self.vision = Vision()
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
