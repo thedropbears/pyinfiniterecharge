@@ -7,7 +7,6 @@ class Vision:
         self.nt = NetworkTables
         self.table = self.nt.getTable("/vision")
         self.entry = self.table.getEntry("data")
-        self.nt.setUpdateRate(1)
 
     def get_vision_data(self) -> Tuple[float, float, float]:
         """Returns a tuple containing the distance (metres), angle (radians), and timestamp (time.monotonic)
