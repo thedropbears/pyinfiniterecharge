@@ -11,7 +11,7 @@ def scale_value(
 ) -> float:
     """Scales a value based on the input range and output range.
     For example, to scale a joystick throttle (1 to -1) to 0-1, we would:
-        self.scale_value(joystick.getThrottle(), (1, -1), (0, 1))
+        scale_value(joystick.getThrottle(), 1, -1, 0, 1)
     The output is then raised to the exponent argument.
     """
     input_distance = input_upper - input_lower
