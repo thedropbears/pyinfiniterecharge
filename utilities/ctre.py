@@ -29,6 +29,10 @@ class TalonEncoder(wpilib.Sendable):
         """Get the raw number of counts from the encoder."""
         return self.talon.getSelectedSensorPosition(self.pid_loop_idx)
 
+    def setRaw(self, value: int) -> None:
+        """Set the raw number of counts of the encoder."""
+        self.talon.setSelectedSensorPosition(value, self.pid_loop_idx)
+
     def reset(self) -> None:
         """Reset the encoder distance to 0, iff it is a relative encoder."""
         self.talon.setSelectedSensorPosition(0, self.pid_loop_idx)
