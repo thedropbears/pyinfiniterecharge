@@ -15,18 +15,18 @@ class ShooterController:
     turret: Turret
     vision: Vision
 
-    def __init__(self):
+    def __init__(self) -> None:
         # super().__init__()
         self.state = self.searching
 
-    def execute(self):
+    def execute(self) -> None:
         """
         tempoary replacement of magicbot statemachine
         """
         self.state()
 
     # @state(first=True)
-    def searching(self):
+    def searching(self) -> None:
         """
         The vision system does not have a target, we try to find one using odometry
         """
@@ -37,7 +37,7 @@ class ShooterController:
             self.state = self.tracking
 
     # @state
-    def tracking(self):
+    def tracking(self) -> None:
         """
         Aiming towards a vision target and spining up flywheels
         """
@@ -55,7 +55,7 @@ class ShooterController:
                 self.state = self.firing
 
     # @state
-    def firing(self):
+    def firing(self) -> None:
         """
         Positioned to fire, inject and expel a single ball
         """
@@ -63,13 +63,13 @@ class ShooterController:
         # self.next_state("tracking")
         self.state = self.tracking
 
-    def driver_input(self, command: bool):
+    def driver_input(self, command: bool) -> None:
         """
         Called by robot.py to indicate the fire button has been pressed
         """
         self.input_command = command
 
-    def ready_to_fire(self):
+    def ready_to_fire(self) -> bool:
         return (
             self.shooter.is_ready()
             and self.shooter.is_in_range()
