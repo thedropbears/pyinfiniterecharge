@@ -17,8 +17,8 @@ class Shooter:
     # outer_rpm = tunable(0)
     # centre_rpm = tunable(0)
     def __init__(self):
-        self.outer_rpm = 4400
-        self.centre_rpm = -3700
+        self.outer_rpm = 0
+        self.centre_rpm = 0
 
         self.inject = False
         self.in_range = False
