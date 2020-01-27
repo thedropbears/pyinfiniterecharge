@@ -55,10 +55,7 @@ class MyRobot(magicbot.MagicRobot):
 
         self.vision = Vision()
 
-        self.turret_motor = wpilib.Spark(3)
-        self.turret_left_index = wpilib.DigitalInput(1)
         self.turret_centre_index = wpilib.DigitalInput(0)
-        self.turret_right_index = wpilib.DigitalInput(2)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
