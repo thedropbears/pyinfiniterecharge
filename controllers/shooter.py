@@ -1,4 +1,6 @@
-# from magicbot import StateMachine, state
+import math
+
+from magicbot import StateMachine, state
 
 from components.indexer import Indexer
 from components.shooter import Shooter
@@ -14,6 +16,12 @@ class ShooterController:
     shooter: Shooter
     turret: Turret
     vision: Vision
+
+    TARGET_RADIUS = (3 * 12 + 3.25)/2 * 0.0254 # Circumscribing radius of target
+    BALL_RADIUS = 7/2 * 0.0254
+    # convert from freedom units
+    CENTRE_ACCURACY = 0.1 # maximum distance the centre of the ball will be from our target point
+    TOTAL_RADIUS = BALL_RADIUS + CENTRE_ACCURACY
 
     def __init__(self) -> None:
         # super().__init__()
@@ -49,6 +57,7 @@ class ShooterController:
             self.state = self.searching
         else:
             self.shooter.set_range(dist)
+            if delta_angle > self.find_allowable_angle(dist):
             self.turret.slew(delta_angle)
             if self.ready_to_fire() and self.input_command:
                 # self.next_state("firing")
@@ -76,3 +85,16 @@ class ShooterController:
             and self.indexer.is_ball_ready()
             and self.turret.is_ready()
         )
+    
+
+    def find_allowable_angle(self, dist: float) -> float:
+        """
+        Find the maximum angle by which the turret can be misaligned to still score a hit
+        Currently does not consider angle from target
+        dist: planar distance from the target 
+        """
+        offset = self.TOTAL_RADIUS / math.sin(math.pi / 3)
+        true_target_radius = self.TARGET_RADIUS - offset
+        angle = math.atan(true_target_radius / dist)
+        return angle
+
