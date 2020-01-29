@@ -30,6 +30,7 @@ class ShooterController:
     def __init__(self) -> None:
         # super().__init__()
         self.state = self.searching
+        self.input_command = False
 
     def execute(self) -> None:
         """
@@ -43,7 +44,7 @@ class ShooterController:
         The vision system does not have a target, we try to find one using odometry
         """
         # currently just waits for vision
-        if self.vision.get_vision_data()[2] is None:  # -1 means no data is available
+        if self.vision.get_vision_data()[2] is not None:  # None means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             # self.next_state("tracking")
             self.state = self.tracking
@@ -61,7 +62,7 @@ class ShooterController:
             self.state = self.searching
         else:
             self.shooter.set_range(dist)
-            if delta_angle > self.find_allowable_angle(dist):
+            if abs(delta_angle) > self.find_allowable_angle(dist):
                 self.turret.slew(delta_angle)
             if self.ready_to_fire() and self.input_command:
                 # self.next_state("firing")
@@ -97,4 +98,5 @@ class ShooterController:
         dist: planar distance from the target 
         """
         angle = math.atan(self.TRUE_TARGET_RADIUS / dist)
+        # print(f"angle tolerance +- {angle} true target radius{self.TRUE_TARGET_RADIUS}")
         return angle
