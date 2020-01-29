@@ -7,15 +7,15 @@ class Turret:
     # TODO - There should be 5 indexes total: left, right, and centre hall-effect
     # sensors, and two limit switches. Right now there is only one hall-effect
     # sensor in the centre.
-    #left_index: wpilib.DigitalInput
-    #right_index: wpilib.DigitalInput
+    # left_index: wpilib.DigitalInput
+    # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
     INDEX_NOT_FOUND = 0
     INDEX_CENTRE = 1
-    #INDEX_RIGHT = 2
-    #INDEX_LEFT_LIMIT = 3
-    #INDEX_RIGHT_LIMIT = 4
-    HALL_EFFECT_CLOSED = 0; # Consider inverting the input instead
+    # INDEX_RIGHT = 2
+    # INDEX_LEFT_LIMIT = 3
+    # INDEX_RIGHT_LIMIT = 4
+    HALL_EFFECT_CLOSED = 0
 
     joystick: wpilib.Joystick
 
@@ -25,7 +25,7 @@ class Turret:
     IDLE = 0
     SLEWING = 1
     FINDING_INDEX = 2
-    
+
     # Constants for Talon on the turret
     COUNTS_PER_MOTOR_REV = 4096
     GEAR_REDUCTION = 160 / 18
