@@ -6,6 +6,7 @@
 # the project.
 
 import wpilib
+import ctre
 import rev
 import rev.color
 
@@ -60,6 +61,7 @@ class MyRobot(magicbot.MagicRobot):
         self.vision = Vision()
 
         self.turret_centre_index = wpilib.DigitalInput(0)
+        self.turret_motor = ctre.WPI_TalonSRX(10)
 
         self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
         self.chassis_left_front = rev.CANSparkMax(5, rev.MotorType.kBrushless)
