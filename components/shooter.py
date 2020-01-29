@@ -37,15 +37,14 @@ class Shooter:
         self.centre_pid = self.centre_motor.getPIDController()
         self.outer_pid = self.outer_motor.getPIDController()
 
-        self.outer_pid.setP(0.0279/60)
+        self.outer_pid.setP(0.0279 / 60)
         self.outer_pid.setI(1e-6)
         self.outer_pid.setD(0)
         self.outer_pid.setFF(0.000156)
-        self.centre_pid.setP(0.0247/60)
+        self.centre_pid.setP(0.0247 / 60)
         self.centre_pid.setI(1e-6)
         self.centre_pid.setD(0)
         self.centre_pid.setFF(0.000156)
-        
 
     def execute(self) -> None:
         self.centre_pid.setReference(self.centre_rpm, rev.ControlType.kVelocity)
