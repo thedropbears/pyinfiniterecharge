@@ -24,6 +24,8 @@ class ShooterController:
         0.1  # maximum distance the centre of the ball will be from our target point
     )
     TOTAL_RADIUS = BALL_RADIUS + CENTRE_ACCURACY
+    OFFSET = TOTAL_RADIUS / math.sin(math.pi / 3)
+    TRUE_TARGET_RADIUS = TARGET_RADIUS - OFFSET
 
     def __init__(self) -> None:
         # super().__init__()
@@ -94,7 +96,5 @@ class ShooterController:
         Currently does not consider angle from target
         dist: planar distance from the target 
         """
-        offset = self.TOTAL_RADIUS / math.sin(math.pi / 3)
-        true_target_radius = self.TARGET_RADIUS - offset
-        angle = math.atan(true_target_radius / dist)
+        angle = math.atan(self.TRUE_TARGET_RADIUS / dist)
         return angle
