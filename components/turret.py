@@ -28,7 +28,7 @@ class Turret:
     
     # Constants for Talon on the turret
     COUNTS_PER_MOTOR_REV = 4096
-    GEAR_REDUCTION = 160 / 12
+    GEAR_REDUCTION = 160 / 18
     COUNTS_PER_TURRET_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION
     COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
 
@@ -130,7 +130,7 @@ class Turret:
     def _do_indexing(self):
         # Are we there yet? If so, greb the encoder value, stop the motor,
         # and stop seeking
-        if self._index_found() == INDEX_CENTRE:
+        if self._index_found() == self.INDEX_CENTRE:
             self.baseline_azimuth = self.motor.getSelectedSensorPosition(0)
             self.motor.stopMotor()
             self._reset_ticks()
