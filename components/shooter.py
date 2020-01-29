@@ -1,9 +1,6 @@
-import time
-
 import wpilib
 import rev
 from numpy import interp
-from magicbot import tunable
 
 
 class Shooter:
@@ -14,8 +11,6 @@ class Shooter:
     ranges = (7, 8, 9, 10, 11)
     centre_rpms = (880, 1120, 1500, 2150, 2400)
 
-    # outer_rpm = tunable(0)
-    # centre_rpm = tunable(0)
     def __init__(self):
         self.outer_rpm = 0
         self.centre_rpm = 0

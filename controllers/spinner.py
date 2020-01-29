@@ -1,6 +1,5 @@
 # from magicbot import StateMachine, state
 from components.spinner import Spinner
-import wpilib
 
 # class SpinnerController(StateMachine):
 class SpinnerController:

@@ -1,5 +1,4 @@
 import rev
-import wpilib
 from wpilib.drive import DifferentialDrive
 from typing import Tuple
 
