@@ -5,32 +5,39 @@ import math
 
 
 class Turret:
-    left_index: wpilib.DigitalInput
+    # TODO - There should be 5 indexes total: left, right, centre, and two
+    # limit switches. Right now there is only one in the centre.
+    #left_index: wpilib.DigitalInput
+    #right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
+
     right_index: wpilib.DigitalInput
 
     def reset_ticks(self) -> None:
         # prototype starts at full speed
         self.motor_speed = 0.2
+
     joystick: wpilib.Joystick
-    
+
+    motor: ctre.WPI_TalonSRX
+
     HALL_EFFECT_CLOSED = 0; # Consider inverting the input instead
-    
+
     # Possible states
     IDLE = 0
     SLEWING = 1
     FINDING_INDEX = 2
-    
+
     # Constants for Talon on the turret
     COUNTS_PER_MOTOR_REV = 4096
     GEAR_REDUCTION = 160/12
     COUNTS_PER_TURRET_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION
     COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
 
+    # Seek for 200ms at first, before reversing and doubling
     STARTING_MAX_TICKS = 10
 
     def __init__(self):
-        self.motor = ctre.WPI_TalonSRX(10)            
         # Note that we don't know where the turret actually is until we've 
         # run the indexing.
         self.current_azimuth: int
@@ -56,7 +63,7 @@ class Turret:
     def setup(self) -> None:
         err = self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
-        ) 
+        )
         if err != ctre.ErrorCode.OK:
             self.logger.warning(f'Error configuring encoder: {err}')
 
@@ -124,10 +131,8 @@ class Turret:
             #self.logger.info("Found the sensor")
             return
 
-        # Start seeking right
-
         # If we haven't started yet, start seeking clockwise
-    
+
         if self.seeking == False:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
             self.tick_count = 0
@@ -145,11 +150,11 @@ class Turret:
             self.max_ticks = self.max_ticks * self.max_ticks_factor
 
             return
-            
+
         # Currently running and haven't hit the limit nor found an index.
         # Just keep the motor running
         self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
-    
+
     def _do_slewing(self):
         # The following will have to change to use the Talon Absolute Position mode
         # Are we there yet?
@@ -159,7 +164,7 @@ class Turret:
             self.target_count = 0
             self.tick_count = 0
             return
-        
+
         # Not there, so keep the motor running
         speed = self.motor_speed
         if self.target_count < self.current_azimuth:
