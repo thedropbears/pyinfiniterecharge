@@ -17,10 +17,12 @@ class ShooterController:
     turret: Turret
     vision: Vision
 
-    TARGET_RADIUS = (3 * 12 + 3.25)/2 * 0.0254 # Circumscribing radius of target
-    BALL_RADIUS = 7/2 * 0.0254
+    TARGET_RADIUS = (3 * 12 + 3.25) / 2 * 0.0254  # Circumscribing radius of target
+    BALL_RADIUS = 7 / 2 * 0.0254
     # convert from freedom units
-    CENTRE_ACCURACY = 0.1 # maximum distance the centre of the ball will be from our target point
+    CENTRE_ACCURACY = (
+        0.1  # maximum distance the centre of the ball will be from our target point
+    )
     TOTAL_RADIUS = BALL_RADIUS + CENTRE_ACCURACY
 
     def __init__(self) -> None:
@@ -58,7 +60,7 @@ class ShooterController:
         else:
             self.shooter.set_range(dist)
             if delta_angle > self.find_allowable_angle(dist):
-            self.turret.slew(delta_angle)
+                self.turret.slew(delta_angle)
             if self.ready_to_fire() and self.input_command:
                 # self.next_state("firing")
                 self.state = self.firing
@@ -85,7 +87,6 @@ class ShooterController:
             and self.indexer.is_ball_ready()
             and self.turret.is_ready()
         )
-    
 
     def find_allowable_angle(self, dist: float) -> float:
         """
@@ -97,4 +98,3 @@ class ShooterController:
         true_target_radius = self.TARGET_RADIUS - offset
         angle = math.atan(true_target_radius / dist)
         return angle
-
