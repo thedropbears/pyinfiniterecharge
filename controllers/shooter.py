@@ -1,6 +1,6 @@
 import math
 
-from magicbot import StateMachine, state
+# from magicbot import StateMachine, state
 
 from components.indexer import Indexer
 from components.shooter import Shooter
