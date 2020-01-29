@@ -32,7 +32,11 @@ class Spinner:
 
     WHEEL_ORDER = ["R", "Y", "B", "G"]
 
-    WHEEL_SPIN_FACTOR = 0.3
+    POSITION_SPIN_FACTOR = 0.3
+
+    ROTATION_SPIN_FACTOR = 20
+    ROTATION_MAX_SPEED = 1
+    ROTATION_TARGET_ROTATIONS = 3.5
 
     MAX_SESNOR_RANGE = 40
 
@@ -50,6 +54,7 @@ class Spinner:
         self.state = None
         self.lastCol = None
         self.required_colour = None
+        self.spin_speed = 0
 
     # Methods to be called by controller
     def is_complete(self) -> bool:
@@ -114,9 +119,9 @@ class Spinner:
             return minDist
 
     def run_rotation(self) -> None:  # rotation control to be called every 20ms
-        self.spinner_motor.set(
-            1 - self.rotations / 6
-        )  # speed slows down as it gets closer to required revolutions
+        self.spin_speed = ROTATION_SPIN_FACTOR**(x-ROTATION_TARGET_ROTATIONS+1)+ROTATION_MAX_SPEED
+        self.spinner_motor.set(self.spin_speed) 
+        # speed slows down as it gets closer to required revolutions
         current_colour = self.get_current_colour()
         if self.lastCol != current_colour:
             self.rotations += 1 / 8
@@ -128,7 +133,7 @@ class Spinner:
 
     def run_position(self) -> None:  # position control to be called every 20ms
         distance = self.get_wheel_dist()
-        self.spinner_motor.set(distance * self.WHEEL_SPIN_FACTOR)
+        self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
         if distance == 0 and self.pistonState == "down":
             self.state = None
             self.piston_up()
