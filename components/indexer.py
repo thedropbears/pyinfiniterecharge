@@ -1,6 +1,3 @@
-import wpilib
-
-
 class Indexer:
     indexer_motors: list
     indexer_switches: list
@@ -13,11 +10,11 @@ class Indexer:
             motor_states = [True] * len(self.indexer_motors)
             switch_results = [switch.get() for switch in self.indexer_switches]
             # Test the back switch (because all others require 2 switches)
-            if not switch_results[0]:  
+            if not switch_results[0]:
                 motor_states[0] = False
 
             # Disable motor if switch and previous switch are pressed
-            for i in range(1, len(motor_states)):  
+            for i in range(1, len(motor_states)):
                 if not switch_results[i] and not switch_results[i - 1]:
                     motor_states[i] = False
 
@@ -42,4 +39,3 @@ class Indexer:
 
     def is_ball_ready(self) -> bool:
         return not self.indexer_switches[0].get()
-

@@ -23,6 +23,7 @@ from components.vision import Vision
 from components.turret import Turret
 from utilities.scale_value import scale_value
 
+
 class MyRobot(magicbot.MagicRobot):
     shooter_controller: ShooterController
     spinner_controller: SpinnerController
@@ -32,7 +33,7 @@ class MyRobot(magicbot.MagicRobot):
     chassis: Chassis
     hang: Hang
     turret: Turret
-      
+
     def createObjects(self):
         """Robot initialization function"""
         # object that handles basic drive operations
@@ -76,15 +77,15 @@ class MyRobot(magicbot.MagicRobot):
 
         self.handle_spinner_inputs(self.spinner_joystick)
         self.handle_chassis_inputs(self.joystick_left)
-        
+
         pov = self.turret_joystick.getPOV(0)
-        about_five_degrees = 0.087 # radians
+        about_five_degrees = 0.087  # radians
         if pov != -1:
             if pov < 180:
                 self.turret.slew(about_five_degrees)
             else:
                 self.turret.slew(-about_five_degrees)
-         
+
         if self.joystick_left.getRawButtonPressed(7):
             if self.indexer.indexing:
                 self.indexer.disable_indexing()
