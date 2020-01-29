@@ -28,17 +28,24 @@ class Shooter:
         self.outer_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
         self.centre_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
 
+        self.outer_motor.setInverted(False)
+        self.centre_motor.setInverted(True)
+
         self.outer_encoder = self.outer_motor.getEncoder()
         self.centre_encoder = self.centre_motor.getEncoder()
 
         self.centre_pid = self.centre_motor.getPIDController()
         self.outer_pid = self.outer_motor.getPIDController()
 
-        for pid in (self.centre_pid, self.outer_pid):
-            pid.setP(5e-5)
-            pid.setI(1e-6)
-            pid.setD(0)
-            pid.setFF(0.000156)
+        self.outer_pid.setP(0.0279/60)
+        self.outer_pid.setI(1e-6)
+        self.outer_pid.setD(0)
+        self.outer_pid.setFF(0.000156)
+        self.centre_pid.setP(0.0247/60)
+        self.centre_pid.setI(1e-6)
+        self.centre_pid.setD(0)
+        self.centre_pid.setFF(0.000156)
+        
 
     def execute(self) -> None:
         self.centre_pid.setReference(self.centre_rpm, rev.ControlType.kVelocity)
