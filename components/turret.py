@@ -15,7 +15,7 @@ class Turret:
     # INDEX_RIGHT = 2
     # INDEX_LEFT_LIMIT = 3
     # INDEX_RIGHT_LIMIT = 4
-    HALL_EFFECT_CLOSED = 0
+    HALL_EFFECT_CLOSED = False
 
     joystick: wpilib.Joystick
 
