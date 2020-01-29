@@ -4,18 +4,22 @@ import math
 
 
 class Turret:
-    # TODO - There should be 5 indexes total: left, right, centre, and two
-    # limit switches. Right now there is only one in the centre.
+    # TODO - There should be 5 indexes total: left, right, and centre hall-effect
+    # sensors, and two limit switches. Right now there is only one hall-effect
+    # sensor in the centre.
     # left_index: wpilib.DigitalInput
     # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
+    INDEX_NOT_FOUND = 0
+    INDEX_CENTRE = 1
+    # INDEX_RIGHT = 2
+    # INDEX_LEFT_LIMIT = 3
+    # INDEX_RIGHT_LIMIT = 4
+    HALL_EFFECT_CLOSED = 0
 
     joystick: wpilib.Joystick
 
     motor: ctre.WPI_TalonSRX
-
-    HALL_EFFECT_CLOSED = 0
-    # Consider inverting the input instead
 
     # Possible states
     IDLE = 0
@@ -24,7 +28,7 @@ class Turret:
 
     # Constants for Talon on the turret
     COUNTS_PER_MOTOR_REV = 4096
-    GEAR_REDUCTION = 160 / 12
+    GEAR_REDUCTION = 160 / 18
     COUNTS_PER_TURRET_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION
     COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
 
@@ -115,13 +119,18 @@ class Turret:
         # state must be IDLE
         return
 
+    # TODO: this currently uses only the centre hall-effect sensor; it should
+    # use all three hall-effect sensors and the two limit switches.
+    def _index_found(self) -> int:
+        if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
+            return self.INDEX_CENTRE
+        # other sensors go here
+        return self.INDEX_NOT_FOUND
+
     def _do_indexing(self):
-        # TODO: this currently uses only the centre index; it should use
-        # All three hall-effect sensors and the two limit switches
         # Are we there yet? If so, greb the encoder value, stop the motor,
         # and stop seeking
-        val = self.centre_index.get()
-        if val == self.HALL_EFFECT_CLOSED:
+        if self._index_found() == self.INDEX_CENTRE:
             self.baseline_azimuth = self.motor.getSelectedSensorPosition(0)
             self.motor.stopMotor()
             self._reset_ticks()
