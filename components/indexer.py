@@ -37,5 +37,5 @@ class Indexer:
     def balls_loaded(self) -> int:
         return sum(not switch.get() for switch in self.indexer_switches)
 
-    def is_ball_ready(self) -> bool:
+    def is_ready(self) -> bool:
         return not self.indexer_switches[0].get()
