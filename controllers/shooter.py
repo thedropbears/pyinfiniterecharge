@@ -43,7 +43,9 @@ class ShooterController:
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        # currently just waits for vision
+        heading = self.chassis.get_heading()
+        self.turret.scan(heading)
+
         if self.vision.get_vision_data()[2] is not None:
             # means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
@@ -87,8 +89,7 @@ class ShooterController:
     def ready_to_fire(self) -> bool:
         return (
             self.shooter.is_ready()
-            and self.shooter.is_in_range()
-            and self.indexer.is_ball_ready()
+            and self.indexer.is_ready()
             and self.turret.is_ready()
         )
 
@@ -96,7 +97,7 @@ class ShooterController:
         """
         Find the maximum angle by which the turret can be misaligned to still score a hit
         Currently does not consider angle from target
-        dist: planar distance from the target 
+        dist: planar distance from the target
         """
         angle = math.atan(self.TRUE_TARGET_RADIUS / dist)
         # print(f"angle tolerance +- {angle} true target radius{self.TRUE_TARGET_RADIUS}")

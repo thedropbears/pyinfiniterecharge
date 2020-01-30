@@ -68,9 +68,9 @@ class Shooter:
         self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
         self.outer_rpm = 5000
 
-    def is_ready(self) -> bool:
+    def is_at_speed(self) -> bool:
         """
-        Returns true if the shooter is able to make a successful shot with the currently set dist.
+        Returns true if the shooter is spinning at the set speed.
 
         Considers the rotation rates of the flywheels compared with their setpoints
         """
@@ -92,9 +92,17 @@ class Shooter:
     def is_in_range(self) -> bool:
         """
         Returns true if the current target of the shooter is within range
-        Returns false if the range has been clamped 
+        Returns false if the range has been clamped
         """
         return self.in_range
+
+    def is_ready(self) -> bool:
+        """
+        Returns true if the shooter is ready to take a shot.
+
+        Checks the speed, range and whether the piston is moving
+        """
+        return self.is_in_range() and self.is_at_speed() and not self.is_firing()
 
     def fire(self) -> None:
         """
