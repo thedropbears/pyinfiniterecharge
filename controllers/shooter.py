@@ -43,7 +43,9 @@ class ShooterController:
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        # currently just waits for vision
+        heading = self.chassis.get_heading()
+        self.turret.scan(heading)
+
         if self.vision.get_vision_data()[2] is not None:
             # means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
