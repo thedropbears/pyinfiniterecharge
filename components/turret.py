@@ -88,7 +88,30 @@ class Turret:
 
     # Slew to the given absolute position, given as an encoder count
     def _slew_to_count(self, count: int) -> None:
-        # Accept this only if we're not doing anything else
+        self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+        delta = count - self.current_azimuth
+        self.target_count = self.current_azimuth + delta
+        self.incrementing = True
+        if self.target_count < self.current_azimuth:
+            self.incrementing = False
+        self.current_state = self.SLEWING
+
+    def scan(self, heading):
+        """
+        Slew the turret back and forth looking for a target.
+        """
+        # If we haven't hit an index yet, we just have to scan
+        # about the current position.
+        # Otherwise scan about the heading we've been given.
+        # The target must be downfield from us, so scan up to
+        # 90 degrees either side of the given heading
+        pass
+
+    # Find the nearest index and reset the encoder
+    def run_indexing(self) -> None:
+        self.current_state = self.FINDING_INDEX
+
+    def is_ready(self) -> bool:
         if self.current_state == self.IDLE:
             # self.logger.info(f'slewing to count {count}')
             self.current_azimuth = self.motor.getSelectedSensorPosition(0)
