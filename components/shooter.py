@@ -83,6 +83,10 @@ class Shooter:
         """
         return not self.loading_piston.get()
 
+    def set_motor_rpm(self, v_outer, v_centre) -> None:
+        self.centre_rpm = v_centre
+        self.outer_rpm = v_outer
+
     def is_in_range(self) -> bool:
         """
         Returns true if the current target of the shooter is within range

@@ -11,6 +11,12 @@ class Turret:
     # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
 
+    right_index: wpilib.DigitalInput
+
+    def reset_ticks(self) -> None:
+        # prototype starts at full speed
+        self.motor_speed = 0.2
+
     joystick: wpilib.Joystick
 
     motor: ctre.WPI_TalonSRX
@@ -42,6 +48,7 @@ class Turret:
     # the times it's called, incrementing (or decrementing) a tick count each
     # time. This method resets the counting mechanism.
     def _reset_ticks(self) -> None:
+
         self.motor_speed = 0.2  # Flips when seeking, so not a constant
         self.seeking = False
         self.tick_count = 0
@@ -130,16 +137,10 @@ class Turret:
             # self.logger.info("Found the sensor")
             return
 
-<<<<<<< HEAD
         # If we haven't started yet, start seeking
+
         if not self.seeking:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
-=======
-        # Start seeking right
-        if self.seeking == False:
-            self.logger.info("starting to seek")
-            self.motor.set(self.motor_speed)
->>>>>>> checks if piston down, uses two buttons rather than fms
             self.tick_count = 0
             self.max_ticks = self.STARTING_MAX_TICKS
             self.seeking = True
@@ -153,7 +154,6 @@ class Turret:
             self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
             self.tick_increment = self.tick_increment * -1
             self.max_ticks = self.max_ticks * self.max_ticks_factor
-<<<<<<< HEAD
             return
 
         # Currently running and haven't hit the limit nor found an index.
@@ -175,5 +175,3 @@ class Turret:
         if self.target_count < self.current_azimuth:
             speed = -speed
         self.motor.set(ctre.ControlMode.PercentOutput, speed)
-=======
->>>>>>> checks if piston down, uses two buttons rather than fms

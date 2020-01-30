@@ -60,6 +60,7 @@ class MyRobot(magicbot.MagicRobot):
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
 
+
         self.vision = Vision()
 
         self.turret_centre_index = wpilib.DigitalInput(0)
@@ -103,14 +104,6 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(8):
             self.spinner_controller.run(test=True, task="rotation")
             print(f"Rotation Control")
-
-        # only needed for testing
-        if joystick.getRawButtonPressed(12):
-            self.spinner.piston_up()
-            print("Spinner Piston Up")
-        if joystick.getRawButtonPressed(11):
-            self.spinner.piston_down()
-            print("Spinner Piston Down")
 
     def handle_chassis_inputs(self, joystick):
         scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
