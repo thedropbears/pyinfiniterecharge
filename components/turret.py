@@ -99,14 +99,14 @@ class Turret:
     # Slew to the given absolute position, given as an encoder count
     # This should change to use the Talon Absolute Position mode
     def _slew_to_count(self, count: int) -> None:
-        #self.logger.info(f'slewing to count {count}')
+        # self.logger.info(f'slewing to count {count}')
         self.current_azimuth = self.motor.getSelectedSensorPosition(0)
         delta = count - self.current_azimuth
         self.target_count = self.current_azimuth + delta
         # self.incrementing = True
         # if self.target_count < self.current_azimuth:
         #    self.incrementing = False
-        #self.logger.info(f'calling motor to go from count {self.current_azimuth} to count {self.target_count}')
+        # self.logger.info(f'calling motor to go from count {self.current_azimuth} to count {self.target_count}')
         self.motor.set(ctre.ControlMode.Position, self.target_count)
         self.current_state = self.SLEWING
 
@@ -135,7 +135,7 @@ class Turret:
             #    not self.incrementing and self.current_azimuth <= self.target_count
             # ):
             closed_loop_error = self.motor.getClosedLoopError(0)
-            #self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.MIN_CLOSED_LOOP_ERROR}')
+            # self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.MIN_CLOSED_LOOP_ERROR}')
             if abs(closed_loop_error) < self.MIN_CLOSED_LOOP_ERROR:
                 return True
             else:
@@ -198,7 +198,7 @@ class Turret:
         # The following will have to change to use the Talon Absolute Position mode
         # Are we there yet?
         if self.is_ready():
-            #self.logger.info("Hey, I'm ready!")
+            # self.logger.info("Hey, I'm ready!")
             self.motor.stopMotor()
             self.current_state = self.IDLE
             self.target_count = 0

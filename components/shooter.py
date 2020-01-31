@@ -3,6 +3,7 @@ import rev
 from numpy import interp
 from magicbot import feedback
 
+
 class Shooter:
     outer_motor: rev.CANSparkMax
     centre_motor: rev.CANSparkMax
@@ -84,7 +85,7 @@ class Shooter:
     @feedback
     def get_centre_velocity(self):
         return self.centre_encoder.getVelocity()
-        
+
     @feedback
     def get_outer_velocity(self):
         return self.outer_encoder.getVelocity()
