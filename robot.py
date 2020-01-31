@@ -63,7 +63,7 @@ class MyRobot(magicbot.MagicRobot):
 
         self.vision = Vision()
 
-        self.turret_centre_index = wpilib.DigitalInput(0)
+        self.turret_centre_index = wpilib.DigitalInput(1)
         self.turret_motor = ctre.WPI_TalonSRX(10)
 
         self.vision = Vision()
