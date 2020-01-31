@@ -2,6 +2,7 @@ import math
 
 # from magicbot import StateMachine, state
 
+from components.chassis import Chassis
 from components.indexer import Indexer
 from components.shooter import Shooter
 from components.turret import Turret
@@ -12,6 +13,7 @@ from components.vision import Vision
 class ShooterController:
     """Statemachine for high level control of the shooter and injector"""
 
+    chassis: Chassis
     indexer: Indexer
     shooter: Shooter
     turret: Turret

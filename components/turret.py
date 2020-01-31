@@ -37,12 +37,14 @@ class Turret:
 
     # PID values
     pidF = 0
-    pidP = 0.0001
+    pidP = 0.2
     pidI = 0
     pidD = 0
 
-    # Arbitrarily start at half a degree
-    MIN_CLOSED_LOOP_ERROR = 0.5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
+    # Arbitrarily start at 5 degrees. TODO: This is way too big to aim. We
+    # currently believe this is necessary due to the large amount of jitter in
+    # in the angle returned from vision.
+    MIN_CLOSED_LOOP_ERROR = 5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
 
     def __init__(self):
         # Note that we don't know where the turret actually is until we've
@@ -73,10 +75,10 @@ class Turret:
         )
         if err != ctre.ErrorCode.OK:
             self.logger.warning(f"Error configuring encoder: {err}")
-        self.motor.config_kF(0, pidF, 10)
-        self.motor.config_kP(0, pidP, 10)
-        self.motor.config_kI(0, pidI, 10)
-        self.motor.config_kD(0, pidD, 10)
+        self.motor.config_kF(0, self.pidF, 10)
+        self.motor.config_kP(0, self.pidP, 10)
+        self.motor.config_kI(0, self.pidI, 10)
+        self.motor.config_kD(0, self.pidD, 10)
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point.
@@ -97,12 +99,14 @@ class Turret:
     # Slew to the given absolute position, given as an encoder count
     # This should change to use the Talon Absolute Position mode
     def _slew_to_count(self, count: int) -> None:
+        #self.logger.info(f'slewing to count {count}')
         self.current_azimuth = self.motor.getSelectedSensorPosition(0)
         delta = count - self.current_azimuth
         self.target_count = self.current_azimuth + delta
         # self.incrementing = True
         # if self.target_count < self.current_azimuth:
         #    self.incrementing = False
+        #self.logger.info(f'calling motor to go from count {self.current_azimuth} to count {self.target_count}')
         self.motor.set(ctre.ControlMode.Position, self.target_count)
         self.current_state = self.SLEWING
 
@@ -123,6 +127,7 @@ class Turret:
 
     def is_ready(self) -> bool:
         if self.current_state == self.IDLE:
+            # self.logger.info("is_ready in IDLE state")
             return True
         if self.current_state == self.SLEWING:
             # self.current_azimuth = self.motor.getSelectedSensorPosition(0)
@@ -130,6 +135,7 @@ class Turret:
             #    not self.incrementing and self.current_azimuth <= self.target_count
             # ):
             closed_loop_error = self.motor.getClosedLoopError(0)
+            #self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.MIN_CLOSED_LOOP_ERROR}')
             if abs(closed_loop_error) < self.MIN_CLOSED_LOOP_ERROR:
                 return True
             else:
@@ -192,6 +198,7 @@ class Turret:
         # The following will have to change to use the Talon Absolute Position mode
         # Are we there yet?
         if self.is_ready():
+            self.logger.info("Hey, I'm ready!")
             self.motor.stopMotor()
             self.current_state = self.IDLE
             self.target_count = 0
