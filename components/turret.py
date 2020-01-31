@@ -198,7 +198,7 @@ class Turret:
         # The following will have to change to use the Talon Absolute Position mode
         # Are we there yet?
         if self.is_ready():
-            self.logger.info("Hey, I'm ready!")
+            #self.logger.info("Hey, I'm ready!")
             self.motor.stopMotor()
             self.current_state = self.IDLE
             self.target_count = 0
