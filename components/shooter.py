@@ -1,7 +1,7 @@
 import wpilib
 import rev
 from numpy import interp
-
+from magicbot import feedback
 
 class Shooter:
     outer_motor: rev.CANSparkMax
@@ -81,6 +81,14 @@ class Shooter:
             <= self.velocity_tolerance
         )
 
+    @feedback
+    def get_centre_velocity(self):
+        return self.centre_encoder.getVelocity()
+        
+    @feedback
+    def get_outer_velocity(self):
+        return self.outer_encoder.getVelocity()
+
     def is_firing(self) -> bool:
         """
         Returns true if the shooter is attempting a shot.
@@ -102,7 +110,7 @@ class Shooter:
 
         Checks the speed, range and whether the piston is moving
         """
-        #print(f"in range {self.is_in_range()} at speed {self.is_at_speed()} is firing {self.is_firing()}")
+        # print(f"in range {self.is_in_range()} at speed {self.is_at_speed()} is firing {self.is_firing()}")
         return self.is_in_range() and self.is_at_speed() and not self.is_firing()
 
     def fire(self) -> None:
