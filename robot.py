@@ -22,7 +22,6 @@ from controllers.spinner import SpinnerController
 from utilities.scale_value import scale_value
 
 
-
 class MyRobot(magicbot.MagicRobot):
     # List controllers (which require components) here.
     shooter_controller: ShooterController
@@ -59,7 +58,6 @@ class MyRobot(magicbot.MagicRobot):
         self.spinner_solenoid = wpilib.Solenoid(2)
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.shooter_loading_piston = wpilib.DoubleSolenoid(0, 1)
-
 
         self.vision = Vision()
 

@@ -113,4 +113,3 @@ class Shooter:
         Inject a ball into the shooter
         """
         self.inject = True
-

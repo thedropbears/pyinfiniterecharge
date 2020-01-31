@@ -38,7 +38,7 @@ class Spinner:
     ROTATION_MAX_SPEED = 1
     ROTATION_TARGET_ROTATIONS = 3.5
 
-    MAX_SESNOR_RANGE = 40
+    MAX_SENSOR_RANGE = 40
 
     def __init__(self) -> None:
         self.rotations = 0
@@ -86,9 +86,7 @@ class Spinner:
         else:
             return col
 
-    def get_wheel_dist(
-        self,
-    ) -> int:
+    def get_wheel_dist(self,) -> int:
         # finds the colour wheels distance from required colour in segments
         current_colour = self.get_current_colour()
         if current_colour == None:
@@ -112,15 +110,16 @@ class Spinner:
             distances[col_name] = col_value.dist(sensed_colour)
 
         minDist = min(distances, key=lambda col: distances[col])
-        if (
-            distances[minDist]
-            < self.MAX_COLOUR_DIST
-        ):
+        if distances[minDist] < self.MAX_COLOUR_DIST:
             return minDist
 
     def run_rotation(self) -> None:  # rotation control to be called every 20ms
-        self.spin_speed = ROTATION_SPIN_FACTOR**(x-ROTATION_TARGET_ROTATIONS+1)+ROTATION_MAX_SPEED
-        self.spinner_motor.set(self.spin_speed) 
+        self.spin_speed = (
+            self.ROTATION_SPIN_FACTOR
+            ** (self.rotations - self.ROTATION_TARGET_ROTATIONS + 1)
+            + self.ROTATION_MAX_SPEED
+        )
+        self.spinner_motor.set(self.spin_speed)
         # speed slows down as it gets closer to required revolutions
         current_colour = self.get_current_colour()
         if self.lastCol != current_colour:

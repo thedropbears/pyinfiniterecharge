@@ -3,7 +3,6 @@ import ctre
 import math
 
 
-
 class Turret:
     # TODO - There should be 5 indexes total: left, right, and centre hall-effect
     # sensors, and two limit switches. Right now there is only one hall-effect

@@ -10,6 +10,7 @@ from components.vision import Vision
 
 # class ShooterController(StateMachine):
 
+
 class ShooterController:
     """Statemachine for high level control of the shooter and injector"""
 

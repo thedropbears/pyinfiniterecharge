@@ -32,4 +32,4 @@ class SpinnerController:
             self.spinner.do_rotation_control()
 
     def execute():
-        pass #needed beacuse it a magicbot component
+        pass  # needed beacuse it a magicbot component
