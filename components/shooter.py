@@ -102,6 +102,7 @@ class Shooter:
 
         Checks the speed, range and whether the piston is moving
         """
+        #print(f"in range {self.is_in_range()} at speed {self.is_at_speed()} is firing {self.is_firing()}")
         return self.is_in_range() and self.is_at_speed() and not self.is_firing()
 
     def fire(self) -> None:
