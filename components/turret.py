@@ -34,15 +34,15 @@ class Turret:
 
     # Seek for 200ms at first, before reversing and doubling
     STARTING_MAX_TICKS = 10
-    
+
     # PID values
     pidF = 0
-    pidP = 0.001
+    pidP = 0.0001
     pidI = 0
     pidD = 0
-    
+
     # Arbitrarily start at half a degree
-    MIN_CLOSED_LOOP_ERROR = .5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
+    MIN_CLOSED_LOOP_ERROR = 0.5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
 
     def __init__(self):
         # Note that we don't know where the turret actually is until we've
@@ -67,16 +67,16 @@ class Turret:
         self.run_indexing()
 
     def setup(self) -> None:
-        #self.motor.configFactoryDefault()
+        # self.motor.configFactoryDefault()
         err = self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         )
         if err != ctre.ErrorCode.OK:
             self.logger.warning(f"Error configuring encoder: {err}")
-        self.motor.config_kF(0, pidF, 10);
-        self.motor.config_kP(0, pidP, 10);
-        self.motor.config_kI(0, pidI, 10);
-        self.motor.config_kD(0, pidD, 10);
+        self.motor.config_kF(0, pidF, 10)
+        self.motor.config_kP(0, pidP, 10)
+        self.motor.config_kI(0, pidI, 10)
+        self.motor.config_kD(0, pidD, 10)
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point.
@@ -100,8 +100,8 @@ class Turret:
         self.current_azimuth = self.motor.getSelectedSensorPosition(0)
         delta = count - self.current_azimuth
         self.target_count = self.current_azimuth + delta
-        #self.incrementing = True
-        #if self.target_count < self.current_azimuth:
+        # self.incrementing = True
+        # if self.target_count < self.current_azimuth:
         #    self.incrementing = False
         self.motor.set(ctre.ControlMode.Position, self.target_count)
         self.current_state = self.SLEWING
@@ -125,10 +125,10 @@ class Turret:
         if self.current_state == self.IDLE:
             return True
         if self.current_state == self.SLEWING:
-            #self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-            #if (self.incrementing and self.current_azimuth >= self.target_count) or (
+            # self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+            # if (self.incrementing and self.current_azimuth >= self.target_count) or (
             #    not self.incrementing and self.current_azimuth <= self.target_count
-            #):
+            # ):
             closed_loop_error = self.motor.getClosedLoopError(0)
             if abs(closed_loop_error) < self.MIN_CLOSED_LOOP_ERROR:
                 return True
@@ -199,7 +199,7 @@ class Turret:
             return
 
         # Not there, so keep the motor running
-        #speed = self.motor_speed
-        #if self.target_count < self.current_azimuth:
+        # speed = self.motor_speed
+        # if self.target_count < self.current_azimuth:
         #    speed = -speed
-        #self.motor.set(ctre.ControlMode.PercentOutput, speed)
+        # self.motor.set(ctre.ControlMode.PercentOutput, speed)
