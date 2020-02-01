@@ -96,11 +96,6 @@ class Shooter:
         else:
             self.led_vision.setRGB(255, 0, 0)
 
-        self.led_vals = (
-            [self.led_speed] * int(self.led_length / 3)
-            + [self.led_ball] * int(self.led_length / 3)
-            + [self.led_vision] * int(self.led_length / 3)
-        )
         self.led.setData(self.led_vals)
 
         # if self.has_ball() == True:
