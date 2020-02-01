@@ -4,9 +4,10 @@ import math
 
 
 class Turret:
-    # TODO - There should be 5 indexes total: left, right, and centre hall-effect
-    # sensors, and two limit switches. Right now there is only one hall-effect
-    # sensor in the centre.
+    # TODO - There will be several (5 or 6) hall-effect sensors distributed
+    # around the turrent ring, with one of them aligned with an azimuth of 0
+    # relative to the robot. Right now there is only one hall-effect sensor at
+    # that point.
     # left_index: wpilib.DigitalInput
     # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
@@ -43,38 +44,24 @@ class Turret:
 
     # Arbitrarily start at 5 degrees. TODO: This is way too big to aim. We
     # currently believe this is necessary due to the large amount of jitter in
-    # in the angle returned from vision.
+    # in the angle returned from vision. That will have to be tuned before
+    # this can be made a usefully narrow window.
     MIN_CLOSED_LOOP_ERROR = 5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
 
     def __init__(self):
         # Note that we don't know where the turret actually is until we've
-        # run the indexing.
+        # seen an index.
         self.current_azimuth: int
-        # TODO: do we need to invert the encoder?
-
-    # The indexing does not use the encoder at all right now. It just counts
-    # the times it's called, incrementing (or decrementing) a tick count each
-    # time. This method resets the counting mechanism.
-    def _reset_ticks(self) -> None:
-        self.motor_speed = 0.2  # Flips when seeking, so not a constant
-        self.seeking = False
-        self.tick_count = 0
-        self.max_ticks = self.STARTING_MAX_TICKS
-        self.max_ticks_factor = -2
-        self.tick_increment = 1
 
     def on_enable(self) -> None:
         self.motor.stopMotor()
-        self._reset_ticks()
         self.run_indexing()
 
     def setup(self) -> None:
         # self.motor.configFactoryDefault()
-        err = self.motor.configSelectedFeedbackSensor(
+        self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         )
-        if err != ctre.ErrorCode.OK:
-            self.logger.warning(f"Error configuring encoder: {err}")
         self.motor.config_kF(0, self.pidF, 10)
         self.motor.config_kP(0, self.pidP, 10)
         self.motor.config_kI(0, self.pidI, 10)
@@ -121,10 +108,6 @@ class Turret:
         # 90 degrees either side of the given heading
         pass
 
-    # Find the nearest index and reset the encoder
-    def run_indexing(self) -> None:
-        self.current_state = self.FINDING_INDEX
-
     def is_ready(self) -> bool:
         if self.current_state == self.IDLE:
             # self.logger.info("is_ready in IDLE state")
@@ -136,10 +119,7 @@ class Turret:
             # ):
             closed_loop_error = self.motor.getClosedLoopError(0)
             # self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.MIN_CLOSED_LOOP_ERROR}')
-            if abs(closed_loop_error) < self.MIN_CLOSED_LOOP_ERROR:
-                return True
-            else:
-                return False
+            return abs(closed_loop_error) < self.MIN_CLOSED_LOOP_ERROR
         # state must be FINDING_INDEX. Return False until it's done.
         return False
 
@@ -153,13 +133,48 @@ class Turret:
         # state must be IDLE
         return
 
-    # TODO: this currently uses only the centre hall-effect sensor; it should
-    # use all three hall-effect sensors and the two limit switches.
+    # TODO: this currently uses only one hall-effect sensor; it should
+    # use all of them.
     def _index_found(self) -> int:
         if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
             return self.INDEX_CENTRE
         # other sensors go here
         return self.INDEX_NOT_FOUND
+
+    def _do_slewing(self):
+        # The following will have to change to use the Talon Absolute Position mode
+        # Are we there yet?
+        if self.is_ready():
+            # self.logger.info("Hey, I'm ready!")
+            self.motor.stopMotor()
+            self.current_state = self.IDLE
+            self.target_count = 0
+            self.tick_count = 0
+            return
+
+    ################
+    #
+    # The remainder of this file, as well as the FINDING_INDEX state and all
+    # the relevant references, can be removed once we no longer explicitly
+    # do indexing.
+    #
+    ################
+
+    # The indexing does not use the encoder at all right now. It just counts
+    # the times it's called, incrementing (or decrementing) a tick count each
+    # time. This method resets the counting mechanism.
+    def _reset_ticks(self) -> None:
+        self.motor_speed = 0.2  # Flips when seeking, so not a constant
+        self.seeking = False
+        self.tick_count = 0
+        self.max_ticks = self.STARTING_MAX_TICKS
+        self.max_ticks_factor = -2
+        self.tick_increment = 1
+
+    # Find the nearest index and reset the encoder
+    def run_indexing(self) -> None:
+        self._reset_ticks()
+        self.current_state = self.FINDING_INDEX
 
     def _do_indexing(self):
         # Are we there yet? If so, greb the encoder value, stop the motor,
@@ -193,20 +208,3 @@ class Turret:
         # Currently running and haven't hit the limit nor found an index.
         # Just keep the motor running
         self.motor.set(ctre.ControlMode.PercentOutput, self.motor_speed)
-
-    def _do_slewing(self):
-        # The following will have to change to use the Talon Absolute Position mode
-        # Are we there yet?
-        if self.is_ready():
-            # self.logger.info("Hey, I'm ready!")
-            self.motor.stopMotor()
-            self.current_state = self.IDLE
-            self.target_count = 0
-            self.tick_count = 0
-            return
-
-        # Not there, so keep the motor running
-        # speed = self.motor_speed
-        # if self.target_count < self.current_azimuth:
-        #    speed = -speed
-        # self.motor.set(ctre.ControlMode.PercentOutput, speed)
