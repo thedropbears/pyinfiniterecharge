@@ -18,7 +18,7 @@ This is enforced by CI. To install this:
 
 See [PEP 8](https://www.python.org/dev/peps/pep-0008/) on naming conventions.
 
-Docstrings should follow Google style.
+[Docstrings should follow Google style](https://google.github.io/styleguide/pyguide.html#383-functions-and-methods).
 See also [PEP 257](https://www.python.org/dev/peps/pep-0257/).
 
 ## Checks
