@@ -42,16 +42,15 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
         self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
 
-        self.indexer_motors = [wpilib.Spark(9), wpilib.Spark(8), wpilib.Spark(7)]
-        self.indexer_switches = [
-            wpilib.DigitalInput(9),
-            wpilib.DigitalInput(8),
-            wpilib.DigitalInput(7),
-        ]
+        self.indexer_motors = [ctre.WPI_TalonSRX(3)]
+        self.indexer_switches = [wpilib.DigitalInput(9)]
+        self.injector_slave_motor = ctre.WPI_TalonSRX(43)
+        self.injector_slave_motor.follow(self.indexer_motors[0])
+        self.injector_slave_motor.setInverted(True)
 
         self.loading_piston = wpilib.Solenoid(0)
-        self.shooter_centre_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
-        self.shooter_outer_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
+        self.shooter_centre_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
+        self.shooter_outer_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.spinner_motor = wpilib.Spark(2)
