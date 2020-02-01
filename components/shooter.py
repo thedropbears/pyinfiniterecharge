@@ -9,8 +9,8 @@ class Shooter:
     centre_motor: rev.CANSparkMax
     loading_piston: wpilib.Solenoid
 
-    ranges = (7, 8, 9, 10, 11)
-    centre_rpms = (880, 1120, 1500, 2150, 2400)
+    ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
+    centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
 
     def __init__(self):
         self.outer_rpm = 0
@@ -18,7 +18,7 @@ class Shooter:
 
         self.inject = False
         self.in_range = False
-        self.velocity_tolerance = 50  # rpm
+        self.velocity_tolerance = 0.05  # of setpoint
 
     def on_enable(self) -> None:
         self.centre_motor.stopMotor()
@@ -38,12 +38,12 @@ class Shooter:
         self.centre_pid = self.centre_motor.getPIDController()
         self.outer_pid = self.outer_motor.getPIDController()
 
-        self.outer_pid.setP(0.0279 / 60)
-        self.outer_pid.setI(1e-6)
+        self.outer_pid.setP(0.0161 / 60)
+        self.outer_pid.setI(0)
         self.outer_pid.setD(0)
         self.outer_pid.setFF(0.000156)
         self.centre_pid.setP(0.0247 / 60)
-        self.centre_pid.setI(1e-6)
+        self.centre_pid.setI(0)
         self.centre_pid.setD(0)
         self.centre_pid.setFF(0.000156)
 
@@ -77,9 +77,9 @@ class Shooter:
         """
         return (
             abs(self.centre_rpm - self.centre_encoder.getVelocity())
-            <= self.velocity_tolerance
+            <= self.centre_rpm * self.velocity_tolerance
             and abs(self.outer_rpm - self.outer_encoder.getVelocity())
-            <= self.velocity_tolerance
+            <= self.outer_rpm * self.velocity_tolerance
         )
 
     @feedback
