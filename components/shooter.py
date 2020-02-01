@@ -1,7 +1,7 @@
 import wpilib
 import rev
 from numpy import interp
-from magicbot import feedback
+from magicbot import feedback, tunable
 
 
 class Shooter:
@@ -12,10 +12,10 @@ class Shooter:
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
     centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
 
-    def __init__(self):
-        self.outer_rpm = 0
-        self.centre_rpm = 0
+    outer_rpm = tunable(0)
+    centre_rpm = tunable(0)
 
+    def __init__(self):
         self.inject = False
         self.in_range = False
         self.velocity_tolerance = 0.05  # of setpoint
@@ -29,8 +29,8 @@ class Shooter:
         self.outer_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
         self.centre_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
 
-        self.outer_motor.setInverted(False)
-        self.centre_motor.setInverted(True)
+        self.outer_motor.setInverted(True)
+        self.centre_motor.setInverted(False)
 
         self.outer_encoder = self.outer_motor.getEncoder()
         self.centre_encoder = self.centre_motor.getEncoder()
@@ -39,15 +39,17 @@ class Shooter:
         self.outer_pid = self.outer_motor.getPIDController()
 
         self.outer_pid.setP(0.958 / 3600)
-        self.outer_pid.setI(0)
+        self.outer_pid.setI(1e-7)
         self.outer_pid.setD(0)
         self.outer_pid.setFF(0.000156)
         self.centre_pid.setP(0.959 / 3600)
-        self.centre_pid.setI(0)
+        self.centre_pid.setI(1e-7)
         self.centre_pid.setD(0)
         self.centre_pid.setFF(0.000156)
 
     def execute(self) -> None:
+        # self.centre_rpm = 2000
+        # self.outer_rpm = 5000
         self.centre_pid.setReference(self.centre_rpm, rev.ControlType.kVelocity)
         self.outer_pid.setReference(self.outer_rpm, rev.ControlType.kVelocity)
 
@@ -69,6 +71,7 @@ class Shooter:
         self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
         self.outer_rpm = 5000
 
+    @feedback
     def is_at_speed(self) -> bool:
         """
         Returns true if the shooter is spinning at the set speed.
@@ -90,14 +93,16 @@ class Shooter:
     def get_outer_velocity(self):
         return self.outer_encoder.getVelocity()
 
+    @feedback
     def is_firing(self) -> bool:
         """
         Returns true if the shooter is attempting a shot.
 
         based off of the pistons current state
         """
-        return not self.loading_piston.get()
+        return self.loading_piston.get()
 
+    @feedback
     def is_in_range(self) -> bool:
         """
         Returns true if the current target of the shooter is within range
@@ -105,6 +110,7 @@ class Shooter:
         """
         return self.in_range
 
+    @feedback
     def is_ready(self) -> bool:
         """
         Returns true if the shooter is ready to take a shot.
