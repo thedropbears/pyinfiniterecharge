@@ -1,3 +1,6 @@
+from magicbot import feedback
+
+
 class Indexer:
     indexer_motors: list
     indexer_switches: list
@@ -34,8 +37,10 @@ class Indexer:
     def disable_indexing(self) -> None:
         self.indexing = False
 
+    @feedback
     def balls_loaded(self) -> int:
         return sum(not switch.get() for switch in self.indexer_switches)
 
+    @feedback
     def is_ready(self) -> bool:
         return not self.indexer_switches[0].get()
