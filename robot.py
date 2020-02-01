@@ -118,6 +118,9 @@ class MyRobot(magicbot.MagicRobot):
             self.shooter_controller.driver_input(True)
         if joystick.getTriggerReleased():
             self.shooter_controller.driver_input(False)
+        if joystick.getRawButtonPressed(5):
+            self.shooter_controller.spin_input()
+
 
 
 if __name__ == "__main__":

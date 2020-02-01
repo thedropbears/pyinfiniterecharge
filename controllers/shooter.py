@@ -1,6 +1,7 @@
 import math
 
 # from magicbot import StateMachine, state
+from magicbot import feedback
 
 from components.chassis import Chassis
 from components.indexer import Indexer
@@ -33,6 +34,9 @@ class ShooterController:
         # super().__init__()
         self.state = self.searching
         self.input_command = False
+        self.spin_command = False
+        self.distance = None
+        self.initial_call = True
 
     def execute(self) -> None:
         """
@@ -66,12 +70,25 @@ class ShooterController:
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
             self.state = self.searching
         else:
-            self.shooter.set_range(dist)
             if abs(delta_angle) > self.find_allowable_angle(dist):
+                # print(f"Telling turret to slew by {delta_angle}")
                 self.turret.slew(delta_angle)
-            if self.ready_to_fire() and self.input_command:
+            if self.ready_to_spin():
                 # self.next_state("firing")
-                self.state = self.firing
+                # print(f"tracking -> spining_up {self.vision.get_vision_data()}")
+                self.distance = dist
+                self.state = self.spining_up
+    
+    def spining_up(self) -> None:
+        if self.initial_call:
+            self.shooter.set_range(self.distance)
+            self.initial_call = False
+        if self.ready_to_fire() and self.input_command:
+            self.distance = None
+            self.initial_call = True
+            # print(f"spining_up -> firing {self.vision.get_vision_data()}")
+            self.state = self.firing
+
 
     # @state
     def firing(self) -> None:
@@ -87,12 +104,27 @@ class ShooterController:
         Called by robot.py to indicate the fire button has been pressed
         """
         self.input_command = command
+    
+    def spin_input(self) -> None:
+        """
+        Called by robot.py to indicate the fire button has been pressed
+        """
+        self.spin_command = not self.spin_command
 
+    @feedback
     def ready_to_fire(self) -> bool:
         return (
             self.shooter.is_ready()
             and self.indexer.is_ready()
             and self.turret.is_ready()
+        )
+    
+    @feedback
+    def ready_to_spin(self) -> bool:
+        return (
+            self.indexer.is_ready()
+            and self.turret.is_ready()
+            and self.spin_command
         )
 
     def find_allowable_angle(self, dist: float) -> float:
