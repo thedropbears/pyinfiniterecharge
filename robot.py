@@ -122,6 +122,5 @@ class MyRobot(magicbot.MagicRobot):
             self.shooter_controller.spin_input()
 
 
-
 if __name__ == "__main__":
     wpilib.run(MyRobot)

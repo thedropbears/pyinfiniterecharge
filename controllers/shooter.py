@@ -78,7 +78,7 @@ class ShooterController:
                 # print(f"tracking -> spining_up {self.vision.get_vision_data()}")
                 self.distance = dist
                 self.state = self.spining_up
-    
+
     def spining_up(self) -> None:
         if self.initial_call:
             self.shooter.set_range(self.distance)
@@ -88,7 +88,6 @@ class ShooterController:
             self.initial_call = True
             # print(f"spining_up -> firing {self.vision.get_vision_data()}")
             self.state = self.firing
-
 
     # @state
     def firing(self) -> None:
@@ -104,7 +103,7 @@ class ShooterController:
         Called by robot.py to indicate the fire button has been pressed
         """
         self.input_command = command
-    
+
     def spin_input(self) -> None:
         """
         Called by robot.py to indicate the fire button has been pressed
@@ -118,14 +117,10 @@ class ShooterController:
             and self.indexer.is_ready()
             and self.turret.is_ready()
         )
-    
+
     @feedback
     def ready_to_spin(self) -> bool:
-        return (
-            self.indexer.is_ready()
-            and self.turret.is_ready()
-            and self.spin_command
-        )
+        return self.indexer.is_ready() and self.turret.is_ready() and self.spin_command
 
     def find_allowable_angle(self, dist: float) -> float:
         """
