@@ -49,6 +49,7 @@ class Shooter:
         self.centre_pid.setFF(0.000156)
 
         self.led_length = 72
+<<<<<<< HEAD
         self.led_speed = wpilib._wpilib.AddressableLED.LEDData(255, 0, 0)
         self.led_ball = wpilib._wpilib.AddressableLED.LEDData(0, 255, 0)
         self.led_vision = wpilib._wpilib.AddressableLED.LEDData(0, 0, 255)
@@ -58,6 +59,13 @@ class Shooter:
             + [self.led_ball] * int(self.led_length / 3)
             + [self.led_vision] * int(self.led_length / 3)
         )
+=======
+        self.led_speed = wpilib._wpilib.AddressableLED.LEDData(255,0,0)
+        self.led_ball = wpilib._wpilib.AddressableLED.LEDData(0,255,0)
+        self.led_vision = wpilib._wpilib.AddressableLED.LEDData(0,0,255)
+        self.led.setLength(self.led_length)
+        self.led_vals = [self.led_speed]*int(self.led_length/3) + [self.led_ball]*int(self.led_length/3) + [self.led_vision]*int(self.led_length/3)
+>>>>>>> 0fc260b... Adds led code, missing vision and ball checks
         self.led.setData(self.led_vals)
         self.led.start()
 
@@ -108,6 +116,7 @@ class Shooter:
         # self.led_vision.setRGB(255,0,0)
         # self.led_vals = [self.led_speed]*int(self.led_length/3) + [self.led_ball]*int(self.led_length/3) + [self.led_vision]*int(self.led_length/3)
         # self.led.setData(self.led_vals)
+
 
     def set_range(self, dist: float) -> None:
         """
