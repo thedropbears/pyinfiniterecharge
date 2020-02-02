@@ -35,5 +35,6 @@ class Vision:
 
             if self.repeats > 5:  # if it has got the same data for five loops
                 return False  # no target
-           else: return True # has a target
-        return False # no network tables, so no target
+            else:
+                return True  # has a target
+        return False  # no network tables, so no target
