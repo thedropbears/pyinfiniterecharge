@@ -44,7 +44,7 @@ class Turret:
 
     # Slew to within +- half a degree of the target azimuth. This is about
     # 50 encoder steps.
-    CLOSED_LOOP_ERROR = .5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
+    CLOSED_LOOP_ERROR = 0.5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
     # The number of cycles that we must be within the error to decide we're done.
     TICKS_TO_SETTLE = 10
 
@@ -117,19 +117,19 @@ class Turret:
     def is_ready(self) -> bool:
         # Once slewing or indexing is complete, state will go to IDLE
         return self.current_state == self.IDLE
-        #if self.current_state == self.IDLE:
-            # self.logger.info("is_ready in IDLE state")
-            #return True
-        #if self.current_state == self.SLEWING:
-            # self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-            # if (self.incrementing and self.current_azimuth >= self.target_count) or (
-            #    not self.incrementing and self.current_azimuth <= self.target_count
-            # ):
-            #closed_loop_error = self.motor.getClosedLoopError(0)
-            # self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.CLOSED_LOOP_ERROR}')
-            #return abs(closed_loop_error) < self.CLOSED_LOOP_ERROR
+        # if self.current_state == self.IDLE:
+        # self.logger.info("is_ready in IDLE state")
+        # return True
+        # if self.current_state == self.SLEWING:
+        # self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+        # if (self.incrementing and self.current_azimuth >= self.target_count) or (
+        #    not self.incrementing and self.current_azimuth <= self.target_count
+        # ):
+        # closed_loop_error = self.motor.getClosedLoopError(0)
+        # self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.CLOSED_LOOP_ERROR}')
+        # return abs(closed_loop_error) < self.CLOSED_LOOP_ERROR
         # state must be FINDING_INDEX. Return False until it's done.
-        #return False
+        # return False
 
     def execute(self) -> None:
         if self.current_state == self.FINDING_INDEX:
@@ -166,7 +166,6 @@ class Turret:
         else:
             self.ticks_within_threshold = 0
         return self.ticks_within_threshold > self.TICKS_TO_SETTLE
-
 
     def _do_slewing(self):
         if self._slewing_is_finished():
