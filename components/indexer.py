@@ -12,21 +12,11 @@ class Indexer:
 
     def execute(self) -> None:
         if self.indexing:
-            motor_states = [True] * len(self.indexer_motors)
-            switch_results = [switch.get() for switch in self.indexer_switches]
-            # Test the back switch (because all others require 2 switches)
-            if not switch_results[0]:
-                motor_states[0] = False
-
-            # Disable motor if switch and previous switch are pressed
-            for i in range(1, len(motor_states)):
-                if not switch_results[i] and not switch_results[i - 1]:
-                    motor_states[i] = False
-
-            # Set all motors to required states
-            for motor_state, motor in zip(motor_states, self.indexer_motors):
-                if motor_state:
-                    motor.set(1)
+            for motor, switch in zip(
+                self.indexer_motors, [switch.get() for switch in self.indexer_switches]
+            ):
+                if switch:
+                    motor.set(0.3)
                 else:
                     motor.stopMotor()
         else:
