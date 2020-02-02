@@ -44,7 +44,7 @@ class Turret:
 
     # Slew to within +- half a degree of the target azimuth. This is about
     # 50 encoder steps.
-    CLOSED_LOOP_ERROR = 0.5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
+    CLOSED_LOOP_ERROR = int(0.5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN)
     # The number of cycles that we must be within the error to decide we're done.
     TICKS_TO_SETTLE = 10
 
@@ -57,21 +57,20 @@ class Turret:
     def on_enable(self) -> None:
         self.motor.stopMotor()
         self.run_indexing()
-
-    def setup(self) -> None:
-        # self.motor.configFactoryDefault()
-        self.motor.configSelectedFeedbackSensor(
-            ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
-        )
-        self.motor.setSelectedSensorPosition(0)
+        self.motor.setSelectedSensorPosition(0, 0)
         self.baseline_azimuth = self.motor.getSelectedSensorPosition(0)
         self.baseline_is_provisional = True
         self.current_azimuth = self.baseline_azimuth
+
+    def setup(self) -> None:
+        self.motor.configSelectedFeedbackSensor(
+            ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
+        )
         self.motor.config_kF(0, self.pidF, 10)
         self.motor.config_kP(0, self.pidP, 10)
         self.motor.config_kI(0, self.pidI, 10)
         self.motor.config_kD(0, self.pidD, 10)
-        self.motor.configAllowableClosedloopError(0, self.CLOSED_LOOP_ERROR)
+        self.motor.configAllowableClosedloopError(0, self.CLOSED_LOOP_ERROR, 10)
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point.
