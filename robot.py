@@ -61,7 +61,7 @@ class MyRobot(magicbot.MagicRobot):
         self.spinner_motor = wpilib.Spark(2)
         self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
 
-        self.turret_centre_index = wpilib.DigitalInput(1)
+        self.turret_centre_index = wpilib.DigitalInput(0)
         self.turret_motor = ctre.WPI_TalonSRX(10)
 
         self.vision = Vision()

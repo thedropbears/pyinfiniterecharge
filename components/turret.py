@@ -1,21 +1,26 @@
+from enum import Enum
+
 import wpilib
 import ctre
 import math
 
 
+class Index(Enum):
+    NOT_FOUND = 0
+    CENTRE = 1
+    # RIGHT = 2
+    # LEFT = 3
+    # BACK = 4
+
+
 class Turret:
-    # TODO - There will be several (5 or 6) hall-effect sensors distributed
+    # TODO - There will be several (4 to 6) hall-effect sensors distributed
     # around the turrent ring, with one of them aligned with an azimuth of 0
     # relative to the robot. Right now there is only one hall-effect sensor at
     # that point.
     # left_index: wpilib.DigitalInput
     # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
-    INDEX_NOT_FOUND = 0
-    INDEX_CENTRE = 1
-    # INDEX_RIGHT = 2
-    # INDEX_LEFT_LIMIT = 3
-    # INDEX_RIGHT_LIMIT = 4
     HALL_EFFECT_CLOSED = False
 
     motor: ctre.WPI_TalonSRX
@@ -31,20 +36,17 @@ class Turret:
     COUNTS_PER_TURRET_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION
     COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
 
-    # Seek for 200ms at first, before reversing and doubling
-    STARTING_MAX_TICKS = 10
-
     # PID values
     pidF = 0
     pidP = 0.2
     pidI = 0
     pidD = 0
 
-    # Arbitrarily start at 5 degrees. TODO: This is way too big to aim. We
-    # currently believe this is necessary due to the large amount of jitter in
-    # in the angle returned from vision. That will have to be tuned before
-    # this can be made a usefully narrow window.
-    MIN_CLOSED_LOOP_ERROR = 5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN
+    # Slew to within +- half a degree of the target azimuth. This is about
+    # 50 encoder steps.
+    CLOSED_LOOP_ERROR = int(math.radians(0.5) * COUNTS_PER_TURRET_RADIAN)
+    # The number of cycles that we must be within the error to decide we're done.
+    TICKS_TO_SETTLE = 10
 
     def __init__(self):
         # Note that we don't know where the turret actually is until we've
@@ -55,9 +57,12 @@ class Turret:
     def on_enable(self) -> None:
         self.motor.stopMotor()
         self.run_indexing()
+        self.motor.setSelectedSensorPosition(0, 0)
+        self.baseline_azimuth = self.motor.getSelectedSensorPosition(0)
+        self.baseline_is_provisional = True
+        self.current_azimuth = self.baseline_azimuth
 
     def setup(self) -> None:
-        # self.motor.configFactoryDefault()
         self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         )
@@ -65,36 +70,33 @@ class Turret:
         self.motor.config_kP(0, self.pidP, 10)
         self.motor.config_kI(0, self.pidI, 10)
         self.motor.config_kD(0, self.pidD, 10)
+        self.motor.configAllowableClosedloopError(0, self.CLOSED_LOOP_ERROR, 10)
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point.
     def slew_to_azimuth(self, angle: float) -> None:
-        if self.current_state != self.FINDING_INDEX:
-            self._slew_to_count(
-                angle * self.COUNTS_PER_TURRET_RADIAN - self.baseline_azimuth
-            )
+        self._slew_to_count(
+            angle * self.COUNTS_PER_TURRET_RADIAN - self.baseline_azimuth
+        )
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
-        if self.current_state != self.FINDING_INDEX:
-            self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-            self._slew_to_count(
-                self.current_azimuth + angle * self.COUNTS_PER_TURRET_RADIAN
-            )
+        self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+        self._slew_to_count(
+            self.current_azimuth + angle * self.COUNTS_PER_TURRET_RADIAN
+        )
 
     # Slew to the given absolute position, given as an encoder count
-    # This should change to use the Talon Absolute Position mode
     def _slew_to_count(self, count: int) -> None:
-        # self.logger.info(f'slewing to count {count}')
-        self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-        delta = count - self.current_azimuth
-        self.target_count = self.current_azimuth + delta
-        # self.incrementing = True
-        # if self.target_count < self.current_azimuth:
-        #    self.incrementing = False
-        # self.logger.info(f'calling motor to go from count {self.current_azimuth} to count {self.target_count}')
-        self.motor.set(ctre.ControlMode.Position, self.target_count)
-        self.current_state = self.SLEWING
+        # Accept this only if we're not doing anything else
+        if self.current_state == self.IDLE:
+            # self.logger.info(f'slewing to count {count}')
+            self.current_azimuth = self.motor.getSelectedSensorPosition(0)
+            delta = count - self.current_azimuth
+            self.target_count = self.current_azimuth + delta
+            self.motor.set(ctre.ControlMode.Position, self.target_count)
+            self.ticks_within_threshold = 0
+            self.current_state = self.SLEWING
 
     def scan(self, heading):
         """
@@ -108,19 +110,8 @@ class Turret:
         pass
 
     def is_ready(self) -> bool:
-        if self.current_state == self.IDLE:
-            # self.logger.info("is_ready in IDLE state")
-            return True
-        if self.current_state == self.SLEWING:
-            # self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-            # if (self.incrementing and self.current_azimuth >= self.target_count) or (
-            #    not self.incrementing and self.current_azimuth <= self.target_count
-            # ):
-            closed_loop_error = self.motor.getClosedLoopError(0)
-            # self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.MIN_CLOSED_LOOP_ERROR}')
-            return abs(closed_loop_error) < self.MIN_CLOSED_LOOP_ERROR
-        # state must be FINDING_INDEX. Return False until it's done.
-        return False
+        # Once slewing or indexing is complete, state will go to IDLE
+        return self.current_state == self.IDLE
 
     def execute(self) -> None:
         if self.current_state == self.FINDING_INDEX:
@@ -134,22 +125,34 @@ class Turret:
 
     # TODO: this currently uses only one hall-effect sensor; it should
     # use all of them.
-    def _index_found(self) -> int:
+    def _index_found(self) -> Index:
         if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
-            return self.INDEX_CENTRE
+            return Index.CENTRE
         # other sensors go here
-        return self.INDEX_NOT_FOUND
+        return Index.NOT_FOUND
+
+    # Returns the encoder count corresponding to the given index value
+    # TODO: implement
+    def _index_to_count(self, index: Index) -> int:
+        # TODO: implement for real
+        if index == Index.CENTRE:
+            return 0
+        return 0
+
+    # This is adapted from
+    # https://phoenix-documentation.readthedocs.io/en/latest/ch16_ClosedLoop.html#mechanism-is-finished-command
+    def _slewing_is_finished(self) -> bool:
+        current_error = self.motor.getClosedLoopError()
+        if -self.CLOSED_LOOP_ERROR < current_error < self.CLOSED_LOOP_ERROR:
+            self.ticks_within_threshold += 1
+        else:
+            self.ticks_within_threshold = 0
+        return self.ticks_within_threshold > self.TICKS_TO_SETTLE
 
     def _do_slewing(self):
-        # The following will have to change to use the Talon Absolute Position mode
-        # Are we there yet?
-        if self.is_ready():
-            # self.logger.info("Hey, I'm ready!")
-            self.motor.stopMotor()
+        if self._slewing_is_finished():
             self.current_state = self.IDLE
             self.target_count = 0
-            self.tick_count = 0
-            return
 
     ################
     #
@@ -158,6 +161,9 @@ class Turret:
     # do indexing.
     #
     ################
+
+    # Seek for 200ms at first, before reversing and doubling
+    STARTING_MAX_TICKS = 10
 
     # The indexing does not use the encoder at all right now. It just counts
     # the times it's called, incrementing (or decrementing) a tick count each
@@ -178,8 +184,9 @@ class Turret:
     def _do_indexing(self):
         # Are we there yet? If so, greb the encoder value, stop the motor,
         # and stop seeking
-        if self._index_found() == self.INDEX_CENTRE:
+        if self._index_found() == Index.CENTRE:
             self.baseline_azimuth = self.motor.getSelectedSensorPosition(0)
+            self.baseline_is_provisional = False
             self.motor.stopMotor()
             self._reset_ticks()
             self.current_state = self.IDLE
