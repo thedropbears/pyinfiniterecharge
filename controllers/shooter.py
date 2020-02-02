@@ -87,6 +87,7 @@ class ShooterController:
         """
         Aiming towards a vision target and spining up flywheels
         """
+        self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
         if vision_data is None:
@@ -115,11 +116,14 @@ class ShooterController:
         if self.initial_call:
             self.shooter.set_range(self.distance)
             self.initial_call = False
-        if self.ready_to_fire() and self.input_command:
-            self.distance = None
-            self.initial_call = True
-            # print(f"spining_up -> firing {self.vision.get_vision_data()}")
-            self.state = self.firing
+        if self.turret.is_ready():
+            if self.ready_to_fire() and self.input_command:
+                self.distance = None
+                self.initial_call = True
+                # print(f"spining_up -> firing {self.vision.get_vision_data()}")
+                self.state = self.firing
+        else:
+            self.state = self.tracking
 
     # @state
     def firing(self) -> None:
@@ -152,7 +156,6 @@ class ShooterController:
         return (
             self.shooter.is_ready()
             and self.indexer.is_ready()
-            and self.turret.is_ready()
         )
 
     @feedback

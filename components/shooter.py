@@ -150,3 +150,7 @@ class Shooter:
 
     def is_ball_cleared(self) -> bool:
         return not self.indexer_motors[-1].isFwdLimitSwitchClosed()
+
+    def stop_motors(self) -> None:
+        self.centre_target = 0
+        self.outer_target = 0
