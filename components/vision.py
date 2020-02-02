@@ -18,11 +18,8 @@ class Vision:
         If the pi vision cant see the target it will not send to network tables, meaning this will continue
         to return the most recently seen target position and the time it was seen
         """
-        if self.entry.exists():
-            self.data = self.entry.getDoubleArray([None, None, None])
-            return self.data
-        else:
-            return [None, None, None]
+        self.data = self.entry.getDoubleArray([None, None, None])
+        return self.data
 
     def is_ready(self) -> bool:
         if self.entry.exists() and self.data[2] != None:
