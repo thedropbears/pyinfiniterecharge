@@ -15,9 +15,12 @@ class Indexer:
 
     def execute(self) -> None:
         if self.indexing:
-            for i, (motor, switch) in enumerate(zip(
-                self.indexer_motors, [switch.get() for switch in self.indexer_switches]
-            )):
+            for i, (motor, switch) in enumerate(
+                zip(
+                    self.indexer_motors,
+                    [switch.get() for switch in self.indexer_switches],
+                )
+            ):
 
                 if switch:
                     if not i:
