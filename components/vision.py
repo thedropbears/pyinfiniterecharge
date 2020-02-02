@@ -18,8 +18,9 @@ class Vision:
         return self.data
 
     def is_ready(self) -> int:
-    	if abs(self.data[2]-time.monotonic()) > 0.5:
-    		return 0 # no target
-    	elif abs(self.data[1]) < math.degrees(5):
-    		return 1 #target out of alignment
-    	else: return 2 #aligned
+        if abs(self.data[2] - time.monotonic()) > 0.5:
+            return 0  # no target
+        elif abs(self.data[1]) < math.degrees(5):
+            return 1  # target out of alignment
+        else:
+            return 2  # aligned
