@@ -69,6 +69,7 @@ class MyRobot(magicbot.MagicRobot):
         self.shooter_outer_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
+
         self.spinner_motor = wpilib.Spark(2)
         self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
 
