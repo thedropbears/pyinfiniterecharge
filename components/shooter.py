@@ -72,6 +72,17 @@ class Shooter:
             self.loading_piston.startPulse()
             self.inject = False
 
+        self.led.setData(self.led_vals)
+    
+    def set_led_speed_RGB(self, r, g, b) -> None:
+        self.led_speed.setRGB(r, g, b)
+
+    def set_led_ball_RGB(self, r, g, b) -> None:
+        self.led_ball.setRGB(r, g, b)
+
+    def set_led_vision_RGB(self, r, g, b) -> None:
+        self.led_vision.setRGB(r, g, b)
+
     def set_range(self, dist: float) -> None:
         """
         Set the target range for the shooter, this will be converted into target speeds for the flywheels

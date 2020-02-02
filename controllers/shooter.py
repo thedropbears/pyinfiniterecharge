@@ -44,26 +44,25 @@ class ShooterController:
         """
         self.state()
         self.update_LED()
-
-    def update_LED(self):
-        if self.shooter.is_at_speed() == True:
-            self.shooter.led_speed.setRGB(0, 255, 0)
+        
+    def update_LED(self) -> None:
+        if self.shooter.is_at_speed():
+            self.shooter.set_led_speed_RGB(0, 255, 0)
         else:
-            self.shooter.led_speed.setRGB(255, 0, 0)
+            self.shooter.set_led_speed_RGB(255, 0, 0)
 
-        if self.indexer.is_ready() == True:
-            self.shooter.led_ball.setRGB(0, 255, 0)
+        if self.indexer.is_ready():
+            self.shooter.set_led_ball_RGB(0, 255, 0)
         else:
-            self.shooter.led_ball.setRGB(255, 0, 0)
+            self.shooter.set_led_ball_RGB(255, 0, 0)
 
-        # if self.vision() == True:
-        #     self.shooter.led_vision.setRGB(255,255,0)
-        # elif self.vision() == True and self.vision_centered() == True:
-        #     self.shooter.led_vision.setRGB(0,255,0)
+        # if self.vision():
+        #     self.shooter.set_led_vision_RGB(0, 255, 0)
+        # elif self.vision() and self.vision_centered():
+        #     self.shooter.set_led_vision_RGB(200, 200, 0)
         # else:
-        #     self.shooter.led_vision.setRGB(255,0,0)
-        self.shooter.led_vision.setRGB(200, 200, 0)
-        self.shooter.led.setData(self.shooter.led_vals)
+        #     self.shooter.set_led_vision_RGB(0, 255, 0)
+        self.shooter.set_led_vision_RGB(200, 200, 0)
 
     # @state(first=True)
     def searching(self) -> None:
