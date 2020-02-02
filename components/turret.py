@@ -52,6 +52,7 @@ class Turret:
         # Note that we don't know where the turret actually is until we've
         # seen an index.
         self.current_azimuth: int
+        self.current_state = self.IDLE
 
     def on_enable(self) -> None:
         self.motor.stopMotor()

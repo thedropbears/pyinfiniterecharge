@@ -8,6 +8,7 @@ class Shooter:
     outer_motor: rev.CANSparkMax
     centre_motor: rev.CANSparkMax
     loading_piston: wpilib.Solenoid
+
     led: wpilib._wpilib.AddressableLED
 
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
@@ -49,11 +50,15 @@ class Shooter:
         self.centre_pid.setFF(0.000156)
 
         self.led_length = 72
-        self.led_speed = wpilib._wpilib.AddressableLED.LEDData(255,0,0)
-        self.led_ball = wpilib._wpilib.AddressableLED.LEDData(0,255,0)
-        self.led_vision = wpilib._wpilib.AddressableLED.LEDData(0,0,255)
+        self.led_speed = wpilib._wpilib.AddressableLED.LEDData(255, 0, 0)
+        self.led_ball = wpilib._wpilib.AddressableLED.LEDData(0, 255, 0)
+        self.led_vision = wpilib._wpilib.AddressableLED.LEDData(0, 0, 255)
         self.led.setLength(self.led_length)
-        self.led_vals = [self.led_speed]*int(self.led_length/3) + [self.led_ball]*int(self.led_length/3) + [self.led_vision]*int(self.led_length/3)
+        self.led_vals = (
+            [self.led_speed] * int(self.led_length / 3)
+            + [self.led_ball] * int(self.led_length / 3)
+            + [self.led_vision] * int(self.led_length / 3)
+        )
         self.led.setData(self.led_vals)
         self.led.start()
 
@@ -62,44 +67,10 @@ class Shooter:
         # self.outer_rpm = 5000
         self.centre_pid.setReference(self.centre_rpm, rev.ControlType.kVelocity)
         self.outer_pid.setReference(self.outer_rpm, rev.ControlType.kVelocity)
-        self.update_LED()
 
         if self.inject:
             self.loading_piston.startPulse()
             self.inject = False
-
-    def update_LED(self):
-        if self.is_at_speed() == True:
-            self.led_speed.setRGB(0,255,0)
-        else:
-           self.led_speed.setRGB(255,0,0) 
-
-        if self.is_firing() == True:
-            self.led_ball.setRGB(0,255,0)
-        else:
-           self.led_ball.setRGB(255,0,0)  
-
-        if self.is_in_range() == True:
-            self.led_vision.setRGB(0,255,0)
-        else:
-           self.led_vision.setRGB(255,0,0)
-
-        self.led_vals = [self.led_speed]*int(self.led_length/3) + [self.led_ball]*int(self.led_length/3) + [self.led_vision]*int(self.led_length/3)
-        self.led.setData(self.led_vals)
-
-        #if self.has_ball() == True:
-            #self.led_ball.setRGB(0,255,0)
-        #else:
-           #self.led_ball.setRGB(255,0,0) 
-
-        #if self.vision() == True:
-            #self.led_vision.setRGB(255,255,0)
-        #elif self.vision() == True and self.vision_centered() == True:
-            #self.led_vision.setRGB(0,255,0)
-        #else:
-           #self.led_vision.setRGB(255,0,0) 
-        #self.led_vals = [self.led_speed]*int(self.led_length/3) + [self.led_ball]*int(self.led_length/3) + [self.led_vision]*int(self.led_length/3)
-        #self.led.setData(self.led_vals)
 
     def set_range(self, dist: float) -> None:
         """

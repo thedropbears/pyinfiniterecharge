@@ -43,6 +43,27 @@ class ShooterController:
         tempoary replacement of magicbot statemachine
         """
         self.state()
+        self.update_LED()
+
+    def update_LED(self):
+        if self.shooter.is_at_speed() == True:
+            self.shooter.led_speed.setRGB(0, 255, 0)
+        else:
+            self.shooter.led_speed.setRGB(255, 0, 0)
+
+        if self.indexer.is_ready() == True:
+            self.shooter.led_ball.setRGB(0, 255, 0)
+        else:
+            self.shooter.led_ball.setRGB(255, 0, 0)
+
+        # if self.vision() == True:
+        #     self.shooter.led_vision.setRGB(255,255,0)
+        # elif self.vision() == True and self.vision_centered() == True:
+        #     self.shooter.led_vision.setRGB(0,255,0)
+        # else:
+        #     self.shooter.led_vision.setRGB(255,0,0)
+        self.shooter.led_vision.setRGB(200, 200, 0)
+        self.shooter.led.setData(self.shooter.led_vals)
 
     # @state(first=True)
     def searching(self) -> None:
