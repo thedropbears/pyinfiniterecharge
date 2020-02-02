@@ -1,9 +1,11 @@
 from magicbot import feedback
+import wpilib
 
 
 class Indexer:
     indexer_motors: list
     indexer_switches: list
+    ready_piston: wpilib.DigitalInput
 
     def on_enable(self) -> None:
         for motor in self.indexer_motors:
@@ -18,7 +20,10 @@ class Indexer:
 
                 if switch:
                     if not i:
+                        if not self.ready_piston.get():
                         motor.set(0.8)
+                    else:
+                            motor.stopMotor()
                     else:
                         motor.set(0.3)
                 else:

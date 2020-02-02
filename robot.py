@@ -61,6 +61,7 @@ class MyRobot(magicbot.MagicRobot):
             wpilib.DigitalInput(8),
             wpilib.DigitalInput(7),
         ]
+        self.ready_piston = wpilib.DigitalInput(4)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
         self.injector_slave_motor.follow(self.indexer_motors[0])
         self.injector_slave_motor.setInverted(False)
