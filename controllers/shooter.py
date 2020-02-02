@@ -1,7 +1,6 @@
 import math
 
-# from magicbot import StateMachine, state
-from magicbot import feedback
+from magicbot import feedback, StateMachine, state
 
 from components.chassis import Chassis
 from components.indexer import Indexer
@@ -11,8 +10,7 @@ from components.vision import Vision
 from components.led_screen import LEDScreen
 
 
-# class ShooterController(StateMachine):
-class ShooterController:
+class ShooterController(StateMachine):
     """Statemachine for high level control of the shooter and injector"""
 
     chassis: Chassis
@@ -36,18 +34,13 @@ class ShooterController:
     # TODO fix vision so this isn't nessecary, requires tuning
 
     def __init__(self) -> None:
-        # super().__init__()
-        self.state = self.searching
+        super().__init__()
         self.input_command = False
         self.spin_command = False
         self.distance = None
-        self.initial_call = True
 
     def execute(self) -> None:
-        """
-        tempoary replacement of magicbot statemachine
-        """
-        self.state()
+        super().execute()
         self.update_LED()
 
     def update_LED(self) -> None:
@@ -69,7 +62,7 @@ class ShooterController:
         else:
             self.led_screen.set_top_row(255, 0, 0)
 
-    # @state(first=True)
+    @state(first=True)
     def searching(self) -> None:
         """
         The vision system does not have a target, we try to find one using odometry
@@ -79,10 +72,10 @@ class ShooterController:
 
         if self.vision.get_data() is not None:
             # means no data is available
-            # self.next_state("tracking")
-            self.state = self.tracking
+            # print(f"searching -> tracking {self.vision.get_vision_data()}")
+            self.next_state("tracking")
 
-    # @state
+    @state
     def tracking(self) -> None:
         """
         Aiming towards a vision target and spining up flywheels
@@ -90,9 +83,9 @@ class ShooterController:
         self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
-        if vision_data is None:
-            # self.next_state("searching")
-            self.state = self.searching
+        if timestamp is None:
+            self.next_state("searching")
+            # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
             current_turret_angle = self.turret.get_azimuth()
             old_turret_angle = self.turret.azimuth_at_time(vision_data.timestamp)
@@ -108,24 +101,23 @@ class ShooterController:
                 # print(f"Telling turret to slew by {delta_angle}")
                 self.turret.slew(target_angle)
             if self.ready_to_spin():
-                # self.next_state("firing")
-                self.distance = vision_data.distance
-                self.state = self.spining_up
+                self.distance = dist
+                self.next_state("spining_up")
+                # print(f"tracking -> spining_up {self.vision.get_vision_data()}")
 
-    def spining_up(self) -> None:
-        if self.initial_call:
+    @state
+    def spining_up(self, initial_call) -> None:
+        if initial_call:
             self.shooter.set_range(self.distance)
-            self.initial_call = False
         if self.turret.is_ready():
             if self.ready_to_fire() and self.input_command:
                 self.distance = None
-                self.initial_call = True
                 # print(f"spining_up -> firing {self.vision.get_vision_data()}")
-                self.state = self.firing
+                self.next_state("firing")
         else:
-            self.state = self.tracking
+            self.next_state("tracking")
 
-    # @state
+    @state
     def firing(self) -> None:
         """
         Positioned to fire, inject and expel a single ball
