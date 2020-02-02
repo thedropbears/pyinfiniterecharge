@@ -9,6 +9,8 @@ class Shooter:
     centre_motor: rev.CANSparkMax
     loading_piston: wpilib.Solenoid
 
+    led: wpilib._wpilib.AddressableLED
+
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
     centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
 
@@ -47,6 +49,19 @@ class Shooter:
         self.centre_pid.setD(0)
         self.centre_pid.setFF(0.000156)
 
+        self.led_length = 72
+        self.led_speed = wpilib._wpilib.AddressableLED.LEDData(255, 0, 0)
+        self.led_ball = wpilib._wpilib.AddressableLED.LEDData(0, 255, 0)
+        self.led_vision = wpilib._wpilib.AddressableLED.LEDData(0, 0, 255)
+        self.led.setLength(self.led_length)
+        self.led_vals = (
+            [self.led_speed] * int(self.led_length / 3)
+            + [self.led_ball] * int(self.led_length / 3)
+            + [self.led_vision] * int(self.led_length / 3)
+        )
+        self.led.setData(self.led_vals)
+        self.led.start()
+
     def execute(self) -> None:
         # self.centre_rpm = 2000
         # self.outer_rpm = 5000
@@ -56,6 +71,17 @@ class Shooter:
         if self.inject:
             self.loading_piston.startPulse()
             self.inject = False
+
+        self.led.setData(self.led_vals)
+
+    def set_flywheel_led(self, r, g, b) -> None:
+        self.led_speed.setRGB(r, g, b)
+
+    def set_ball_ready_led(self, r, g, b) -> None:
+        self.led_ball.setRGB(r, g, b)
+
+    def set_vision_led(self, r, g, b) -> None:
+        self.led_vision.setRGB(r, g, b)
 
     def set_range(self, dist: float) -> None:
         """
