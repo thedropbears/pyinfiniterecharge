@@ -126,9 +126,14 @@ class ShooterController:
         """
         Positioned to fire, inject and expel a single ball
         """
-        self.shooter.fire()
-        # self.next_state("tracking")
-        self.state = self.tracking
+        if self.initial_call:
+            self.shooter.fire()
+            self.initial_call = False  # XXX
+        elif not self.shooter.is_firing():
+            # self.next_state("tracking")
+            self.state = self.tracking
+
+        self.indexer.jog()
 
     def driver_input(self, command: bool) -> None:
         """
