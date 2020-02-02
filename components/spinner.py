@@ -97,6 +97,10 @@ class Spinner:
         self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
         print("position control ran")
         if distance == 0 and self.piston_state == "down":
+        self.state = "position"
+        distance = self.get_wheel_dist()
+        self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
+        if distance == 0 and self.pistonState == "down":
             self.state = None
             self.piston_up()
 
