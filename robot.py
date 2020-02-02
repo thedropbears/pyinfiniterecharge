@@ -17,7 +17,6 @@ from components.shooter import Shooter
 from components.spinner import Spinner
 from components.turret import Turret
 from components.vision import Vision
-from components.hang import Hang
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities.scale_value import scale_value
