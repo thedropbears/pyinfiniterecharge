@@ -27,6 +27,11 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
 
 ### macOS ###
 *.DS_Store
@@ -38,7 +43,6 @@ venv.bak/
 
 ### VS Code ###
 .vscode/*
-!.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
