@@ -44,7 +44,7 @@ class Turret:
 
     # Slew to within +- half a degree of the target azimuth. This is about
     # 50 encoder steps.
-    CLOSED_LOOP_ERROR = int(0.5 * math.pi / 180 * COUNTS_PER_TURRET_RADIAN)
+    CLOSED_LOOP_ERROR = int(math.radians(0.5) * COUNTS_PER_TURRET_RADIAN)
     # The number of cycles that we must be within the error to decide we're done.
     TICKS_TO_SETTLE = 10
 
