@@ -63,7 +63,7 @@ class MyRobot(magicbot.MagicRobot):
         ]
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
         self.injector_slave_motor.follow(self.indexer_motors[0])
-        self.injector_slave_motor.setInverted(True)
+        self.injector_slave_motor.setInverted(False)
 
         self.led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.Solenoid(0)
