@@ -54,6 +54,8 @@ class MyRobot(magicbot.MagicRobot):
         self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
         self.indexer_motors = [ctre.WPI_TalonSRX(3), wpilib.Spark(2), wpilib.Spark(1)]
+        # Motors and switches created from injector [0] to intake [4]
+        # Or in this case from injector[0] to half-indexer [2]
         self.indexer_switches = [
             wpilib.DigitalInput(9),
             wpilib.DigitalInput(8),
