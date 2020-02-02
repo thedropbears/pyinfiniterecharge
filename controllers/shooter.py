@@ -72,9 +72,8 @@ class ShooterController:
         heading = self.chassis.get_heading()
         self.turret.scan(heading)
 
-        if self.vision.get_vision_data()[2] is not None:
+        if self.vision.get_data() is not None:
             # means no data is available
-            # print(f"searching -> tracking {self.vision.get_vision_data()}")
             # self.next_state("tracking")
             self.state = self.tracking
 
@@ -83,20 +82,18 @@ class ShooterController:
         """
         Aiming towards a vision target and spining up flywheels
         """
-        dist, delta_angle, timestamp = self.vision.get_vision_data()
+        vision_data = self.vision.get_data()
         # collect data only once per loop
-        if timestamp is None:
+        if vision_data is None:
             # self.next_state("searching")
-            # print(f"tracking -> searching {self.vision.get_vision_data()}")
             self.state = self.searching
         else:
-            if abs(delta_angle) > self.find_allowable_angle(dist):
+            if abs(vision_data.angle) > self.find_allowable_angle(vision_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
-                self.turret.slew(delta_angle)
+                self.turret.slew(vision_data.angle)
             if self.ready_to_spin():
                 # self.next_state("firing")
-                # print(f"tracking -> spining_up {self.vision.get_vision_data()}")
-                self.distance = dist
+                self.distance = vision_data.distance
                 self.state = self.spining_up
 
     def spining_up(self) -> None:
