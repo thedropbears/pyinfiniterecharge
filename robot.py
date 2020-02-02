@@ -17,6 +17,7 @@ from components.shooter import Shooter
 from components.spinner import Spinner
 from components.turret import Turret
 from components.vision import Vision
+from components.hang import Hang
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities.scale_value import scale_value
@@ -41,6 +42,10 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
         self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
+
+        self.hang_winch_motor_master = ctre.WPI_TalonSRX(21)
+        self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)
+        self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
         self.indexer_motors = [ctre.WPI_TalonSRX(3)]
         self.indexer_switches = [wpilib.DigitalInput(9)]
@@ -94,6 +99,7 @@ class MyRobot(magicbot.MagicRobot):
         self.handle_spinner_inputs(self.spinner_joystick)
         self.handle_shooter_inputs(self.joystick_left)
 
+
     def handle_spinner_inputs(self, joystick):
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
@@ -121,6 +127,13 @@ class MyRobot(magicbot.MagicRobot):
             self.shooter_controller.driver_input(False)
         if joystick.getRawButtonPressed(5):
             self.shooter_controller.spin_input()
+
+    def handle_hang_inputs(self, joystick: wpilib.Joystick):
+        # if joystick.getRawButtonPressed(3) and joystick.getRawButtonPressed(4):
+        #     self.hang.raise_hook()
+        # if self.hang.fire_hook and joystick.getRawButtonPressed(4):
+        #     self.hang.winch()
+        pass
 
 
 if __name__ == "__main__":
