@@ -122,7 +122,7 @@ class Shooter:
 
         based off of the pistons current state
         """
-        return self.loading_piston.get()
+        return self.ready_piston.get() or self.loading_piston.get()
 
     @feedback
     def is_in_range(self) -> bool:
