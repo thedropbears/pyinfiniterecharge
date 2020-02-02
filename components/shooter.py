@@ -74,13 +74,13 @@ class Shooter:
 
         self.led.setData(self.led_vals)
 
-    def get_flywheel_led(self, r, g, b) -> None:
+    def set_flywheel_led(self, r, g, b) -> None:
         self.led_speed.setRGB(r, g, b)
 
-    def get_ball_ready_led(self, r, g, b) -> None:
+    def set_ball_ready_led(self, r, g, b) -> None:
         self.led_ball.setRGB(r, g, b)
 
-    def get_vision_led(self, r, g, b) -> None:
+    def set_vision_led(self, r, g, b) -> None:
         self.led_vision.setRGB(r, g, b)
 
     def set_range(self, dist: float) -> None:

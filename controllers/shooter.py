@@ -47,22 +47,22 @@ class ShooterController:
 
     def update_LED(self) -> None:
         if self.shooter.is_at_speed():
-            self.shooter.get_flywheel_led(0, 255, 0)
+            self.shooter.set_flywheel_led(0, 255, 0)
         else:
-            self.shooter.get_flywheel_led(255, 0, 0)
+            self.shooter.set_flywheel_led(255, 0, 0)
 
         if self.indexer.is_ready():
-            self.shooter.get_ball_ready_led(0, 255, 0)
+            self.shooter.set_ball_ready_led(0, 255, 0)
         else:
-            self.shooter.get_ball_ready_led(255, 0, 0)
+            self.shooter.set_ball_ready_led(255, 0, 0)
 
         # if self.vision():
-        #     self.shooter.get_vision_led(0, 255, 0)
+        #     self.shooter.set_vision_led(0, 255, 0)
         # elif self.vision() and self.vision_centered():
-        #     self.shooter.get_vision_led(200, 200, 0)
+        #     self.shooter.set_vision_led(200, 200, 0)
         # else:
-        #     self.shooter.get_vision_led(0, 255, 0)
-        self.shooter.get_vision_led(200, 200, 0)
+        #     self.shooter.set_vision_led(0, 255, 0)
+        self.shooter.set_vision_led(200, 200, 0)
 
     # @state(first=True)
     def searching(self) -> None:
