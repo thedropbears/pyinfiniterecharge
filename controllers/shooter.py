@@ -44,7 +44,7 @@ class ShooterController:
         """
         self.state()
         self.update_LED()
-        
+
     def update_LED(self) -> None:
         if self.shooter.is_at_speed():
             self.shooter.set_led_speed_RGB(0, 255, 0)

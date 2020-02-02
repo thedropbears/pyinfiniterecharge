@@ -73,7 +73,7 @@ class Shooter:
             self.inject = False
 
         self.led.setData(self.led_vals)
-    
+
     def set_led_speed_RGB(self, r, g, b) -> None:
         self.led_speed.setRGB(r, g, b)
 
