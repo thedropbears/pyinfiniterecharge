@@ -9,6 +9,8 @@ class Vision:
         self.nt = NetworkTables
         self.table = self.nt.getTable("/vision")
         self.entry = self.table.getEntry("data")
+        self.lastTime = 0
+        self.repeats = 0
 
     def get_vision_data(self) -> Tuple[float, float, float]:
         """Returns a tuple containing the distance (metres), angle (radians), and timestamp (time.monotonic)
@@ -18,9 +20,15 @@ class Vision:
         return self.data
 
     def is_ready(self) -> int:
-        if abs(self.data[2] - time.monotonic()) > 0.5:
+        if self.data[2] == self.lastTime:  # if it gets the same time twice
+            self.repeats += 1
+        else:
+            self.repeats = 0
+        self.lastTime = self.data[2]
+
+        if self.repeats >= 5:  # if it has got the same data for five loops
             return 0  # no target
-        elif abs(self.data[1]) < math.degrees(5):
+        if abs(self.data[1]) < math.degrees(5):
             return 1  # target out of alignment
         else:
             return 2  # aligned
