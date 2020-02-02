@@ -25,7 +25,7 @@ class Vision:
             return [None, None, None]
 
     def is_ready(self) -> bool:
-        if self.entry.exists():
+        if self.entry.exists() and self.data[2] != None:
             if self.data[2] == self.lastTime:  # if it gets the same time twice
                 self.repeats += 1
             else:
