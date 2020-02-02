@@ -42,6 +42,10 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
         self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
 
+        self.hang_winch_motor_master = ctre.WPI_TalonSRX(21)
+        self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)
+        self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
+
         self.indexer_motors = [ctre.WPI_TalonSRX(3)]
         self.indexer_switches = [wpilib.DigitalInput(9)]
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
@@ -63,10 +67,7 @@ class MyRobot(magicbot.MagicRobot):
         self.vision = Vision()
 
         # operator interface
-        self.joystick_left = wpilib.Joystick(0)
-        self.joystick_right = wpilib.Joystick(1)
-        self.spinner_joystick = wpilib.Joystick(2)
-        self.turret_joystick = wpilib.Joystick(3)
+        self.driver_joystick = wpilib.Joystick(0)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -74,10 +75,10 @@ class MyRobot(magicbot.MagicRobot):
     def teleopPeriodic(self):
         """Executed every cycle"""
 
-        self.handle_spinner_inputs(self.spinner_joystick)
-        self.handle_chassis_inputs(self.joystick_left)
+        self.handle_spinner_inputs(self.driver_joystick)
+        self.handle_chassis_inputs(self.driver_joystick)
 
-        pov = self.turret_joystick.getPOV(0)
+        pov = self.driver_joystick.getPOV(0)
         about_five_degrees = 0.087  # radians
         if pov != -1:
             if pov < 180:
@@ -85,14 +86,15 @@ class MyRobot(magicbot.MagicRobot):
             else:
                 self.turret.slew(-about_five_degrees)
 
-        if self.joystick_left.getRawButtonPressed(7):
+        if self.driver_joystick.getRawButtonPressed(6):
             if self.indexer.indexing:
                 self.indexer.disable_indexing()
             else:
                 self.indexer.enable_indexing()
 
-        self.handle_spinner_inputs(self.spinner_joystick)
-        self.handle_shooter_inputs(self.joystick_left)
+        self.handle_spinner_inputs(self.driver_joystick)
+        self.handle_shooter_inputs(self.driver_joystick)
+        self.handle_hang_inputs(self.driver_joystick)
 
     def handle_spinner_inputs(self, joystick):
         if joystick.getRawButtonPressed(7):
@@ -121,6 +123,13 @@ class MyRobot(magicbot.MagicRobot):
             self.shooter_controller.driver_input(False)
         if joystick.getRawButtonPressed(5):
             self.shooter_controller.spin_input()
+
+    def handle_hang_inputs(self, joystick: wpilib.Joystick):
+        # if joystick.getRawButtonPressed(3) and joystick.getRawButtonPressed(4):
+        #     self.hang.raise_hook()
+        # if self.hang.fire_hook and joystick.getRawButtonPressed(4):
+        #     self.hang.winch()
+        pass
 
 
 if __name__ == "__main__":

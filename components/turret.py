@@ -18,8 +18,6 @@ class Turret:
     # INDEX_RIGHT_LIMIT = 4
     HALL_EFFECT_CLOSED = False
 
-    joystick: wpilib.Joystick
-
     motor: ctre.WPI_TalonSRX
 
     # Possible states
