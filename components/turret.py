@@ -94,10 +94,6 @@ class Turret:
             self.current_azimuth = self.motor.getSelectedSensorPosition(0)
             delta = count - self.current_azimuth
             self.target_count = self.current_azimuth + delta
-            # self.incrementing = True
-            # if self.target_count < self.current_azimuth:
-            #    self.incrementing = False
-            # self.logger.info(f'calling motor to go from count {self.current_azimuth} to count {self.target_count}')
             self.motor.set(ctre.ControlMode.Position, self.target_count)
             self.ticks_within_threshold = 0
             self.current_state = self.SLEWING
@@ -116,19 +112,6 @@ class Turret:
     def is_ready(self) -> bool:
         # Once slewing or indexing is complete, state will go to IDLE
         return self.current_state == self.IDLE
-        # if self.current_state == self.IDLE:
-        # self.logger.info("is_ready in IDLE state")
-        # return True
-        # if self.current_state == self.SLEWING:
-        # self.current_azimuth = self.motor.getSelectedSensorPosition(0)
-        # if (self.incrementing and self.current_azimuth >= self.target_count) or (
-        #    not self.incrementing and self.current_azimuth <= self.target_count
-        # ):
-        # closed_loop_error = self.motor.getClosedLoopError(0)
-        # self.logger.info(f'is_ready check: error i {closed_loop_error}, min is {self.CLOSED_LOOP_ERROR}')
-        # return abs(closed_loop_error) < self.CLOSED_LOOP_ERROR
-        # state must be FINDING_INDEX. Return False until it's done.
-        # return False
 
     def execute(self) -> None:
         if self.current_state == self.FINDING_INDEX:
