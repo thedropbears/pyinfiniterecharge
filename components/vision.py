@@ -1,6 +1,5 @@
 from networktables import NetworkTables
 from typing import Tuple
-import math
 
 
 class Vision:
