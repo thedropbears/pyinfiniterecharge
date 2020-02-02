@@ -30,9 +30,7 @@ class Hang:
             self.kracken_hook_latch.set(wpilib.DoubleSolenoid.Value.kForward)
 
         # drive winch
-        self.winch_motor_master.set(
-            ctre.ControlMode.percentageOutput, self.winch_desired_output
-        )
+        self.winch_motor_master.set(self.winch_desired_output)
 
     def raise_hook(self) -> None:
         # fire solenoid
