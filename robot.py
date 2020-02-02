@@ -68,10 +68,7 @@ class MyRobot(magicbot.MagicRobot):
         self.vision = Vision()
 
         # operator interface
-        self.joystick_left = wpilib.Joystick(0)
-        self.joystick_right = wpilib.Joystick(1)
-        self.spinner_joystick = wpilib.Joystick(2)
-        self.turret_joystick = wpilib.Joystick(3)
+        self.driver_joystick = wpilib.Joystick(0)
 
     def teleopInit(self):
         """Executed at the start of teleop mode"""
@@ -79,10 +76,10 @@ class MyRobot(magicbot.MagicRobot):
     def teleopPeriodic(self):
         """Executed every cycle"""
 
-        self.handle_spinner_inputs(self.spinner_joystick)
-        self.handle_chassis_inputs(self.joystick_left)
+        self.handle_spinner_inputs(self.driver_joystick)
+        self.handle_chassis_inputs(self.driver_joystick)
 
-        pov = self.turret_joystick.getPOV(0)
+        pov = self.driver_joystick.getPOV(0)
         about_five_degrees = 0.087  # radians
         if pov != -1:
             if pov < 180:
@@ -90,15 +87,15 @@ class MyRobot(magicbot.MagicRobot):
             else:
                 self.turret.slew(-about_five_degrees)
 
-        if self.joystick_left.getRawButtonPressed(7):
+        if self.driver_joystick.getRawButtonPressed(6):
             if self.indexer.indexing:
                 self.indexer.disable_indexing()
             else:
                 self.indexer.enable_indexing()
 
-        self.handle_spinner_inputs(self.spinner_joystick)
-        self.handle_shooter_inputs(self.joystick_left)
-
+        self.handle_spinner_inputs(self.driver_joystick)
+        self.handle_shooter_inputs(self.driver_joystick)
+        self.handle_hang_inputs(self.driver_joystick)
 
     def handle_spinner_inputs(self, joystick):
         if joystick.getRawButtonPressed(7):
