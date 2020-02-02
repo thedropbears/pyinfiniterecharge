@@ -11,6 +11,7 @@ class Indexer:
         for motor in self.indexer_motors:
             motor.setInverted(True)
         self.indexing = True
+        self.speed = 0.2
 
     def execute(self) -> None:
         if self.indexing:
@@ -21,11 +22,11 @@ class Indexer:
                 if switch:
                     if not i:
                         if not self.ready_piston.get():
-                        motor.set(0.8)
-                    else:
+                            motor.set(self.speed * 2)
+                        else:
                             motor.stopMotor()
                     else:
-                        motor.set(0.3)
+                        motor.set(self.speed)
                 else:
                     motor.stopMotor()
         else:
