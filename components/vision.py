@@ -1,5 +1,22 @@
+from dataclasses import dataclass
+from typing import Optional
+
 from networktables import NetworkTables
-from typing import Tuple
+
+
+@dataclass
+class VisionData:
+    #: The distance to the target in metres.
+    distance: float
+
+    #: The angle to the target in radians.
+    angle: float
+
+    #: An arbitrary timestamp, in seconds,
+    #: for when the vision system last obtained data.
+    timestamp: float
+
+    __slots__ = ("distance", "angle", "timestamp")
 
 
 class Vision:
@@ -8,8 +25,11 @@ class Vision:
         self.table = self.nt.getTable("/vision")
         self.entry = self.table.getEntry("data")
 
-    def get_vision_data(self) -> Tuple[float, float, float]:
-        """Returns a tuple containing the distance (metres), angle (radians), and timestamp (time.monotonic)
-        If it can't get info, it returns [None, None, None]
+    def get_data(self) -> Optional[VisionData]:
+        """Returns the latest vision data.
+
+        Returns None if there is no vision data.
         """
-        return self.entry.getDoubleArray([None, None, None])
+        data = self.entry.getDoubleArray(None)
+        if data is not None:
+            return VisionData(*data)
