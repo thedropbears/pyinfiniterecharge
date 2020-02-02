@@ -6,6 +6,8 @@ class Indexer:
     indexer_switches: list
 
     def on_enable(self) -> None:
+        for motor in self.indexer_motors:
+            motor.setInverted(True)
         self.indexing = True
 
     def execute(self) -> None:
