@@ -1,6 +1,6 @@
 import math
 
-from magicbot import feedback, StateMachine, state
+from magicbot import feedback, StateMachine, state, will_reset_to
 
 from components.chassis import Chassis
 from components.indexer import Indexer
@@ -20,6 +20,8 @@ class ShooterController(StateMachine):
     vision: Vision
     led_screen: LEDScreen
 
+    fire_command = will_reset_to(False)
+
     TARGET_RADIUS = (3 * 12 + 3.25) / 2 * 0.0254  # Circumscribing radius of target
     BALL_RADIUS = 7 / 2 * 0.0254
     # convert from freedom units
@@ -35,7 +37,6 @@ class ShooterController(StateMachine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.input_command = False
         self.spin_command = False
         self.distance = None
 
@@ -76,11 +77,12 @@ class ShooterController(StateMachine):
             self.next_state("tracking")
 
     @state
-    def tracking(self) -> None:
+    def tracking(self, initial_call) -> None:
         """
         Aiming towards a vision target and spining up flywheels
         """
-        self.shooter.stop_motors()
+        if initial_call:
+            self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
         if timestamp is None:
@@ -110,7 +112,7 @@ class ShooterController(StateMachine):
         if initial_call:
             self.shooter.set_range(self.distance)
         if self.turret.is_ready():
-            if self.ready_to_fire() and self.input_command:
+            if self.ready_to_fire() and self.fire_command:
                 self.distance = None
                 # print(f"spining_up -> firing {self.vision.get_vision_data()}")
                 self.next_state("firing")
@@ -131,11 +133,11 @@ class ShooterController(StateMachine):
 
         self.indexer.jog()
 
-    def driver_input(self, command: bool) -> None:
+    def fire_input(self) -> None:
         """
         Called by robot.py to indicate the fire button has been pressed
         """
-        self.input_command = command
+        self.fire_command = True
 
     def spin_input(self) -> None:
         """
@@ -145,10 +147,7 @@ class ShooterController(StateMachine):
 
     @feedback
     def ready_to_fire(self) -> bool:
-        return (
-            self.shooter.is_ready()
-            and self.indexer.is_ready()
-        )
+        return self.shooter.is_ready() and self.indexer.is_ready()
 
     @feedback
     def ready_to_spin(self) -> bool:

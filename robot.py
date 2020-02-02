@@ -131,10 +131,8 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis.drive(vx, vz)
 
     def handle_shooter_inputs(self, joystick: wpilib.Joystick):
-        if joystick.getTriggerPressed():
-            self.shooter_controller.driver_input(True)
-        if joystick.getTriggerReleased():
-            self.shooter_controller.driver_input(False)
+        if joystick.getTrigger():
+            self.shooter_controller.fire_input()
         if joystick.getRawButtonPressed(5):
             self.shooter_controller.spin_input()
 
