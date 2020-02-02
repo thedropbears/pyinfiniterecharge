@@ -33,3 +33,4 @@ class Vision:
         data = self.entry.getDoubleArray(None)
         if data is not None:
             return VisionData(*data)
+        return None
