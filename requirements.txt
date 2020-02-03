@@ -1,6 +1,7 @@
+numpy ~= 1.18
 pyfrc ~= 2020.0
-pyntcore >= 2020.1.2.3
-robotpy-ctre ~= 2020.0.1
-robotpy-rev ~= 2020.0.0
-robotpy-rev-color ~= 2020.0.1
+robotpy-ctre ~= 2020.1.0
+robotpy-rev ~= 2020.1.0
+robotpy-rev-color ~= 2020.1.0
 robotpy-wpilib-utilities ~= 2020.0.3
+wpilib ~= 2020.2.2.0
