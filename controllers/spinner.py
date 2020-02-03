@@ -8,21 +8,19 @@ class SpinnerController:
 
     def setup(self):
         self.state = None
-        self.spinner.piston_up()
-        self.task = "position"
+        self.spinner.raise_wheel()
+        self.task = None
         self.required_colour = "R"
 
     # @state()
     def position_control(self):
-        self.spinner.piston_down()
+        self.spinner.lower_wheel()
         self.state = "position"
-        self.spinner.state = "position"
-        self.required_colour = "R"  # get colour
+        self.required_colour = "R"  # get colour from fms
 
     def rotation_control(self):
-        self.spinner.piston_down()
+        self.spinner.lower_wheel()
         self.state = "rotation"
-        self.spinner.state = "rotation"
 
     def execute(self):
         if self.state == "position":  # TODO get FMS info
