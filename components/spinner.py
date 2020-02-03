@@ -45,7 +45,7 @@ class Spinner:
         self.spinner_motor.set(0)
         self.piston_up()
         self.rotations = 0
-        self.state = None
+        # self.state = None
         self.piston_state = "down"
         self.required_colour = "B"
         self.lastCol = "Y"
@@ -92,23 +92,19 @@ class Spinner:
 
     def go_to_colour(self, colour: str):
         self.required_colour = colour
-        self.state = "position"
         distance = self.get_wheel_dist()
         self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
         print("position control ran")
-        if distance == 0 and self.piston_state == "down":
-        self.state = "position"
-        distance = self.get_wheel_dist()
-        self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
-        if distance == 0 and self.pistonState == "down":
-            self.state = None
-            self.piston_up()
+        if distance == 0:
+            return True
+        else:
+            return False
 
     def do_rotation(self) -> None:
-        self.state = "rotation"
-        spin_speed = (
-            self.ROTATION_SPIN_FACTOR ** (self.rotations - self.ROTATION_TARGET_ROTATIONS + 1)
-            + self.ROTATION_MAX_SPEED
+        spin_speed = 1 - (
+            self.ROTATION_SPIN_FACTOR
+            ** (self.rotations - self.ROTATION_TARGET_ROTATIONS)
+            * self.ROTATION_MAX_SPEED
         )
         self.spinner_motor.set(spin_speed)
         print("rotation control ran")
@@ -117,13 +113,12 @@ class Spinner:
         if self.lastCol != current_colour:
             self.rotations += 1 / 8
         self.lastCol = current_colour
-        if self.rotations >= 3.5 and self.piston_state == "down":
-            self.state = None
+        if self.rotations >= 3.5:
+            self.rotations = 0
             self.spinner_motor.set(0)
-            self.piston_up()
-
-    def is_complete(self) -> bool:
-        return self.state == None
+            return True
+        else:
+            return False
 
     def execute(self):
         pass
