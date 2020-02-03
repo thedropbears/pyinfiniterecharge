@@ -45,13 +45,10 @@ class Spinner:
         self.spinner_motor.set(0)
         self.piston_up()
         self.rotations = 0
-        self.state = None
+        # self.state = None
         self.piston_state = "down"
-<<<<<<< HEAD
         self.required_colour = "B"
         self.lastCol = "Y"
-=======
->>>>>>> 9cba054243d070358ffdcf8075670a9af6e68956
 
     def on_enable(self) -> None:
         self.spinner_motor.set(0)
@@ -94,57 +91,34 @@ class Spinner:
         return distance
 
     def go_to_colour(self, colour: str):
-<<<<<<< HEAD
         self.required_colour = colour
-        self.state = "position"
         distance = self.get_wheel_dist()
         self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
         print("position control ran")
-        if distance == 0 and self.piston_state == "down":
-=======
-        self.state = "position"
-        distance = self.get_wheel_dist()
-        self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
-        if distance == 0 and self.pistonState == "down":
->>>>>>> 9cba054243d070358ffdcf8075670a9af6e68956
-            self.state = None
-            self.piston_up()
+        if distance == 0:
+            return True
+        else:
+            return False
 
     def do_rotation(self) -> None:
-        self.state = "rotation"
-        spin_speed = (
-<<<<<<< HEAD
-            self.ROTATION_SPIN_FACTOR ** (self.rotations - self.ROTATION_TARGET_ROTATIONS + 1)
-            + self.ROTATION_MAX_SPEED
+        spin_speed = 1 - (
+            self.ROTATION_SPIN_FACTOR
+            ** (self.rotations - self.ROTATION_TARGET_ROTATIONS)
+            * self.ROTATION_MAX_SPEED
         )
         self.spinner_motor.set(spin_speed)
         print("rotation control ran")
-=======
-            self.ROTATION_SPIN_FACTOR ** (x - self.ROTATION_TARGET_ROTATIONS + 1)
-            + self.ROTATION_MAX_SPEED
-        )
-        self.spinner_motor.set(spin_speed)
->>>>>>> 9cba054243d070358ffdcf8075670a9af6e68956
         # speed slows down as it gets closer to required revolutions
         current_colour = self.get_current_colour()
         if self.lastCol != current_colour:
             self.rotations += 1 / 8
         self.lastCol = current_colour
-<<<<<<< HEAD
-        if self.rotations >= 3.5 and self.piston_state == "down":
-=======
-        if self.rotations >= 3.5 and self.pistonState == "down":
->>>>>>> 9cba054243d070358ffdcf8075670a9af6e68956
-            self.state = None
+        if self.rotations >= 3.5:
+            self.rotations = 0
             self.spinner_motor.set(0)
-            self.piston_up()
-
-<<<<<<< HEAD
-    def is_complete(self) -> bool:
-=======
-    def is_complete(self) -> None:
->>>>>>> 9cba054243d070358ffdcf8075670a9af6e68956
-        return self.state == None
+            return True
+        else:
+            return False
 
     def execute(self):
         pass
