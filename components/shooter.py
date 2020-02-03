@@ -9,7 +9,7 @@ class Shooter:
     centre_motor: rev.CANSparkMax
     loading_piston: wpilib.Solenoid
 
-    led: wpilib._wpilib.AddressableLED
+    led: wpilib.AddressableLED
 
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
     centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
