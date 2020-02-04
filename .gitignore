@@ -50,3 +50,6 @@ dmypy.json
 ### WPILib ###
 networktables.ini
 imgui.ini
+
+### Project-specific ###
+gitid

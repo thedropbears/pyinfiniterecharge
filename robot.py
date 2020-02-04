@@ -19,7 +19,10 @@ from components.turret import Turret
 from components.vision import Vision
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
+from utilities import git
 from utilities.scale_value import scale_value
+
+GIT_COMMIT = git.describe()
 
 
 class MyRobot(magicbot.MagicRobot):
@@ -37,6 +40,8 @@ class MyRobot(magicbot.MagicRobot):
 
     def createObjects(self):
         """Robot initialization function"""
+        self.logger.info("pyinfiniterecharge %s", GIT_COMMIT)
+
         self.chassis_left_front = rev.CANSparkMax(5, rev.MotorType.kBrushless)
         self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
