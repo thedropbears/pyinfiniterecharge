@@ -1,6 +1,16 @@
+from enum import Enum
+
 import wpilib
 import ctre
 import math
+
+
+class Index(Enum):
+    NOT_FOUND = 0
+    CENTRE = 1
+    RIGHT = 2
+    LEFT = 3
+    BACK = 4
 
 
 class Turret:
@@ -9,8 +19,6 @@ class Turret:
     # left_index: wpilib.DigitalInput
     # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
-    HALL_EFFECT_CLOSED = False
-
     motor: ctre.WPI_TalonSRX
 
     # Possible states
@@ -22,6 +30,15 @@ class Turret:
     GEAR_REDUCTION = 160 / 18
     COUNTS_PER_TURRET_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION
     COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
+
+    INDEX_POSITIONS = {
+        Index.CENTRE: 0,
+        Index.LEFT: int(math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
+        Index.RIGHT: int(-math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
+        Index.BACK: int(math.pi * COUNTS_PER_TURRET_RADIAN),
+    }
+    HALL_EFFECT_CLOSED = False
+    HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
 
     # PID values
     pidF = 0
@@ -36,7 +53,9 @@ class Turret:
     def on_enable(self) -> None:
         if self.index_found:
             # Don't throw away previously found indices
-            self.motor.set(ctre.ControlMode.Position, self.motor.getSelectedSensorPosition())
+            self.motor.set(
+                ctre.ControlMode.Position, self.motor.getSelectedSensorPosition()
+            )
         else:
             self.motor.setSelectedSensorPosition(0)
             self.motor.set(ctre.ControlMode.Position, 0)
@@ -52,6 +71,7 @@ class Turret:
         self.motor.configAllowableClosedloopError(0, self.ACCEPTABLE_ERROR_COUNTS, 10)
         self.scan_increment = math.radians(10.0)
         self.index_found = False
+        self.previous_index = Index.NOT_FOUND
         self.current_state = self.SLEWING
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
@@ -107,17 +127,35 @@ class Turret:
         return self.index_found
 
     def execute(self) -> None:
-        self._check_for_index()
+        self._handle_indices()
         if self.current_state == self.SCANNING:
             self._do_scanning()
 
-    def _check_for_index(self) -> None:
+    def _handle_indices(self) -> None:
         # Check if we're at a known position
         # If so, update the encoder position on the motor controller
         # and change the current setpoint with the applied delta.
+        index = self._get_current_index()
+        if index != Index.NOT_FOUND and self.previous_index == Index.NOT_FOUND:
+            # Last tick we didn't have an index triggered, and now we do
+            count = self._index_to_counts(index)
+            self._reset_encoder(count)
+        self.previous_index = index
+
+    def _get_current_index(self) -> Index:
         if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
-            self._reset_encoder(0)
+            return Index.CENTRE
         # TODO: Repeat for other index marks
+        return Index.NOT_FOUND
+
+    def _index_to_counts(self, index: Index) -> int:
+        # We need to account for the width of the sensor.
+        # This means we use the direction of travel to work out
+        # which side we are approaching from
+        middle = self.INDEX_POSITIONS[index]
+        direction = 1 if self.motor.getSelectedSensorVelocity() > 0 else -1
+        count = middle + direction * self.HALL_EFFECT_HALF_WIDTH_COUNTS
+        return count
 
     def _reset_encoder(self, counts) -> None:
         current_count = self.motor.getSelectedSensorPosition()
