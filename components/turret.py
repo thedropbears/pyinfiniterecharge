@@ -34,7 +34,12 @@ class Turret:
     ACCEPTABLE_ERROR_COUNTS = int(math.radians(0.5) * COUNTS_PER_TURRET_RADIAN)
 
     def on_enable(self) -> None:
-        self.motor.stopMotor()
+        if self.index_found:
+            # Don't throw away previously found indices
+            self.motor.set(ctre.ControlMode.Position, self.motor.getSelectedSensorPosition())
+        else:
+            self.motor.setSelectedSensorPosition(0)
+            self.motor.set(ctre.ControlMode.Position, 0)
 
     def setup(self) -> None:
         self.motor.configSelectedFeedbackSensor(
