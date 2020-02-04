@@ -35,7 +35,6 @@ class Turret:
 
     def on_enable(self) -> None:
         self.motor.stopMotor()
-        self.scan()
 
     def setup(self) -> None:
         self.motor.configSelectedFeedbackSensor(
