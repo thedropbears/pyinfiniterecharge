@@ -49,6 +49,9 @@ class Turret:
     # Slew to within +- half a degree of the target azimuth. This is about
     # 50 encoder steps.
     ACCEPTABLE_ERROR_COUNTS = int(math.radians(0.5) * COUNTS_PER_TURRET_RADIAN)
+    ACCEPTABLE_ERROR_SPEED = int(
+        math.radians(0.5) * COUNTS_PER_TURRET_RADIAN
+    )  # counts per 100ms
 
     def on_enable(self) -> None:
         if self.index_found:
@@ -120,7 +123,9 @@ class Turret:
     def is_ready(self) -> bool:
         return (
             self.current_state != self.SCANNING
-            and abs(self.motor.getClosedLoopError) < self.ACCEPTABLE_ERROR_COUNTS
+            and abs(self.motor.getClosedLoopError()) < self.ACCEPTABLE_ERROR_COUNTS
+            and abs(self.motor.getSelectedSensorVelocity())
+            < self.ACCEPTABLE_ERROR_SPEED
         )
 
     def has_index(self) -> bool:
