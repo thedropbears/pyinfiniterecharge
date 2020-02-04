@@ -90,6 +90,7 @@ class Turret:
             self._slew_to_counts(
                 current_count + (self.scan_increment * self.COUNTS_PER_TURRET_RADIAN)
             )
+        self.current_state = self.SCANNING
 
     def is_ready(self) -> bool:
         return (
