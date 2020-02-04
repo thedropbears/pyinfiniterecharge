@@ -34,6 +34,7 @@ class Turret:
     ACCEPTABLE_ERROR_COUNTS = int(math.radians(0.5) * COUNTS_PER_TURRET_RADIAN)
 
     def on_enable(self) -> None:
+        self.motor.stopMotor()
         self.scan()
 
     def setup(self) -> None:
