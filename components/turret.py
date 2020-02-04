@@ -121,7 +121,7 @@ class Turret:
         self.motor.setSelectedSensorPosition(counts)
         # Reset any current target using the new absolute azimuth
         self._slew_to_counts(counts + delta)
-        self.has_index = True
+        self.index_found = True
 
     def _do_scanning(self) -> None:
         # Check if we've finished a scan pass
