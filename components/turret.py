@@ -137,11 +137,11 @@ class Turret:
         if abs(self.motor.getClosedLoopError()) < self.ACCEPTABLE_ERROR_COUNTS:
             next_target = self.motor.getClosedLoopTarget() - self.current_scan_increment
             # next_target points back at the centre of the scan again
-            if self.current_scan_increment > 0 and self.current_scan_increment < 90:
+            if 0 < self.current_scan_increment < 90:
                 self.current_scan_increment = (
                     self.current_scan_increment + self.scan_increment_degrees
                 )
-            if self.current_scan_increment < 0 and self.current_scan_increment > -90:
+            if -90 < self.current_scan_increment < 0:
                 self.current_scan_increment = (
                     self.current_scan_increment - self.scan_increment_degrees
                 )
