@@ -31,9 +31,7 @@ class Turret:
 
     # Slew to within +- half a degree of the target azimuth. This is about
     # 50 encoder steps.
-    CLOSED_LOOP_ERROR = int(math.radians(0.5) * COUNTS_PER_TURRET_RADIAN)
-    # The number of cycles that we must be within the error to decide we're done.
-    TICKS_TO_SETTLE = 10
+    ACCEPTABLE_ERROR_COUNTS = int(math.radians(0.5) * COUNTS_PER_TURRET_RADIAN)
 
     def on_enable(self) -> None:
         self.scan()
@@ -46,7 +44,7 @@ class Turret:
         self.motor.config_kP(0, self.pidP, 10)
         self.motor.config_kI(0, self.pidI, 10)
         self.motor.config_kD(0, self.pidD, 10)
-        self.motor.configAllowableClosedloopError(0, self.CLOSED_LOOP_ERROR, 10)
+        self.motor.configAllowableClosedloopError(0, self.ACCEPTABLE_ERROR_COUNTS, 10)
         self.scan_increment = math.radians(10.0)
         self.index_found = False
         self.current_state = self.SLEWING
