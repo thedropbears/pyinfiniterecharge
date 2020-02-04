@@ -49,7 +49,7 @@ class Turret:
         self.motor.config_kI(0, self.pidI, 10)
         self.motor.config_kD(0, self.pidD, 10)
         self.motor.configAllowableClosedloopError(0, self.CLOSED_LOOP_ERROR, 10)
-        self.scan_increment_degrees = 10.0
+        self.scan_increment = math.radians(10.0)
         self.index_found = False
         self.current_state = self.SLEWING
 
@@ -83,21 +83,16 @@ class Turret:
         # 90 degrees either side of the given heading
 
         # First reset scan size
-        self.current_scan_increment = self.scan_increment_degrees
+        self.current_scan_delta = self.scan_increment
         if self.index_found:
             # set the first pass
             self._slew_to_counts(
-                (azimuth + math.radians(self.scan_increment_degrees))
-                * self.COUNTS_PER_TURRET_RADIAN
+                (azimuth + self.scan_increment) * self.COUNTS_PER_TURRET_RADIAN
             )
         else:
             current_count = self.motor.getSelectedSensorPosition()
             self._slew_to_counts(
-                current_count
-                + (
-                    math.radians(self.scan_increment_degrees)
-                    * self.COUNTS_PER_TURRET_RADIAN
-                )
+                current_count + (self.scan_increment * self.COUNTS_PER_TURRET_RADIAN)
             )
 
     def is_ready(self) -> bool:
@@ -135,16 +130,12 @@ class Turret:
         # Check if we've finished a scan pass
         # If so, reverse the direction and increase pass size if necessary
         if abs(self.motor.getClosedLoopError()) < self.ACCEPTABLE_ERROR_COUNTS:
-            next_target = self.motor.getClosedLoopTarget() - self.current_scan_increment
+            next_target = self.motor.getClosedLoopTarget() - self.current_scan_delta
             # next_target points back at the centre of the scan again
-            if 0 < self.current_scan_increment < 90:
-                self.current_scan_increment = (
-                    self.current_scan_increment + self.scan_increment_degrees
-                )
-            if -90 < self.current_scan_increment < 0:
-                self.current_scan_increment = (
-                    self.current_scan_increment - self.scan_increment_degrees
-                )
-            self.current_scan_increment = -self.current_scan_increment
-            next_target = next_target + self.current_scan_increment
-            self._slew_to_counts(next_target)
+            if 0 < self.current_scan_delta < math.pi() / 2:
+                self.current_scan_delta = self.current_scan_delta + self.scan_increment
+            if -math.pi() / 2 < self.current_scan_delta < 0:
+                self.current_scan_delta = self.current_scan_delta - self.scan_increment
+            self.current_scan_delta = -self.current_scan_delta
+            next_target = next_target + self.current_scan_delta
+            self._slew_to_counts(next_target * self.COUNTS_PER_TURRET_RADIAN)
