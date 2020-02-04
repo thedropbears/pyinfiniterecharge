@@ -1,5 +1,3 @@
-from enum import Enum
-
 import wpilib
 import ctre
 import math
@@ -114,7 +112,7 @@ class Turret:
         # If so, update the encoder position on the motor controller
         # and change the current setpoint with the applied delta.
         if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
-            _reset_encoder(0)
+            self._reset_encoder(0)
         # TODO: Repeat for other index marks
 
     def _reset_encoder(self, counts) -> None:

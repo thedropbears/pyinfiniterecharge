@@ -8,7 +8,6 @@ from components.indexer import Indexer
 from components.shooter import Shooter
 from components.turret import Turret
 from components.vision import Vision
-from components.chassis import Chassis
 
 
 # class ShooterController(StateMachine):
@@ -20,7 +19,6 @@ class ShooterController:
     shooter: Shooter
     turret: Turret
     vision: Vision
-    chassis: Chassis
 
     TARGET_RADIUS = (3 * 12 + 3.25) / 2 * 0.0254  # Circumscribing radius of target
     BALL_RADIUS = 7 / 2 * 0.0254
