@@ -83,14 +83,6 @@ class MyRobot(magicbot.MagicRobot):
         self.handle_spinner_inputs(self.driver_joystick)
         self.handle_chassis_inputs(self.driver_joystick)
 
-        pov = self.driver_joystick.getPOV(0)
-        about_five_degrees = 0.087  # radians
-        if pov != -1:
-            if pov < 180:
-                self.turret.slew(about_five_degrees)
-            else:
-                self.turret.slew(-about_five_degrees)
-
         if self.driver_joystick.getRawButtonPressed(6):
             if self.indexer.indexing:
                 self.indexer.disable_indexing()
@@ -134,6 +126,18 @@ class MyRobot(magicbot.MagicRobot):
             self.hang.raise_hook()
         if self.hang.fire_hook and joystick.getRawButton(4):
             self.hang.winch()
+
+    def testInit(self):
+        pass
+
+    def testPeriodic(self):
+        pov = self.driver_joystick.getPOV(0)
+        about_five_degrees = 0.087  # radians
+        if pov != -1:
+            if pov < 180:
+                self.turret.slew(about_five_degrees)
+            else:
+                self.turret.slew(-about_five_degrees)
 
 
 if __name__ == "__main__":
