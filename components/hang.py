@@ -39,3 +39,7 @@ class Hang:
     def winch(self) -> None:
         # drive motor
         self.winch_desired_output = self.WINCH_SPEED
+
+    def pay_out(self) -> None:
+        # drive motor backwards to release cable in pits
+        self.winch_desired_output = -self.WINCH_SPEED

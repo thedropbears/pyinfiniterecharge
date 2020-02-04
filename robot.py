@@ -138,6 +138,8 @@ class MyRobot(magicbot.MagicRobot):
                 self.turret.slew(about_five_degrees)
             else:
                 self.turret.slew(-about_five_degrees)
+        if self.driver_joystick.getRawButton(4):
+            self.hang.pay_out()
 
 
 if __name__ == "__main__":
