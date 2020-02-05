@@ -46,7 +46,7 @@ class Turret:
     MAX_TURRET_COUNT = math.radians(45) * COUNTS_PER_TURRET_RADIAN
 
     # PID values
-    pidF = 0
+    pidF = 0.2
     pidP = 0.2
     pidI = 0
     pidD = 0
@@ -64,15 +64,27 @@ class Turret:
         if self.index_found:
             # Don't throw away previously found indices
             self.motor.set(
-                ctre.ControlMode.Position, self.motor.getSelectedSensorPosition()
+                ctre.ControlMode.MotionMagic, self.motor.getSelectedSensorPosition()
             )
         else:
             self.motor.setSelectedSensorPosition(0)
-            self.motor.set(ctre.ControlMode.Position, 0)
+            self.motor.set(ctre.ControlMode.MotionMagic, 0)
 
     def setup(self) -> None:
         self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
+        )
+        # set the peak and nominal outputs
+        self.talon.configNominalOutputForward(0, 10)
+        self.talon.configNominalOutputReverse(0, 10)
+        self.talon.configPeakOutputForward(0.5, 10)
+        self.talon.configPeakOutputReverse(-0.5, 10)
+        # Set relevant frame periods to be at least as fast as periodic rate
+        self.motor.setStatusFramePeriod(
+            ctre.WPI_TalonSRX.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, 10
+        )
+        self.motor.setStatusFramePeriod(
+            ctre.WPI_TalonSRX.StatusFrameEnhanced.Status_10_MotionMagic, 10, 10
         )
         self.motor.config_kF(0, self.pidF, 10)
         self.motor.config_kP(0, self.pidP, 10)
@@ -117,6 +129,8 @@ class Turret:
             # self.logger.warning(
             #    "attempt to slew beyond limit: " + counts
             # )  # pylint: disable=no-member
+        # TODO: Check for values outside allowed range
+        self.motor.set(ctre.ControlMode.MotionMagic, counts)
 
     def scan(self, azimuth=0.0) -> None:
         """
