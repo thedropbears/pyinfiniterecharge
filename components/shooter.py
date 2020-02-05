@@ -9,8 +9,9 @@ from magicbot import feedback, tunable
 class Shooter:
     outer_motor: ctre.WPI_TalonFX
     centre_motor: ctre.WPI_TalonFX
-    loading_piston: wpilib.DoubleSolenoid
     indexer_motors: Sequence[ctre.WPI_TalonSRX]
+    loading_piston: wpilib.Solenoid
+    piston_switch: wpilib.DigitalInput
 
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
     centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
@@ -122,7 +123,7 @@ class Shooter:
 
         based off of the pistons current state
         """
-        return self.ready_piston.get() or self.loading_piston.get()
+        return self.piston_switch.get() or self.loading_piston.get()
 
     @feedback
     def is_in_range(self) -> bool:
