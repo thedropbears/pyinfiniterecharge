@@ -1,40 +1,42 @@
 from magicbot import feedback
+import ctre
 import wpilib
 
 
 class Indexer:
     indexer_motors: list
     indexer_switches: list
-    ready_piston: wpilib.DigitalInput
+    piston_switch: wpilib.DigitalInput
+    injector_switch: wpilib.DigitalInput
+    injector_master_motor: ctre.TalonSRX
+    injector_slave_motor: ctre.TalonSRX
 
-    def on_enable(self) -> None:
+    def setup(self):
         for motor in self.indexer_motors:
             motor.setInverted(True)
-        self.indexing = True
+
         self.speed = 0.2
+        self.NUMBER_OF_MOTORS = len(self.indexer_motors)
+        self.injector_speed = self.speed * 2
+
+        self.injector_slave_motor.follow(self.injector_master_motor)
+        self.injector_slave_motor.setInverted(ctre.InvertType.OpposeMaster)
+
+    def on_enable(self) -> None:
+        self.indexing = True
 
     def execute(self) -> None:
-        if self.indexing:
-            for i, (motor, switch) in enumerate(
-                zip(
-                    self.indexer_motors,
-                    [switch.get() for switch in self.indexer_switches],
-                )
-            ):
+        # handle the injector motors
+        if not self.injector_switch.get():
+            if not self.piston_switch.get():
+                self.injector_master_motor.set(self.injector_speed)
+            else:
+                self.injector_master_motor.stopMotor()
 
-                if switch:
-                    if not i:
-                        if not self.ready_piston.get():
-                            motor.set(self.speed * 2)
-                        else:
-                            motor.stopMotor()
-                    else:
-                        motor.set(self.speed)
-                else:
-                    motor.stopMotor()
-        else:
-            for motor in self.indexer_motors:
-                motor.stopMotor()
+        # handle indexer motors
+        for i in range(0, self.NUMBER_OF_MOTORS):
+            if self.indexer_switches[i].get():
+                self.indexer_motors[i].set(self.speed)
 
     def enable_indexing(self) -> None:
         self.indexing = True
