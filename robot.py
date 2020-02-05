@@ -59,7 +59,7 @@ class MyRobot(magicbot.MagicRobot):
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.spinner_motor = wpilib.Spark(4)
-        self.spinner_solenoid = wpilib.Solenoid(2, 3)
+        self.spinner_solenoid = wpilib.Solenoid(3)
 
         self.turret_centre_index = wpilib.DigitalInput(0)
         self.turret_motor = ctre.WPI_TalonSRX(10)
