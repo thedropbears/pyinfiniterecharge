@@ -59,6 +59,8 @@ class Turret:
     )  # counts per 100ms
 
     def on_enable(self) -> None:
+        self.motor.configPeakOutputForward(1.0, 10)
+        self.motor.configPeakOutputReverse(-1.0, 10)
         if self.index_found:
             # Don't throw away previously found indices
             self.motor.set(

@@ -130,7 +130,8 @@ class MyRobot(magicbot.MagicRobot):
             self.hang.winch()
 
     def testInit(self):
-        pass
+        self.turret.motor.configPeakOutputForward(0.15, 10)
+        self.turret.motor.configPeakOutputReverse(-0.15, 10)
 
     def testPeriodic(self):
         # Slew the turret
