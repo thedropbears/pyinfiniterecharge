@@ -133,6 +133,7 @@ class MyRobot(magicbot.MagicRobot):
         pass
 
     def testPeriodic(self):
+        # Slew the turret
         pov = self.driver_joystick.getPOV(0)
         five_degrees = math.radians(5)  # radians
         if pov != -1:
@@ -140,8 +141,12 @@ class MyRobot(magicbot.MagicRobot):
                 self.turret.slew(five_degrees)
             else:
                 self.turret.slew(-five_degrees)
+            self.turret.execute()
+
+        # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):
             self.hang.pay_out()
+            self.hang.execute()
 
 
 if __name__ == "__main__":
