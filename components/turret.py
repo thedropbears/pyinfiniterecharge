@@ -104,7 +104,7 @@ class Turret:
         if -self.MAX_TURRET_COUNT < counts < self.MAX_TURRET_COUNT:
             self.motor.set(ctre.ControlMode.Position, counts)
         else:
-            print("attempt to slew beyond limit: ", counts)
+            print("attempt to slew beyond limit: %d", counts)
             # self.logger.warning(
             #    "attempt to slew beyond limit: " + counts
             # )  # pylint: disable=no-member
