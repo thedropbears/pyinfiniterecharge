@@ -5,6 +5,8 @@
 # must be accompanied by the FIRST BSD license file in the root directory of
 # the project.
 
+import math
+
 import ctre
 import magicbot
 import rev.color
@@ -132,12 +134,12 @@ class MyRobot(magicbot.MagicRobot):
 
     def testPeriodic(self):
         pov = self.driver_joystick.getPOV(0)
-        about_five_degrees = 0.087  # radians
+        five_degrees = math.radians(5)  # radians
         if pov != -1:
             if pov < 180:
-                self.turret.slew(about_five_degrees)
+                self.turret.slew(five_degrees)
             else:
-                self.turret.slew(-about_five_degrees)
+                self.turret.slew(-five_degrees)
         if self.driver_joystick.getRawButton(4):
             self.hang.pay_out()
 
