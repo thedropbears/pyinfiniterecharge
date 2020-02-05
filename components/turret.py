@@ -99,14 +99,21 @@ class Turret:
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
         self.current_state = self.SLEWING
-        current_pos = self.motor.getClosedLoopTarget()
+        current_pos = 0
+        if self.motor.getControlMode() == ctre.ControlMode.Position:
+            current_pos = self.motor.getClosedLoopTarget()
         self._slew_to_counts(current_pos + angle * self.COUNTS_PER_TURRET_RADIAN)
 
     def _slew_to_counts(self, counts: int) -> None:
         if -self.MAX_TURRET_COUNT < counts < self.MAX_TURRET_COUNT:
             self.motor.set(ctre.ControlMode.Position, counts)
         else:
-            print("attempt to slew beyond limit: %d", counts)
+            print(
+                "attempt to slew beyond limit. Requested:",
+                counts,
+                " limit: ",
+                self.MAX_TURRET_COUNT,
+            )
             # self.logger.warning(
             #    "attempt to slew beyond limit: " + counts
             # )  # pylint: disable=no-member
