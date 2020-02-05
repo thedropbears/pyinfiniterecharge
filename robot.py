@@ -136,11 +136,11 @@ class MyRobot(magicbot.MagicRobot):
         # Slew the turret
         pov = self.driver_joystick.getPOV(0)
         five_degrees = math.radians(5)  # radians
-        if pov != -1:
-            if pov < 180:
-                self.turret.slew(five_degrees)
-            else:
-                self.turret.slew(-five_degrees)
+        if self.driver_joystick.getRawButtonPressed(5):
+            self.turret.slew(five_degrees)
+            self.turret.execute()
+        elif self.driver_joystick.getRawButtonPressed(6):
+            self.turret.slew(-five_degrees)
             self.turret.execute()
 
         # Pay out the winch after a match
