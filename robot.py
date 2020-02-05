@@ -135,7 +135,6 @@ class MyRobot(magicbot.MagicRobot):
 
     def testPeriodic(self):
         # Slew the turret
-        pov = self.driver_joystick.getPOV(0)
         five_degrees = math.radians(5)  # radians
         if self.driver_joystick.getRawButtonPressed(5):
             self.turret.slew(five_degrees)
