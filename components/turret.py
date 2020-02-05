@@ -40,6 +40,11 @@ class Turret:
     HALL_EFFECT_CLOSED = False
     HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
 
+    # TLimit to prevent turret from rotating too far.
+    # This assumes that the centre index is at a count of 0.
+    # Temporarily imit the travel to 45 degrees away from 0 while debugging.
+    MAX_TURRET_COUNT = math.radians(45) * COUNTS_PER_TURRET_RADIAN
+
     # PID values
     pidF = 0
     pidP = 0.2
@@ -84,7 +89,10 @@ class Turret:
             self.current_state = self.SLEWING
             self.motor._slew_to_counts(angle * self.COUNTS_PER_TURRET_RADIAN)
         else:
-            self.logger.warning("slew_to_azimuth() called before index found")
+            # self.logger.warning(
+            #    "slew_to_azimuth() called before index found"
+            # )  # pylint: disable=no-member
+            print("slew_to_azimuth() called before index found")
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
@@ -93,8 +101,13 @@ class Turret:
         self._slew_to_counts(current_pos + angle * self.COUNTS_PER_TURRET_RADIAN)
 
     def _slew_to_counts(self, counts: int) -> None:
-        # TODO: Check for values outside allowed range
-        self.motor.set(ctre.ControlMode.Position, counts)
+        if -self.MAX_TURRET_COUNT < counts < self.MAX_TURRET_COUNT:
+            self.motor.set(ctre.ControlMode.Position, counts)
+        else:
+            print("attempt to slew beyond limit: ", counts)
+            # self.logger.warning(
+            #    "attempt to slew beyond limit: " + counts
+            # )  # pylint: disable=no-member
 
     def scan(self, azimuth=0.0) -> None:
         """
