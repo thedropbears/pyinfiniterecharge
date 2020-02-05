@@ -85,7 +85,7 @@ class ShooterController(StateMachine):
             self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
-        if timestamp is None:
+        if vision_data is None:
             self.next_state("searching")
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
@@ -101,35 +101,20 @@ class ShooterController(StateMachine):
             )
             if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
-                self.turret.slew(target_angle)
-            if self.ready_to_spin():
-                self.distance = dist
-                self.next_state("spining_up")
-                # print(f"tracking -> spining_up {self.vision.get_vision_data()}")
-
-    @state
-    def spining_up(self, initial_call) -> None:
-        if initial_call:
-            self.shooter.set_range(self.distance)
-        if self.turret.is_ready():
+                self.turret.slew(vision_data.angle)
+            self.shooter.set_range(vision_data.distance)
             if self.ready_to_fire() and self.fire_command:
-                self.distance = None
-                # print(f"spining_up -> firing {self.vision.get_vision_data()}")
                 self.next_state("firing")
-        else:
-            self.next_state("tracking")
 
-    @state
-    def firing(self) -> None:
+    @state(must_finish=True)
+    def firing(self, initial_call) -> None:
         """
         Positioned to fire, inject and expel a single ball
         """
-        if self.initial_call:
+        if initial_call:
             self.shooter.fire()
-            self.initial_call = False  # XXX
         elif not self.shooter.is_firing():
-            # self.next_state("tracking")
-            self.state = self.tracking
+            self.next_state("tracking")
 
         self.indexer.jog()
 
@@ -139,19 +124,13 @@ class ShooterController(StateMachine):
         """
         self.fire_command = True
 
-    def spin_input(self) -> None:
-        """
-        Called by robot.py to indicate the fire button has been pressed
-        """
-        self.spin_command = not self.spin_command
-
     @feedback
     def ready_to_fire(self) -> bool:
-        return self.shooter.is_ready() and self.indexer.is_ready()
-
-    @feedback
-    def ready_to_spin(self) -> bool:
-        return self.indexer.is_ready() and self.turret.is_ready() and self.spin_command
+        return (
+            self.shooter.is_ready()
+            and self.turret.is_ready()
+            and self.indexer.is_ready()
+        )
 
     def find_allowable_angle(self, dist: float) -> float:
         """
