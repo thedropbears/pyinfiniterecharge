@@ -103,7 +103,9 @@ class MyRobot(magicbot.MagicRobot):
         self.handle_shooter_inputs(self.driver_joystick)
         self.handle_hang_inputs(self.driver_joystick)
 
-    def handle_indexer_inputs(self, joystick: wpilib.Joystick) -> None:
+        self.shooter_controller.engage()
+
+    def handle_intake_inputs(self, joystick):
         if joystick.getRawButtonPressed(6):
             if self.indexer.intaking:
                 self.indexer.disable_intaking()
