@@ -72,6 +72,16 @@ class Indexer:
     def disable_intaking(self) -> None:
         self.intaking = False
 
+    def raise_intake(self) -> None:
+        pass
+
+    def lower_intake(self) -> None:
+        pass
+
+    @feedback
+    def is_intake_lowered(self) -> bool:
+        return True
+
     @feedback
     def balls_loaded(self) -> int:
         balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.indexer_motors)
