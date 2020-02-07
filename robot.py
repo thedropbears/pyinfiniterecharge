@@ -61,7 +61,7 @@ class MyRobot(magicbot.MagicRobot):
         ]
         self.piston_switch = wpilib.DigitalInput(4)  # checks if injector retracted
         self.injector_switch = wpilib.DigitalInput(9)
-        self.injector_master_motor = ctre.TalonSRX(3)
+        self.injector_master_motor = ctre.WPI_TalonSRX(3)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
 
         self.led = wpilib.AddressableLED(0)

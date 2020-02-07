@@ -8,16 +8,16 @@ class Indexer:
     indexer_switches: list
     piston_switch: wpilib.DigitalInput
     injector_switch: wpilib.DigitalInput
-    injector_master_motor: ctre.TalonSRX
-    injector_slave_motor: ctre.TalonSRX
+    injector_master_motor: ctre.WPI_TalonSRX
+    injector_slave_motor: ctre.WPI_TalonSRX
 
     def setup(self):
         for motor in self.indexer_motors:
             motor.setInverted(True)
 
-        self.speed = 0.2
+        self.indexer_speed = 0.2
         self.NUMBER_OF_MOTORS = len(self.indexer_motors)
-        self.injector_speed = self.speed * 2
+        self.injector_speed = 0.4
 
         self.injector_slave_motor.follow(self.injector_master_motor)
         self.injector_slave_motor.setInverted(ctre.InvertType.OpposeMaster)
@@ -26,17 +26,23 @@ class Indexer:
         self.indexing = True
 
     def execute(self) -> None:
-        # handle the injector motors
-        if not self.injector_switch.get():
-            if not self.piston_switch.get():
+        if self.indexing:
+            # handle the injector motors
+            if self.injector_switch.get() and not self.piston_switch.get():
                 self.injector_master_motor.set(self.injector_speed)
             else:
                 self.injector_master_motor.stopMotor()
 
-        # handle indexer motors
-        for i in range(0, self.NUMBER_OF_MOTORS):
-            if self.indexer_switches[i].get():
-                self.indexer_motors[i].set(self.speed)
+            # handle indexer motors
+            for motor, switch in zip(self.indexer_motors, self.indexer_switches):
+                if switch.get():
+                    motor.set(self.indexer_speed)
+                else:
+                    motor.stopMotor()
+        else:
+            self.injector_master_motor.stopMotor()
+            for motor in self.indexer_motors:
+                motor.stopMotor()
 
     def enable_indexing(self) -> None:
         self.indexing = True
