@@ -16,7 +16,6 @@ class Indexer:
             motor.setInverted(True)
 
         self.indexer_speed = 0.2
-        self.NUMBER_OF_MOTORS = len(self.indexer_motors)
         self.injector_speed = 0.4
 
         self.injector_slave_motor.follow(self.injector_master_motor)
