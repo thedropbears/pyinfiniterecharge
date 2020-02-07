@@ -170,11 +170,8 @@ class Turret:
             < self.ACCEPTABLE_ERROR_SPEED
         )
 
-    def has_index(self) -> bool:
-        return self.index_found
-
     def execute(self) -> None:
-        # self._handle_indices()
+        self._handle_indices()
         if self.current_state == self.SCANNING:
             self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 10)
             self._do_scanning()
