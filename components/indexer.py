@@ -52,8 +52,11 @@ class Indexer:
 
     @feedback
     def balls_loaded(self) -> int:
-        return sum(not switch.get() for switch in self.indexer_switches)
+        balls = sum(not switch.get() for switch in self.indexer_switches)
+        if not self.injector_switch.get():
+            balls += 1
+        return balls
 
     @feedback
     def is_ready(self) -> bool:
-        return not self.indexer_switches[0].get()
+        return not self.injector_switch.get()
