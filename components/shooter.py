@@ -28,7 +28,6 @@ class Shooter:
         self.inject = False
         self.in_range = False
         self.velocity_tolerance = 0.05  # of setpoint
-        self.centre_rpm = 0
 
     def on_enable(self) -> None:
         self.centre_motor.stopMotor()
