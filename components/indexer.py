@@ -4,6 +4,12 @@ import ctre
 
 class Indexer:
     indexer_motors: list
+    piston_switch: wpilib.DigitalInput
+
+    intake_arm_piston: wpilib.Solenoid
+    intake_main_motor: ctre.WPI_TalonSRX
+    intake_left_motor: ctre.WPI_TalonSRX # Looking from behind the robot
+    intake_right_motor: ctre.WPI_TalonSRX # Looking from behind the robot
 
     def setup(self):
         for motor in self.indexer_motors:

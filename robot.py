@@ -63,6 +63,10 @@ class MyRobot(magicbot.MagicRobot):
         self.injector_switch = wpilib.DigitalInput(9)
         self.injector_master_motor = ctre.WPI_TalonSRX(3)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
+        self.intake_arm_piston = wpilib.Solenoid(1)
+        self.intake_main_motor = ctre.WPI_TalonSRX(4)
+        self.intake_left_motor = ctre.WPI_TalonSRX(5)
+        self.intake_right_motor = ctre.WPI_TalonSRX(6)
 
         self.led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.Solenoid(0)
