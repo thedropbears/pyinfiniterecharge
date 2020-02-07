@@ -53,11 +53,16 @@ class MyRobot(magicbot.MagicRobot):
         self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)
         self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
-        self.indexer_motors = [ctre.WPI_TalonSRX(3)]
-        self.indexer_switches = [wpilib.DigitalInput(9)]
+        self.indexer_motors = [wpilib.Spark(2), wpilib.Spark(1)]
+        # motors and switches for index, injector is seperate
+        self.indexer_switches = [
+            wpilib.DigitalInput(8),
+            wpilib.DigitalInput(7),
+        ]
+        self.piston_switch = wpilib.DigitalInput(4)  # checks if injector retracted
+        self.injector_switch = wpilib.DigitalInput(9)
+        self.injector_master_motor = ctre.WPI_TalonSRX(3)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
-        self.injector_slave_motor.follow(self.indexer_motors[0])
-        self.injector_slave_motor.setInverted(True)
 
         self.led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.Solenoid(0)
