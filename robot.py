@@ -54,8 +54,7 @@ class MyRobot(magicbot.MagicRobot):
         self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
         self.indexer_motors = [wpilib.Spark(2), wpilib.Spark(1)]
-        # Motors and switches created from injector [0] to intake [4]
-        # Or in this case from injector[0] to half-indexer [2]
+        # motors and switches for index, injector is seperate
         self.indexer_switches = [
             wpilib.DigitalInput(8),
             wpilib.DigitalInput(7),
@@ -71,7 +70,6 @@ class MyRobot(magicbot.MagicRobot):
         self.shooter_outer_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
-
         self.spinner_motor = wpilib.Spark(2)
         self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
 
