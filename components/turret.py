@@ -75,10 +75,10 @@ class Turret:
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         )
         # set the peak and nominal outputs
-        self.talon.configNominalOutputForward(0, 10)
-        self.talon.configNominalOutputReverse(0, 10)
-        self.talon.configPeakOutputForward(0.5, 10)
-        self.talon.configPeakOutputReverse(-0.5, 10)
+        self.motor.configNominalOutputForward(0, 10)
+        self.motor.configNominalOutputReverse(0, 10)
+        self.motor.configPeakOutputForward(0.5, 10)
+        self.motor.configPeakOutputReverse(-0.5, 10)
         # Set relevant frame periods to be at least as fast as periodic rate
         self.motor.setStatusFramePeriod(
             ctre.WPI_TalonSRX.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, 10
