@@ -40,16 +40,28 @@ class Turret:
     HALL_EFFECT_CLOSED = False
     HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
 
-    # TLimit to prevent turret from rotating too far.
+    # Limit to prevent turret from rotating too far.
     # This assumes that the centre index is at a count of 0.
-    # Temporarily imit the travel to 45 degrees away from 0 while debugging.
-    MAX_TURRET_COUNT = math.radians(45) * COUNTS_PER_TURRET_RADIAN
+    # Temporarily imit the travel to 60 degrees away from 0 while debugging.
+    MAX_TURRET_COUNT = math.radians(60) * COUNTS_PER_TURRET_RADIAN
 
     # PID values
-    pidF = 0
-    pidP = 0.2
-    pidI = 0
-    pidD = 0
+    # Open loop tests give a turret speed of ~930counts/100ms at 25% throttle
+    # ~ 2500 at 50% throttle
+    # kF = (1023 * 50%) / 2500 ~= 0.2
+    # A commanded move with a cruise of 2500 reaches about 1500
+    # Error of 1000. Add 10% more throttle at this point
+    # kP = (1023 * 10%) / 1000 ~= 0.1
+    # Double until oscillation occurs
+    # Set kD to 10*kP
+    pidF = 0.2
+    pidP = 0.4
+    pidI = 0.005
+    pidIZone = 300
+    pidD = 4.0
+    SLEW_CRUISE_VELOCITY = 3500
+    SCAN_CRUISE_VELOCITY = 1500
+    CRUISE_ACCELERATION = int(SLEW_CRUISE_VELOCITY / 0.15)
 
     # Slew to within +- half a degree of the target azimuth. This is about
     # 50 encoder steps.
@@ -64,21 +76,38 @@ class Turret:
         if self.index_found:
             # Don't throw away previously found indices
             self.motor.set(
-                ctre.ControlMode.Position, self.motor.getSelectedSensorPosition()
+                ctre.ControlMode.MotionMagic, self.motor.getSelectedSensorPosition()
             )
         else:
             self.motor.setSelectedSensorPosition(0)
-            self.motor.set(ctre.ControlMode.Position, 0)
+            self.motor.set(ctre.ControlMode.MotionMagic, 0)
 
     def setup(self) -> None:
         self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         )
+        # set the peak and nominal outputs
+        self.motor.configNominalOutputForward(0, 10)
+        self.motor.configNominalOutputReverse(0, 10)
+        self.motor.configPeakOutputForward(1.0, 10)
+        self.motor.configPeakOutputReverse(-1.0, 10)
+        # Set relevant frame periods to be at least as fast as periodic rate
+        self.motor.setStatusFramePeriod(
+            ctre.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, 10
+        )
+        self.motor.setStatusFramePeriod(
+            ctre.StatusFrameEnhanced.Status_10_MotionMagic, 10, 10
+        )
         self.motor.config_kF(0, self.pidF, 10)
         self.motor.config_kP(0, self.pidP, 10)
+        self.motor.config_IntegralZone(0, self.pidIZone, 10)
         self.motor.config_kI(0, self.pidI, 10)
         self.motor.config_kD(0, self.pidD, 10)
-        self.motor.configAllowableClosedloopError(0, self.ACCEPTABLE_ERROR_COUNTS, 10)
+
+        self.motor.configMotionCruiseVelocity(self.SLEW_CRUISE_VELOCITY, 10)
+        self.motor.configMotionAcceleration(self.CRUISE_ACCELERATION, 10)
+        # self.motor.configAllowableClosedloopError(0, self.ACCEPTABLE_ERROR_COUNTS, 10)
+        self.current_target_counts = 0
         self.scan_increment = math.radians(10.0)
         self.index_found = False
         self.previous_index = Index.NOT_FOUND
@@ -99,24 +128,15 @@ class Turret:
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
         self.current_state = self.SLEWING
-        current_pos = 0
-        if self.motor.getControlMode() == ctre.ControlMode.Position:
-            current_pos = self.motor.getClosedLoopTarget()
-        self._slew_to_counts(current_pos + angle * self.COUNTS_PER_TURRET_RADIAN)
+        current_pos = self.motor.getSelectedSensorPosition()
+        self._slew_to_counts(current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN))
 
     def _slew_to_counts(self, counts: int) -> None:
-        if -self.MAX_TURRET_COUNT < counts < self.MAX_TURRET_COUNT:
-            self.motor.set(ctre.ControlMode.Position, counts)
-        else:
-            print(
-                "attempt to slew beyond limit. Requested:",
-                counts,
-                " limit: ",
-                self.MAX_TURRET_COUNT,
-            )
-            # self.logger.warning(
-            #    "attempt to slew beyond limit: " + counts
-            # )  # pylint: disable=no-member
+        if counts < -self.MAX_TURRET_COUNT:
+            counts = -self.MAX_TURRET_COUNT
+        if counts > self.MAX_TURRET_COUNT:
+            counts = self.MAX_TURRET_COUNT
+        self.current_target_counts = counts
 
     def scan(self, azimuth=0.0) -> None:
         """
@@ -150,13 +170,15 @@ class Turret:
             < self.ACCEPTABLE_ERROR_SPEED
         )
 
-    def has_index(self) -> bool:
-        return self.index_found
-
     def execute(self) -> None:
         self._handle_indices()
         if self.current_state == self.SCANNING:
+            self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 10)
             self._do_scanning()
+        else:
+            self.motor.configMotionCruiseVelocity(self.SLEW_CRUISE_VELOCITY, 10)
+
+        self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
 
     def _handle_indices(self) -> None:
         # Check if we're at a known position
@@ -186,8 +208,7 @@ class Turret:
 
     def _reset_encoder(self, counts) -> None:
         current_count = self.motor.getSelectedSensorPosition()
-        current_target = self.motor.getClosedLoopTarget()
-        delta = current_target - current_count
+        delta = self.current_target_counts - current_count
         self.motor.setSelectedSensorPosition(counts)
         # Reset any current target using the new absolute azimuth
         self._slew_to_counts(counts + delta)
@@ -196,13 +217,16 @@ class Turret:
     def _do_scanning(self) -> None:
         # Check if we've finished a scan pass
         # If so, reverse the direction and increase pass size if necessary
-        if abs(self.motor.getClosedLoopError()) < self.ACCEPTABLE_ERROR_COUNTS:
-            next_target = self.motor.getClosedLoopTarget() - self.current_scan_delta
-            # next_target points back at the centre of the scan again
-            if 0 < self.current_scan_delta < math.pi / 2:
+        current_target = self.current_target_counts
+        if (
+            abs(self.motor.getSelectedSensorPosition() - self.current_target_counts)
+            < self.ACCEPTABLE_ERROR_COUNTS
+        ):
+            current_target -= self.current_scan_delta * self.COUNTS_PER_TURRET_RADIAN
+            if 0 < self.current_scan_delta < math.pi / 4:
                 self.current_scan_delta = self.current_scan_delta + self.scan_increment
-            if -math.pi / 2 < self.current_scan_delta < 0:
+            if -math.pi / 4 < self.current_scan_delta < 0:
                 self.current_scan_delta = self.current_scan_delta - self.scan_increment
             self.current_scan_delta = -self.current_scan_delta
-            next_target = next_target + self.current_scan_delta
-            self._slew_to_counts(next_target * self.COUNTS_PER_TURRET_RADIAN)
+            current_target += self.current_scan_delta * self.COUNTS_PER_TURRET_RADIAN
+        self._slew_to_counts(current_target)
