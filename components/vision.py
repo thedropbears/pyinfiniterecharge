@@ -1,5 +1,21 @@
 from networktables import NetworkTables
-from typing import Tuple
+from typing import Optional
+from dataclasses import dataclass
+
+
+@dataclass
+class VisionData:
+    #: The distance to the target in metres.
+    distance: float
+
+    #: The angle to the target in radians.
+    angle: float
+
+    #: An arbitrary timestamp, in seconds,
+    #: for when the vision system last obtained data.
+    timestamp: float
+
+    __slots__ = ("distance", "angle", "timestamp")
 
 
 class Vision:
@@ -9,17 +25,20 @@ class Vision:
         self.vision_data_entry = self.table.getEntry("data")
         self.lastTime = 0
         self.repeats = 0
-        self.data = [None, None, None]
+        self.data = None
 
-    def get_vision_data(self) -> Tuple[float, float, float]:
-        """Returns a tuple containing the distance (metres), angle (radians), and timestamp (time.monotonic)
-        If it can't get the entry, it returns [None, None, None]
+    def get_data(self) -> Optional[VisionData]:
+        """Returns the latest vision data.
 
-        If the pi vision cant see the target it will not send to network tables, meaning this will continue
-        to return the most recently seen target position and the time it was seen
-        """
-        self.data = self.vision_data_entry.getDoubleArray([None, None, None])
+        Returns None if there is no vision data.
+         """
         return self.data
+
+    def execute(self) -> None:
+        data = None
+        data = self.vision_data_entry.getDoubleArray(None)
+        if data is not None:
+            self.data = VisionData(*data)
 
     def is_ready(self) -> bool:
         if self.vision_data_entry.exists() and self.data[2] != None:
