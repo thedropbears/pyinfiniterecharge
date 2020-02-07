@@ -156,19 +156,18 @@ class MyRobot(magicbot.MagicRobot):
             self.turret.centre_index.get() == self.turret.HALL_EFFECT_CLOSED
             and not self.test_hall_effect_found
         ):
-            print(
-                f"Hall effect detected at count: {self.turret.motor.getSelectedSensorPosition()}"
-            )
+            self.start_hall_effect_count = self.turret.motor.getSelectedSensorPosition()
             self.test_hall_effect_found = True
         if (
             self.turret.centre_index.get() != self.turret.HALL_EFFECT_CLOSED
             and self.test_hall_effect_found
         ):
-            print(
-                f"Hall effect stopped detection at count: {self.turret.motor.getSelectedSensorPosition()}"
-            )
+            self.end_hall_effect_count = self.turret.motor.getSelectedSensorPosition()
             self.test_hall_effect_found = False
             self.turret.motor.stopMotor()
+            print(
+                f"Hall effect detected starting at count: {self.start_hall_effect_count} and ending at count: {self.end_hall_effect_count}"
+            )
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):
