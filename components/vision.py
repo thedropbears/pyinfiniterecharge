@@ -60,11 +60,11 @@ class Vision:
         self.nt = NetworkTables
         self.table = self.nt.getTable("/vision")
         self.vision_data_entry = self.table.getEntry("data")
-        self.ping_time_entry = self.table.getEntry("/vision/ping")
-        self.rio_pong_time_entry = self.table.getEntry("/vision/rio_pong")
-        self.raspi_pong_time_entry = self.table.getEntry("vision/raspi_pong")
-        self.latency_entry = self.table.getEntry("/vision/clock_offset")
-        self.processing_time_entry = self.table.getEntry("/vision/processing_time")
+        self.ping_time_entry = self.table.getEntry("ping")
+        self.rio_pong_time_entry = self.table.getEntry("rio_pong")
+        self.raspi_pong_time_entry = self.table.getEntry("raspi_pong")
+        self.latency_entry = self.table.getEntry("clock_offset")
+        self.processing_time_entry = self.table.getEntry("processing_time")
         self.vision_data = None
 
     def get_data(self) -> Optional[VisionData]:
