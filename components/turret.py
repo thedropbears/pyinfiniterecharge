@@ -117,6 +117,7 @@ class Turret:
         self.index_found = False
         self.previous_index = Index.NOT_FOUND
         self.current_state = self.SLEWING
+        self.finding_indices = True
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point. Note that this is 180 degrees offset from the
@@ -176,8 +177,14 @@ class Turret:
             < self.ACCEPTABLE_ERROR_SPEED
         )
 
+    # Disable/enable resetting the encoder when an index is encountered.
+    # Use this only for testing, and only when necessary.
+    def setFindingIndices(self, val: bool) -> None:
+        self.finding_indices = val
+
     def execute(self) -> None:
-        self._handle_indices()
+        if self.finding_indices:
+            self._handle_indices()
         if self.current_state == self.SCANNING:
             self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 10)
             self._do_scanning()

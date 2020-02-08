@@ -156,8 +156,19 @@ class MyRobot(magicbot.MagicRobot):
 
         # Find the width of a hall effect sensor
         if self.driver_joystick.getRawButtonPressed(12):
-            self.turret.motor.set(ctre.ControlMode.PercentOutput, 0.25)
-            self.testing_hall_effect_width = True
+            if not self.testing_hall_effect_width:
+                # self.turret.motor.set(ctre.ControlMode.PercentOutput, 0.25)
+                self.turret.setFindingIndices(False)
+                self.testing_hall_effect_width = True
+                self.turret.SCAN_CRUISE_VELOCITY = 500
+                self.turret.scan()
+            else:
+                # stop the scanning
+                self.turret.slew(0)
+                self.turret.setFindingIndices(True)
+                self.turret.SCAN_CRUISE_VELOCITY = 1500
+                self.testing_hall_effect_width = False
+
         if self.testing_hall_effect_width:
             if (
                 self.turret.centre_index.get() == self.turret.HALL_EFFECT_CLOSED
@@ -175,12 +186,13 @@ class MyRobot(magicbot.MagicRobot):
                     self.turret.motor.getSelectedSensorPosition()
                 )
                 self.test_hall_effect_found = False
-                self.turret.motor.stopMotor()
-                self.testing_hall_effect_width = False
+                # self.turret.motor.stopMotor()
+                # self.testing_hall_effect_width = False
                 print(
                     f"Hall effect detected starting at count: {self.start_hall_effect_count}"
-                    + f"and ending at count: {self.end_hall_effect_count}"
+                    + f" and ending at count: {self.end_hall_effect_count}"
                 )
+            self.turret.execute()
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):
