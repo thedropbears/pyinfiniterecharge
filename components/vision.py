@@ -3,6 +3,7 @@ import time
 from networktables import NetworkTables
 from typing import Optional
 from dataclasses import dataclass
+from magicbot import feedback
 
 
 @dataclass
@@ -21,7 +22,6 @@ class VisionData:
 
 
 class Vision:
-
     @property
     def ping_time(self) -> float:
         return self.ping_time_entry.getDouble(0.0)
@@ -79,19 +79,21 @@ class Vision:
         data = self.vision_data_entry.getDoubleArray(None)
         if data is not None:
             self.vision_data = VisionData(*data)
+            self.ping()
+            self.pong()
+            vision_time = self.vision_data.timestamp + self.latency
+            self.processing_time = time.monotonic() - vision_time
+            self.nt.flush()
 
-        self.ping()
-        self.pong()
-        vision_time = self.vision_data.timestamp + self.latency
-        self.processing_time = time.monotonic() - vision_time
-        self.nt.flush()
+        
 
     @property
     def target_in_sight(self) -> bool:
         return time.monotonic() - (self.vision_data.timestamp + self.latency) < 0.1
 
+    @feedback
     def is_ready(self) -> bool:
-        if self.vision_data_entry.exists() and self.vision_data.timestamp != None:
+        if self.vision_data_entry.exists() and self.vision_data != None:
             if self.target_in_sight:
                 return True
             else:
@@ -110,5 +112,4 @@ class Vision:
                 self.rio_pong_time - self.raspi_pong_time
             )
             self.last_pong = self.rio_pong_time
-
 
