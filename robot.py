@@ -143,12 +143,11 @@ class MyRobot(magicbot.MagicRobot):
     def testPeriodic(self):
         # Slew the turret
         slew_increment = math.radians(5)  # radians
-        # TODO turret angles are reversed
         if self.driver_joystick.getRawButtonPressed(6):
-            self.turret.slew(slew_increment)
+            self.turret.slew(-slew_increment)
             self.turret.execute()
         elif self.driver_joystick.getRawButtonPressed(5):
-            self.turret.slew(-slew_increment)
+            self.turret.slew(slew_increment)
             self.turret.execute()
         if self.driver_joystick.getRawButtonPressed(2):
             self.turret.scan()

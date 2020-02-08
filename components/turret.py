@@ -6,6 +6,7 @@ import math
 
 
 class Index(Enum):
+    # These are relative to the turret, which faces backwards on the robot.
     NOT_FOUND = 0
     CENTRE = 1
     RIGHT = 2
@@ -32,6 +33,8 @@ class Turret:
     COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
 
     INDEX_POSITIONS = {
+        # Names are relative to the turret, but the count is kept at 0
+        # when the turret is facing backwards on the robot.
         Index.CENTRE: 0,
         Index.LEFT: int(math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
         Index.RIGHT: int(-math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
@@ -86,6 +89,8 @@ class Turret:
         self.motor.configSelectedFeedbackSensor(
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         )
+        # Positive motion is counterclockwise from above.
+        self.motor.setInverted(ctre.InvertType.InvertMotorOutput)
         # set the peak and nominal outputs
         self.motor.configNominalOutputForward(0, 10)
         self.motor.configNominalOutputReverse(0, 10)
@@ -114,7 +119,8 @@ class Turret:
         self.current_state = self.SLEWING
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
-    # to the centre index point.
+    # to the centre index point. Note that this is 180 degrees offset from the
+    # robot.
     def slew_to_azimuth(self, angle: float) -> None:
         if self.index_found:
             self.current_state = self.SLEWING
