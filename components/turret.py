@@ -165,17 +165,20 @@ class Turret:
         # The target must be downfield from us, so scan up to
         # 90 degrees either side of the given heading
 
-        # First reset scan size
-        self.current_scan_delta = self.scan_increment
-        if self.index_found:
-            # set the first pass
-            self._slew_to_counts(
-                int(azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment)
-            )
-        else:
-            current_count = self.motor.getSelectedSensorPosition()
-            self._slew_to_counts(current_count + self.scan_increment)
-        self.current_state = self.SCANNING
+        if self.current_state != self.SCANNING:
+            # First reset scan size
+            self.current_scan_delta = self.scan_increment
+            if self.index_found:
+                # set the first pass
+                self._slew_to_counts(
+                    (azimuth + self.scan_increment) * self.COUNTS_PER_TURRET_RADIAN
+                )
+            else:
+                current_count = self.motor.getSelectedSensorPosition()
+                self._slew_to_counts(
+                    current_count + (self.scan_increment * self.COUNTS_PER_TURRET_RADIAN)
+                )
+            self.current_state = self.SCANNING
 
     def is_ready(self) -> bool:
         return (

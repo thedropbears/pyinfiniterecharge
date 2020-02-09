@@ -73,15 +73,18 @@ class ShooterController(StateMachine):
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
-        rel: wpilib.geometry.Pose2d = self.TARGET_POSITION.relativeTo(pose)
-        rel_heading = rel.rotation().radians()
-        self.turret.scan(rel_heading)
-
         if self.vision.get_data() is not None:
             # means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             self.next_state("tracking")
+
+        # TODO test this
+        # pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
+        # rel: wpilib.geometry.Pose2d = self.TARGET_POSITION.relativeTo(pose)
+        # rel_heading = rel.rotation().radians()
+        # self.turret.scan(rel_heading)
+
+        self.turret.scan(0)  # TODO remove this
 
     @state
     def tracking(self, initial_call) -> None:
