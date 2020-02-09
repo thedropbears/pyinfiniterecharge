@@ -1,5 +1,6 @@
 from magicbot import feedback
 import ctre
+import wpilib
 
 
 class Indexer:
