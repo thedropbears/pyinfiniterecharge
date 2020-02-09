@@ -15,9 +15,8 @@ class Indexer:
             )
         # Motor on the injector needs reversing
         self.indexer_motors[-1].setInverted(True)
-        self.indexer_motors[-1].setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.indexer_speed = 0.3
+        self.indexer_speed = 0.6
         self.injector_speed = 1.0
 
         # We have a delay because the distance between the second last
@@ -32,7 +31,10 @@ class Indexer:
         if self.intaking:
             injector = self.indexer_motors[-1]
             feeder = self.indexer_motors[-2]
-            if not injector.isFwdLimitSwitchClosed() and feeder.isFwdLimitSwitchClosed():
+            if (
+                not injector.isFwdLimitSwitchClosed()
+                and feeder.isFwdLimitSwitchClosed()
+            ):
                 # Transferring
                 self.transfer_to_injector = True
             if injector.isFwdLimitSwitchClosed():
