@@ -35,18 +35,15 @@ class Indexer:
         # stage of the indexer and the injector is longer than others
         # and the injector motors are slower
         self.transfer_to_injector = False
+        self.intake_lowered = False
+        self.intaking = False
+        self.left_shimmy = True
 
     def on_enable(self) -> None:
-        self.intaking = False
-        self.intake_lowered = False
-        self.injector_speed = 0.4
-
-        self.intake_lowered = False
-        self.left_shimmy = True
-        self.indexing = False
         self.shimmy_count = 0
         self.intake_motor_speed = 1.0
         self.shimmy_speed = 1.0
+        self.intaking = True
 
     def execute(self) -> None:
         if self.intaking:
