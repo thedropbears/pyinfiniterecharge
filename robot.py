@@ -64,6 +64,10 @@ class MyRobot(magicbot.MagicRobot):
         self.injector_switch = wpilib.DigitalInput(9)
         self.injector_master_motor = ctre.WPI_TalonSRX(3)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
+        self.intake_arm_piston = wpilib.Solenoid(1)
+        self.intake_main_motor = ctre.WPI_TalonSRX(18)
+        self.intake_left_motor = wpilib.Spark(5)
+        self.intake_right_motor = wpilib.Spark(6)
 
         self.led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.Solenoid(0)
@@ -85,13 +89,13 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         """Executed every cycle"""
+        self.handle_indexer_inputs(self.driver_joystick)
         self.handle_chassis_inputs(self.driver_joystick)
-        self.handle_intake_inputs(self.driver_joystick)
         self.handle_spinner_inputs(self.driver_joystick)
         self.handle_shooter_inputs(self.driver_joystick)
         self.handle_hang_inputs(self.driver_joystick)
 
-    def handle_intake_inputs(self, joystick):
+    def handle_indexer_inputs(self, joystick: wpilib.Joystick) -> None:
         if joystick.getRawButtonPressed(6):
             if self.indexer.intaking:
                 self.indexer.disable_intaking()
@@ -199,6 +203,24 @@ class MyRobot(magicbot.MagicRobot):
         if self.driver_joystick.getRawButton(4):
             self.hang.pay_out()
             self.hang.execute()
+
+        if self.driver_joystick.getTrigger():
+            self.indexer.enable_indexing()
+
+        if self.driver_joystick.getRawButtonPressed(7):
+            self.indexer.shimmy_speed += 0.1
+            if self.indexer.shimmy_speed > 1:
+                self.indexer.shimmy_speed = 1
+            self.indexer.left = True
+        if self.driver_joystick.getRawButtonPressed(9):
+            self.indexer.shimmy_speed -= 0.1
+            if self.indexer.shimmy_speed < 0:
+                self.indexer.shimmy_speed = 0
+        if self.indexer.indexing:
+            self.indexer.intake_motor_speed = (
+                self.driver_joystick.getThrottle() + 1
+            ) / 2
+            self.indexer.execute()
 
 
 if __name__ == "__main__":
