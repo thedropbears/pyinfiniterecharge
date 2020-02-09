@@ -1,6 +1,7 @@
 import math
 
 from magicbot import feedback, StateMachine, state, will_reset_to
+import wpilib.geometry
 
 from components.chassis import Chassis
 from components.indexer import Indexer
@@ -34,6 +35,10 @@ class ShooterController(StateMachine):
 
     VISON_CONVERSION_FACTOR = 0.5  # a magic number for the vision angle
     # TODO fix vision so this isn't nessecary, requires tuning
+    TARGET_POSITION = wpilib.geometry.Pose2d(
+        0, -2.404, wpilib.geometry.Rotation2d(math.pi)
+    )
+    # in field co ordinates
 
     def __init__(self) -> None:
         super().__init__()
@@ -68,8 +73,10 @@ class ShooterController(StateMachine):
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        heading = self.chassis.get_pose().rotation().radians()
-        self.turret.scan(heading)
+        pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
+        rel: wpilib.geometry.Pose2d = self.TARGET_POSITION.relativeTo(pose)
+        rel_heading = rel.rotation().radians()
+        self.turret.scan(rel_heading)
 
         if self.vision.get_data() is not None:
             # means no data is available
