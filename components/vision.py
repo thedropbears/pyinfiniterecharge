@@ -1,6 +1,6 @@
 import time
 
-from networktables import NetworkTables
+from networktables import NetworkTables, NetworkTable
 from typing import Optional
 from dataclasses import dataclass
 from magicbot import feedback
@@ -21,7 +21,7 @@ class VisionData:
     __slots__ = ("distance", "angle", "timestamp")
 
 
-class Vision:
+class VisionComms:
     @property
     def ping_time(self) -> float:
         return self.ping_time_entry.getDouble(0.0)
@@ -46,59 +46,14 @@ class Vision:
     def latency(self, value: float) -> None:
         self.latency_entry.setDouble(value)
 
-    @property
-    def processing_time(self) -> float:
-        return self.processing_time_entry.getDouble(0.0)
-
-    @processing_time.setter
-    def processing_time(self, value: float) -> None:
-        self.processing_time_entry.setDouble(value)
-
-    def __init__(self) -> None:
+    def __init__(self, table: NetworkTable) -> None:
         self.last_pong = time.monotonic()
 
-        self.nt = NetworkTables
-        self.table = self.nt.getTable("/vision")
-        self.vision_data_entry = self.table.getEntry("data")
+        self.table = table
         self.ping_time_entry = self.table.getEntry("ping")
         self.rio_pong_time_entry = self.table.getEntry("rio_pong")
         self.raspi_pong_time_entry = self.table.getEntry("raspi_pong")
         self.latency_entry = self.table.getEntry("clock_offset")
-        self.processing_time_entry = self.table.getEntry("processing_time")
-        self.vision_data = None
-
-    def get_data(self) -> Optional[VisionData]:
-        """Returns the latest vision data.
-
-        Returns None if there is no vision data.
-         """
-        return self.vision_data
-
-    def execute(self) -> None:
-        data = None
-        data = self.vision_data_entry.getDoubleArray(None)
-        if data is not None:
-            self.vision_data = VisionData(*data)
-            self.ping()
-            self.pong()
-            vision_time = self.vision_data.timestamp + self.latency
-            self.processing_time = time.monotonic() - vision_time
-            self.nt.flush()
-
-        
-
-    @property
-    def target_in_sight(self) -> bool:
-        return time.monotonic() - (self.vision_data.timestamp + self.latency) < 0.1
-
-    @feedback
-    def is_ready(self) -> bool:
-        if self.vision_data_entry.exists() and self.vision_data != None:
-            if self.target_in_sight:
-                return True
-            else:
-                return False
-        return False  # no network tables, so no target
 
     def ping(self) -> None:
         """Send a ping to the RasPi to determine the connection latency."""
@@ -113,3 +68,52 @@ class Vision:
             )
             self.last_pong = self.rio_pong_time
 
+    def heart_beat(self) -> None:
+        if self.ping_time_entry.exists():   
+            self.ping()
+            self.pong()
+
+
+class Vision:
+    def __init__(self) -> None:
+
+        self.nt = NetworkTables
+        self.table = self.nt.getTable("/vision")
+        self.vision_data_entry = self.table.getEntry("data")
+
+        self.visionComms = VisionComms(self.table)
+
+        self.vision_data = None
+
+    def get_data(self) -> Optional[VisionData]:
+        """Returns the latest vision data.
+
+        Returns None if there is no vision data.
+         """
+        return self.vision_data
+
+    def execute(self) -> None:
+        self.visionComms.heart_beat()
+        data = None
+        data = self.vision_data_entry.getDoubleArray(None)
+        if data is not None:
+            self.vision_data = VisionData(*data)
+            
+        self.nt.flush()
+
+    @property
+    def target_in_sight(self) -> bool:
+        return (
+            time.monotonic() - (self.vision_data.timestamp + self.visionComms.latency)
+            < 0.1
+        )
+
+    @feedback
+    def is_ready(self) -> bool:
+        if (
+            self.vision_data_entry.exists()
+            and self.vision_data != None
+            and self.target_in_sight
+        ):
+            return True
+        return False  # no network tables, so no target
