@@ -9,6 +9,7 @@ import math
 
 import ctre
 import magicbot
+import navx
 import rev.color
 import wpilib
 
@@ -48,6 +49,7 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
         self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
+        self.imu = navx.AHRS.create_spi(update_rate_hz=50)
 
         self.hang_winch_motor_master = ctre.WPI_TalonSRX(21)
         self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)
@@ -116,8 +118,8 @@ class MyRobot(magicbot.MagicRobot):
 
     def handle_chassis_inputs(self, joystick):
         scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
-        vx = scale_value(joystick.getY(), 1, -1, -1, 1, 2) * scaled_throttle
-        vz = scale_value(joystick.getX(), 1, -1, -1, 1, 2) * scaled_throttle
+        vx = scale_value(joystick.getY(), 1, -1, -1, 1, 3) * scaled_throttle
+        vz = scale_value(joystick.getX(), 1, -1, -1, 1, 3) * scaled_throttle
         self.chassis.drive(vx, vz)
 
     def handle_shooter_inputs(self, joystick: wpilib.Joystick):
