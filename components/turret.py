@@ -30,7 +30,7 @@ class Turret:
     COUNTS_PER_MOTOR_REV = 4096
     GEAR_REDUCTION = 160 / 18
     COUNTS_PER_TURRET_REV = COUNTS_PER_MOTOR_REV * GEAR_REDUCTION
-    COUNTS_PER_TURRET_RADIAN = COUNTS_PER_TURRET_REV / math.tau
+    COUNTS_PER_TURRET_RADIAN = int(COUNTS_PER_TURRET_REV / math.tau)
 
     INDEX_POSITIONS = {
         # Names are relative to the turret, but the count is kept at 0
@@ -46,7 +46,7 @@ class Turret:
     # Limit to prevent turret from rotating too far.
     # This assumes that the centre index is at a count of 0.
     # Temporarily imit the travel to 60 degrees away from 0 while debugging.
-    MAX_TURRET_COUNT = math.radians(60) * COUNTS_PER_TURRET_RADIAN
+    MAX_TURRET_COUNT = int(math.radians(60) * COUNTS_PER_TURRET_RADIAN)
 
     # PID values
     # Open loop tests give a turret speed of ~930counts/100ms at 25% throttle
@@ -72,6 +72,8 @@ class Turret:
     ACCEPTABLE_ERROR_SPEED = int(
         math.radians(0.5) * COUNTS_PER_TURRET_RADIAN
     )  # counts per 100ms
+
+    PI_OVER_4_IN_COUNTS = int(math.pi / 4 * COUNTS_PER_TURRET_RADIAN)
 
     def on_enable(self) -> None:
         self.motor.configPeakOutputForward(1.0, 10)
@@ -113,7 +115,7 @@ class Turret:
         self.motor.configMotionAcceleration(self.CRUISE_ACCELERATION, 10)
         # self.motor.configAllowableClosedloopError(0, self.ACCEPTABLE_ERROR_COUNTS, 10)
         self.current_target_counts = 0
-        self.scan_increment = math.radians(10.0)
+        self.scan_increment = int(math.radians(10.0) * self.COUNTS_PER_TURRET_RADIAN)
         self.index_found = False
         self.previous_index = Index.NOT_FOUND
         self.current_state = self.SLEWING
@@ -125,7 +127,7 @@ class Turret:
     def slew_to_azimuth(self, angle: float) -> None:
         if self.index_found:
             self.current_state = self.SLEWING
-            self.motor._slew_to_counts(angle * self.COUNTS_PER_TURRET_RADIAN)
+            self.motor._slew_to_counts(int(angle * self.COUNTS_PER_TURRET_RADIAN))
         else:
             # self.logger.warning(
             #    "slew_to_azimuth() called before index found"
@@ -160,13 +162,11 @@ class Turret:
         if self.index_found:
             # set the first pass
             self._slew_to_counts(
-                (azimuth + self.scan_increment) * self.COUNTS_PER_TURRET_RADIAN
+                int(azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment)
             )
         else:
             current_count = self.motor.getSelectedSensorPosition()
-            self._slew_to_counts(
-                current_count + (self.scan_increment * self.COUNTS_PER_TURRET_RADIAN)
-            )
+            self._slew_to_counts(current_count + self.scan_increment)
         self.current_state = self.SCANNING
 
     def is_ready(self) -> bool:
@@ -235,11 +235,12 @@ class Turret:
             abs(self.motor.getSelectedSensorPosition() - self.current_target_counts)
             < self.ACCEPTABLE_ERROR_COUNTS
         ):
-            current_target -= self.current_scan_delta * self.COUNTS_PER_TURRET_RADIAN
-            if 0 < self.current_scan_delta < math.pi / 4:
+            current_target -= self.current_scan_delta
+            if 0 < self.current_scan_delta < self.PI_OVER_4_IN_COUNTS:
                 self.current_scan_delta = self.current_scan_delta + self.scan_increment
-            if -math.pi / 4 < self.current_scan_delta < 0:
+            if -self.PI_OVER_4_IN_COUNTS < self.current_scan_delta < 0:
                 self.current_scan_delta = self.current_scan_delta - self.scan_increment
             self.current_scan_delta = -self.current_scan_delta
-            current_target += self.current_scan_delta * self.COUNTS_PER_TURRET_RADIAN
+            current_target += self.current_scan_delta
+
         self._slew_to_counts(current_target)
