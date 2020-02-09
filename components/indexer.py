@@ -13,21 +13,41 @@ class Indexer:
                 ctre.LimitSwitchSource.FeedbackConnector,
                 ctre.LimitSwitchNormal.NormallyOpen,
             )
+        # Motor on the injector needs reversing
+        self.indexer_motors[-1].setInverted(True)
+        self.indexer_motors[-1].setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.indexer_speed = 0.6
+        self.indexer_speed = 0.3
+        self.injector_speed = 1.0
+
+        # We have a delay because the distance between the second last
+        # stage of the indexer and the injector is longer than others
+        # and the injector motors are slower
+        self.transfer_to_injector = False
 
     def on_enable(self) -> None:
         self.intaking = True
 
     def execute(self) -> None:
         if self.intaking:
+            injector = self.indexer_motors[-1]
+            feeder = self.indexer_motors[-2]
+            if not injector.isFwdLimitSwitchClosed() and feeder.isFwdLimitSwitchClosed():
+                # Transferring
+                self.transfer_to_injector = True
+            if injector.isFwdLimitSwitchClosed():
+                self.transfer_to_injector = False
+
             # Turn on all motors and let the limit switches stop it
             for motor in self.indexer_motors:
                 motor.set(self.indexer_speed)
+            self.indexer_motors[-1].set(self.injector_speed)
 
             # Override any limit switches where the next cell is vacant
             for first, second in zip(self.indexer_motors, self.indexer_motors[1:]):
                 at_limit = second.isFwdLimitSwitchClosed()
+                if second == feeder and self.transfer_to_injector:
+                    at_limit = True  # Pretend the ball is still in the feeder
                 if not at_limit:
                     first.overrideLimitSwitchesEnable(False)
                 else:
