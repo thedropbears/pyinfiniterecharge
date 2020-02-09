@@ -27,13 +27,13 @@ class Indexer:
 
             # Override any limit switches where the next cell is vacant
             for first, second in zip(self.indexer_motors, self.indexer_motors[1:]):
-                first.overrideLimitSwitchesEnable(True)
                 at_limit = second.isFwdLimitSwitchClosed()
                 if not at_limit:
                     first.overrideLimitSwitchesEnable(False)
+                else:
+                    first.overrideLimitSwitchesEnable(True)
         else:
             # Move balls through if we have them, but don't take in more
-            self.injector_master_motor.stopMotor()
             ball_in_previous = False
             for motor in self.indexer_motors:
                 if not motor.isFwdLimitSwitchClosed():
