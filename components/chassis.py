@@ -33,7 +33,12 @@ class Chassis:
         self.left_front.setInverted(False)
         self.right_front.setInverted(True)
 
-        for motor in (self.left_front, self.left_rear, self.right_front, self.right_rear):
+        for motor in (
+            self.left_front,
+            self.left_rear,
+            self.right_front,
+            self.right_rear,
+        ):
             motor.setIdleMode(rev.IdleMode.kBrake)
 
         self.left_rear.follow(self.left_front)
