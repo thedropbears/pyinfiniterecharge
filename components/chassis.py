@@ -56,7 +56,7 @@ class Chassis:
             pid.setOutputRange(-1, 1)
 
         self.kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
-        self.odometry = DifferentialDriveOdometry(self.get_heading())
+        self.odometry = DifferentialDriveOdometry(self._get_heading())
 
     def execute(self) -> None:
         # XXX: https://github.com/robotpy/robotpy-wpilib/issues/635
@@ -71,7 +71,7 @@ class Chassis:
         self.right_pid.setReference(speeds.right, rev.ControlType.kVelocity)
 
         self.odometry.update(
-            self.get_heading(),
+            self._get_heading(),
             self.left_encoder.getPosition(),
             self.right_encoder.getPosition(),
         )
@@ -86,8 +86,8 @@ class Chassis:
         self.vx = vx
         self.vz = vz
 
-    def get_heading(self) -> Rotation2d:
-        """Get the current heading of the robot, anticlockwise positive."""
+    def _get_heading(self) -> Rotation2d:
+        """Get the current heading of the robot from the IMU, anticlockwise positive."""
         return Rotation2d.fromDegrees(-self.imu.getYaw())
 
     def get_pose(self) -> Pose2d:
@@ -101,4 +101,4 @@ class Chassis:
         """
         self.left_encoder.setPosition(0)
         self.right_encoder.setPosition(0)
-        self.odometry.resetPosition(pose, self.get_heading())
+        self.odometry.resetPosition(pose, self._get_heading())
