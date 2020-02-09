@@ -22,6 +22,7 @@ from components.vision import Vision
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities import git
+from utilities.navx import NavX
 from utilities.scale_value import scale_value
 
 GIT_COMMIT = git.describe()
@@ -77,6 +78,8 @@ class MyRobot(magicbot.MagicRobot):
         self.turret_motor = ctre.WPI_TalonSRX(10)
 
         self.vision = Vision()
+
+        self.imu = NavX()
 
         # operator interface
         self.driver_joystick = wpilib.Joystick(0)
