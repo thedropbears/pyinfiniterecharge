@@ -10,6 +10,7 @@ class Indexer:
     intake_main_motor: ctre.WPI_TalonSRX
     intake_left_motor: wpilib.Spark  # Looking from behind the robot
     intake_right_motor: wpilib.Spark  # Looking from behind the robot
+    SHIMMY_TICKS = int(50 * 0.5)
 
     def setup(self):
         for motor in self.indexer_motors:
@@ -79,14 +80,14 @@ class Indexer:
                 self.intake_left_motor.set(self.shimmy_speed)
                 self.intake_right_motor.set(0)
                 self.shimmy_count += 1
-                if self.shimmy_count > 50:
+                if self.shimmy_count > self.SHIMMY_TICKS:
                     self.left_shimmy = False
                     self.shimmy_count = 0
             else:
                 self.intake_left_motor.set(0)
                 self.intake_right_motor.set(self.shimmy_speed)
                 self.shimmy_count += 1
-                if self.shimmy_count > 50:
+                if self.shimmy_count > self.SHIMMY_TICKS:
                     self.left_shimmy = True
                     self.shimmy_count = 0
         else:
