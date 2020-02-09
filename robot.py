@@ -39,6 +39,7 @@ class MyRobot(magicbot.MagicRobot):
     shooter: Shooter
     spinner: Spinner
     turret: Turret
+    vision: Vision
 
     def createObjects(self):
         """Robot initialization function"""
@@ -75,8 +76,6 @@ class MyRobot(magicbot.MagicRobot):
 
         self.turret_centre_index = wpilib.DigitalInput(0)
         self.turret_motor = ctre.WPI_TalonSRX(10)
-
-        self.vision = Vision()
 
         # operator interface
         self.driver_joystick = wpilib.Joystick(0)
@@ -140,6 +139,9 @@ class MyRobot(magicbot.MagicRobot):
         self.testing_hall_effect_width = False
 
     def testPeriodic(self):
+
+        self.vision.execute()
+
         # Slew the turret
         slew_increment = math.radians(5)  # radians
         if self.driver_joystick.getRawButtonPressed(6):
