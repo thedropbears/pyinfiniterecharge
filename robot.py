@@ -64,9 +64,9 @@ class MyRobot(magicbot.MagicRobot):
         self.injector_master_motor = ctre.WPI_TalonSRX(3)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
         self.intake_arm_piston = wpilib.Solenoid(1)
-        self.intake_main_motor = ctre.WPI_TalonSRX(4)
-        self.intake_left_motor = ctre.WPI_TalonSRX(5)
-        self.intake_right_motor = ctre.WPI_TalonSRX(6)
+        self.intake_main_motor = ctre.WPI_TalonSRX(18)
+        self.intake_left_motor = wpilib.Spark(5)
+        self.intake_right_motor = wpilib.Spark(6)
 
         self.led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.Solenoid(0)
@@ -201,6 +201,15 @@ class MyRobot(magicbot.MagicRobot):
         if self.driver_joystick.getRawButton(4):
             self.hang.pay_out()
             self.hang.execute()
+
+        if self.driver_joystick.getTrigger():
+            self.indexer.toggle_main_motor()
+
+        if self.driver_joystick.getRawButtonPressed(9):
+            self.indexer.toggle_left_motor()
+
+        if self.driver_joystick.getRawButtonPressed(10):
+            self.indexer.toggle_right_motor()
 
 
 if __name__ == "__main__":
