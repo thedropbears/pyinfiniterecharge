@@ -111,6 +111,10 @@ class Vision:
 
     @feedback
     def is_ready(self) -> bool:
-        if self.vision_data_entry.exists() and self.target_in_sight:
+        if (
+            self.vision_data_entry.exists()
+            and self.vision_data != None
+            and self.target_in_sight
+        ):
             return True
         return False  # no network tables, so no target
