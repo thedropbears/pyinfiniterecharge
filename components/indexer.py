@@ -5,57 +5,53 @@ import wpilib
 
 class Indexer:
     indexer_motors: list
-    indexer_switches: list
-    piston_switch: wpilib.DigitalInput
-    injector_switch: wpilib.DigitalInput
-    injector_master_motor: ctre.WPI_TalonSRX
-    injector_slave_motor: ctre.WPI_TalonSRX
 
     def setup(self):
         for motor in self.indexer_motors:
-            motor.setInverted(True)
+            motor.setInverted(False)
+            motor.configForwardLimitSwitchSource(ctre.LimitSwitchSource.FeedbackConnector, ctre.LimitSwitchNormal.NormallyOpen)
 
         self.indexer_speed = 0.2
-        self.injector_speed = 0.4
-
-        self.injector_slave_motor.follow(self.injector_master_motor)
-        self.injector_slave_motor.setInverted(ctre.InvertType.OpposeMaster)
 
     def on_enable(self) -> None:
-        self.indexing = True
+        self.intaking = True
 
     def execute(self) -> None:
-        if self.indexing:
-            # handle the injector motors
-            if self.injector_switch.get() and not self.piston_switch.get():
-                self.injector_master_motor.set(self.injector_speed)
-            else:
-                self.injector_master_motor.stopMotor()
-
-            # handle indexer motors
-            for motor, switch in zip(self.indexer_motors, self.indexer_switches):
-                if switch.get():
-                    motor.set(self.indexer_speed)
-                else:
-                    motor.stopMotor()
-        else:
-            self.injector_master_motor.stopMotor()
+        if self.intaking:
+            # Turn on all motors and let the limit switches stop it
             for motor in self.indexer_motors:
-                motor.stopMotor()
+                motor.set(self.indexer_speed)
 
-    def enable_indexing(self) -> None:
-        self.indexing = True
+            # Override any limit switches where the next cell is vacant
+            for first, second in zip(self.indexer_motors, self.indexer_motors[1:]):
+                first.overrideLimitSwitchesEnable(True)
+                at_limit = second.isFwdLimitSwitchClosed()
+                if not at_limit:
+                    first.overrideLimitSwitchesEnable(False)
+        else:
+            # Move balls through if we have them, but don't take in more
+            self.injector_master_motor.stopMotor()
+            ball_in_previous = False
+            for motor in self.indexer_motors:
+                if not motor.isFwdLimitSwitchClosed():
+                    # We don't have a ball in this cell
+                    # Test this first so the previous ball flag works
+                    if not ball_in_previous:
+                        motor.stopMotor()
+                else:
+                    ball_in_previous = True
 
-    def disable_indexing(self) -> None:
-        self.indexing = False
+    def enable_intaking(self) -> None:
+        self.intaking = True
+
+    def disable_intaking(self) -> None:
+        self.intaking = False
 
     @feedback
     def balls_loaded(self) -> int:
-        balls = sum(not switch.get() for switch in self.indexer_switches)
-        if not self.injector_switch.get():
-            balls += 1
+        balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.indexer_motors)
         return balls
 
     @feedback
     def is_ready(self) -> bool:
-        return not self.injector_switch.get()
+        return  self.indexer_motors[-1].isFwdLimitSwitchClosed()
