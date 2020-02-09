@@ -53,11 +53,12 @@ class MyRobot(magicbot.MagicRobot):
         self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)
         self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
-        self.indexer_motors = [ctre.WPI_TalonSRX(11),
-                ctre.WPI_TalonSRX(12),
-                ctre.WPI_TalonSRX(13),
-                ctre.WPI_TalonSRX(14)
-                ]
+        self.indexer_motors = [
+            ctre.WPI_TalonSRX(11),
+            ctre.WPI_TalonSRX(12),
+            ctre.WPI_TalonSRX(13),
+            ctre.WPI_TalonSRX(14),
+        ]
         self.piston_switch = wpilib.DigitalInput(4)  # checks if injector retracted
         self.injector_switch = wpilib.DigitalInput(9)
         self.injector_master_motor = ctre.WPI_TalonSRX(3)

@@ -1,6 +1,5 @@
 from magicbot import feedback
 import ctre
-import wpilib
 
 
 class Indexer:
@@ -10,7 +9,10 @@ class Indexer:
         for motor in self.indexer_motors:
             motor.setInverted(False)
             motor.setNeutralMode(ctre.NeutralMode.Brake)
-            motor.configForwardLimitSwitchSource(ctre.LimitSwitchSource.FeedbackConnector, ctre.LimitSwitchNormal.NormallyOpen)
+            motor.configForwardLimitSwitchSource(
+                ctre.LimitSwitchSource.FeedbackConnector,
+                ctre.LimitSwitchNormal.NormallyOpen,
+            )
 
         self.indexer_speed = 0.6
 
@@ -55,4 +57,4 @@ class Indexer:
 
     @feedback
     def is_ready(self) -> bool:
-        return  self.indexer_motors[-1].isFwdLimitSwitchClosed()
+        return self.indexer_motors[-1].isFwdLimitSwitchClosed()
