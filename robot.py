@@ -29,6 +29,9 @@ GIT_COMMIT = git.describe()
 
 
 class MyRobot(magicbot.MagicRobot):
+    # List sensors which should collect data before controllers here.
+    vision: Vision
+
     # List controllers (which require components) here.
     shooter_controller: ShooterController
     spinner_controller: SpinnerController
@@ -40,7 +43,6 @@ class MyRobot(magicbot.MagicRobot):
     shooter: Shooter
     spinner: Spinner
     turret: Turret
-    vision: Vision
 
     def createObjects(self):
         """Robot initialization function"""
