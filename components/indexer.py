@@ -9,9 +9,10 @@ class Indexer:
     def setup(self):
         for motor in self.indexer_motors:
             motor.setInverted(False)
+            motor.setNeutralMode(ctre.NeutralMode.Brake)
             motor.configForwardLimitSwitchSource(ctre.LimitSwitchSource.FeedbackConnector, ctre.LimitSwitchNormal.NormallyOpen)
 
-        self.indexer_speed = 0.2
+        self.indexer_speed = 0.6
 
     def on_enable(self) -> None:
         self.intaking = True
