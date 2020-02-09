@@ -69,7 +69,7 @@ class ShooterController:
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        heading = self.chassis.get_heading()
+        heading = self.chassis.get_pose().rotation().radians()
         self.turret.scan(heading)
 
         if self.vision.get_data() is not None:

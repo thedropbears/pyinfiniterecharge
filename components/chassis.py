@@ -1,41 +1,112 @@
+import math
+
+import magicbot
+import navx
 import rev
-from wpilib.drive import DifferentialDrive
-from typing import Tuple
+
+from wpilib.geometry import Pose2d, Rotation2d
+from wpilib.kinematics import (
+    ChassisSpeeds,
+    DifferentialDriveKinematics,
+    DifferentialDriveOdometry,
+)
+
+GEAR_RATIO = 10.75
+
+# measurements in metres
+TRACK_WIDTH = 0.630  # theoretical as measured
+WHEEL_CIRCUMFERENCE = 0.0254 * 6 * math.pi
 
 
 class Chassis:
-    chassis_left_rear: rev.CANSparkMax
-    chassis_left_front: rev.CANSparkMax
-    chassis_right_rear: rev.CANSparkMax
-    chassis_right_front: rev.CANSparkMax
+    left_rear: rev.CANSparkMax
+    left_front: rev.CANSparkMax
+    right_rear: rev.CANSparkMax
+    right_front: rev.CANSparkMax
+
+    imu: navx.AHRS
+
+    vx = magicbot.will_reset_to(0.0)
+    vy = magicbot.will_reset_to(0.0)
 
     def setup(self) -> None:
-        self.chassis_left_rear.setInverted(False)
-        self.chassis_left_front.setInverted(False)
-        self.chassis_right_rear.setInverted(False)
-        self.chassis_right_front.setInverted(False)
+        self.left_front.setInverted(False)
+        self.right_front.setInverted(True)
 
-        self.chassis_left_rear.follow(self.chassis_left_front)
-        self.chassis_right_rear.follow(self.chassis_right_front)
+        for motor in (
+            self.left_front,
+            self.left_rear,
+            self.right_front,
+            self.right_rear,
+        ):
+            motor.setIdleMode(rev.IdleMode.kBrake)
 
-        self.diff_drive = DifferentialDrive(
-            self.chassis_left_front, self.chassis_right_front
-        )
+        self.left_rear.follow(self.left_front)
+        self.right_rear.follow(self.right_front)
+
+        self.left_encoder: rev.CANEncoder = self.left_front.getEncoder()
+        self.right_encoder: rev.CANEncoder = self.right_front.getEncoder()
+
+        for enc in (self.left_encoder, self.right_encoder):
+            enc.setPositionConversionFactor(WHEEL_CIRCUMFERENCE / GEAR_RATIO)
+            enc.setVelocityConversionFactor(WHEEL_CIRCUMFERENCE / GEAR_RATIO / 60)
+
+        self.left_pid: rev.CANPIDController = self.left_front.getPIDController()
+        self.right_pid: rev.CANPIDController = self.right_front.getPIDController()
+
+        for pid in (self.left_pid, self.right_pid):
+            # TODO: needs tuning
+            pid.setP(1)
+            pid.setI(0)
+            pid.setD(0)
+            pid.setIZone(0)
+            pid.setFF(0.000156)
+            pid.setOutputRange(-1, 1)
+
+        self.kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
+        self.odometry = DifferentialDriveOdometry(self._get_heading())
 
     def execute(self) -> None:
-        self.diff_drive.arcadeDrive(self.vx, self.vz, squareInputs=False)
+        # XXX: https://github.com/robotpy/robotpy-wpilib/issues/635
+        chassis_speeds = ChassisSpeeds()
+        chassis_speeds.vx = self.vx
+        chassis_speeds.omega = self.vz
+
+        speeds = self.kinematics.toWheelSpeeds(chassis_speeds)
+
+        # TODO: use characterisation suite to find appropriate feedforward
+        self.left_pid.setReference(speeds.left, rev.ControlType.kVelocity)
+        self.right_pid.setReference(speeds.right, rev.ControlType.kVelocity)
+
+        self.odometry.update(
+            self._get_heading(),
+            self.left_encoder.getPosition(),
+            self.right_encoder.getPosition(),
+        )
 
     def drive(self, vx: float, vz: float) -> None:
-        """Drive the robot with forwards velocity and rotational velocity
-            vx: Forward is positive.
-            vz: Clockwise is negative
+        """Sets the desired robot velocity.
+
+        Arguments:
+            vx: Forwards linear velocity in m/s.
+            vz: Angular velocity in rad/s, anticlockwise positive.
         """
-        self.vx, self.vz = vx, -vz
+        self.vx = vx
+        self.vz = vz
 
-    def get_heading(self) -> float:
-        # TODO
-        return 0.0
+    def _get_heading(self) -> Rotation2d:
+        """Get the current heading of the robot from the IMU, anticlockwise positive."""
+        return Rotation2d.fromDegrees(-self.imu.getYaw())
 
-    def get_position(self) -> Tuple[float, float]:
-        # TODO
-        return (0.0, 0.0)
+    def get_pose(self) -> Pose2d:
+        """Get the current position of the robot on the field."""
+        return self.odometry.getPose()
+
+    def reset_odometry(self, pose: Pose2d) -> None:
+        """Resets the odometry to start with the given pose.
+
+        This is intended to be called at the start of autonomous.
+        """
+        self.left_encoder.setPosition(0)
+        self.right_encoder.setPosition(0)
+        self.odometry.resetPosition(pose, self._get_heading())
