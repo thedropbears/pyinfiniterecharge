@@ -77,7 +77,6 @@ class MyRobot(magicbot.MagicRobot):
         self.turret_centre_index = wpilib.DigitalInput(0)
         self.turret_motor = ctre.WPI_TalonSRX(10)
 
-
         # operator interface
         self.driver_joystick = wpilib.Joystick(0)
 
@@ -140,7 +139,7 @@ class MyRobot(magicbot.MagicRobot):
         self.testing_hall_effect_width = False
 
     def testPeriodic(self):
-        
+
         self.vision.execute()
 
         # Slew the turret
