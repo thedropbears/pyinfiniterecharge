@@ -35,15 +35,16 @@ class Indexer:
         self.transfer_to_injector = False
 
     def on_enable(self) -> None:
-        self.intaking = True
+        self.intaking = False
         self.intake_lowered = False
-        self.main_motor_speed = 1
-        self.left_motor_speed = 1
-        self.right_motor_speed = 1
+        self.injector_speed = 0.4
 
-        self.right = False
-        self.left = False
-        self.main = False
+        self.intake_lowered = False
+        self.left_shimmy = True
+        self.indexing = False
+        self.shimmy_count = 0
+        self.intake_motor_speed = 1.0
+        self.shimmy_speed = 1.0
 
     def execute(self) -> None:
         if self.intaking:
@@ -72,6 +73,22 @@ class Indexer:
                     first.overrideLimitSwitchesEnable(False)
                 else:
                     first.overrideLimitSwitchesEnable(True)
+
+            self.intake_main_motor.set(self.intake_motor_speed)
+            if self.left_shimmy:
+                self.intake_left_motor.set(self.shimmy_speed)
+                self.intake_right_motor.set(0)
+                self.shimmy_count += 1
+                if self.shimmy_count > 50:
+                    self.left_shimmy = False
+                    self.shimmy_count = 0
+            else:
+                self.intake_left_motor.set(0)
+                self.intake_right_motor.set(self.shimmy_speed)
+                self.shimmy_count += 1
+                if self.shimmy_count > 50:
+                    self.left_shimmy = True
+                    self.shimmy_count = 0
         else:
             # Move balls through if we have them, but don't take in more
             ball_in_previous = False
@@ -83,6 +100,7 @@ class Indexer:
                         motor.stopMotor()
                 else:
                     ball_in_previous = True
+                motor.stopMotor()
 
         if self.intake_lowered:
             self.intake_arm_piston.set(True)
@@ -91,12 +109,6 @@ class Indexer:
 
     def enable_intaking(self) -> None:
         self.intaking = True
-        if self.main:
-            self.intake_main_motor.set(self.main_motor_speed)
-        if self.left:
-            self.intake_left_motor.set(self.left_motor_speed)
-        if self.right:
-            self.intake_right_motor.set(self.right_motor_speed)
 
     def disable_intaking(self) -> None:
         self.intaking = False
@@ -106,15 +118,6 @@ class Indexer:
 
     def lower_intake(self) -> None:
         self.intake_lowered = True
-
-    def toggle_main_motor(self) -> None:
-        self.main = not self.main
-
-    def toggle_left_motor(self) -> None:
-        self.left = not self.left
-
-    def toggle_right_motor(self) -> None:
-        self.right = not self.right
 
     @feedback
     def is_intake_lowered(self) -> bool:

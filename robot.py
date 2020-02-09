@@ -203,13 +203,22 @@ class MyRobot(magicbot.MagicRobot):
             self.hang.execute()
 
         if self.driver_joystick.getTrigger():
-            self.indexer.toggle_main_motor()
+            self.indexer.enable_indexing()
 
+        if self.driver_joystick.getRawButtonPressed(7):
+            self.indexer.shimmy_speed += 0.1
+            if self.indexer.shimmy_speed > 1:
+                self.indexer.shimmy_speed = 1
+            self.indexer.left = True
         if self.driver_joystick.getRawButtonPressed(9):
-            self.indexer.toggle_left_motor()
-
-        if self.driver_joystick.getRawButtonPressed(10):
-            self.indexer.toggle_right_motor()
+            self.indexer.shimmy_speed -= 0.1
+            if self.indexer.shimmy_speed < 0:
+                self.indexer.shimmy_speed = 0
+        if self.indexer.indexing:
+            self.indexer.intake_motor_speed = (
+                self.driver_joystick.getThrottle() + 1
+            ) / 2
+            self.indexer.execute()
 
 
 if __name__ == "__main__":
