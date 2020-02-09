@@ -53,11 +53,11 @@ class MyRobot(magicbot.MagicRobot):
         self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)
         self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
-        self.indexer_motors = [wpilib.Spark(2), wpilib.Spark(1)]
-        # motors and switches for index, injector is seperate
-        self.indexer_switches = [
-            wpilib.DigitalInput(8),
-            wpilib.DigitalInput(7),
+        self.indexer_motors = [
+            ctre.WPI_TalonSRX(11),
+            ctre.WPI_TalonSRX(12),
+            ctre.WPI_TalonSRX(13),
+            ctre.WPI_TalonSRX(14),
         ]
         self.piston_switch = wpilib.DigitalInput(4)  # checks if injector retracted
         self.injector_switch = wpilib.DigitalInput(9)
@@ -86,19 +86,18 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         """Executed every cycle"""
-
-        self.handle_spinner_inputs(self.driver_joystick)
         self.handle_chassis_inputs(self.driver_joystick)
-
-        if self.driver_joystick.getRawButtonPressed(6):
-            if self.indexer.indexing:
-                self.indexer.disable_indexing()
-            else:
-                self.indexer.enable_indexing()
-
+        self.handle_intake_inputs(self.driver_joystick)
         self.handle_spinner_inputs(self.driver_joystick)
         self.handle_shooter_inputs(self.driver_joystick)
         self.handle_hang_inputs(self.driver_joystick)
+
+    def handle_intake_inputs(self, joystick):
+        if joystick.getRawButtonPressed(6):
+            if self.indexer.intaking:
+                self.indexer.disable_intaking()
+            else:
+                self.indexer.enable_intaking()
 
     def handle_spinner_inputs(self, joystick):
         if joystick.getRawButtonPressed(7):
