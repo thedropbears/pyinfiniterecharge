@@ -48,8 +48,8 @@ class Chassis:
 
         for pid in (self.left_pid, self.right_pid):
             # TODO: needs tuning
-            pid.setP(6e-4)
-            pid.setI(1e-6)
+            pid.setP(1)
+            pid.setI(0)
             pid.setD(0)
             pid.setIZone(0)
             pid.setFF(0.000156)
