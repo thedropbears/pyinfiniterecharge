@@ -54,6 +54,7 @@ class VisionComms:
         self.rio_pong_time_entry = self.table.getEntry("rio_pong")
         self.raspi_pong_time_entry = self.table.getEntry("raspi_pong")
         self.latency_entry = self.table.getEntry("clock_offset")
+        self.ping_time = time.monotonic()
 
     def ping(self) -> None:
         """Send a ping to the RasPi to determine the connection latency."""
@@ -69,7 +70,7 @@ class VisionComms:
             self.last_pong = self.rio_pong_time
 
     def heart_beat(self) -> None:
-        if self.ping_time_entry.exists():   
+        if self.ping_time_entry.exists():
             self.ping()
             self.pong()
 
@@ -98,7 +99,7 @@ class Vision:
         data = self.vision_data_entry.getDoubleArray(None)
         if data is not None:
             self.vision_data = VisionData(*data)
-            
+
         self.nt.flush()
 
     @property
