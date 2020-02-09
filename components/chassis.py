@@ -47,12 +47,12 @@ class Chassis:
         self.right_pid: rev.CANPIDController = self.right_front.getPIDController()
 
         for pid in (self.left_pid, self.right_pid):
-            # TODO: PID constants from C++ velocity control example, needs tuning
-            pid.setP(6e-5)
+            # TODO: needs tuning
+            pid.setP(6e-4)
             pid.setI(1e-6)
             pid.setD(0)
             pid.setIZone(0)
-            pid.setFF(0.000015)
+            pid.setFF(0.000156)
             pid.setOutputRange(-1, 1)
 
         self.kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
