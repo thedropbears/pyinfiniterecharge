@@ -40,8 +40,8 @@ class Chassis:
         self.right_encoder: rev.CANEncoder = self.right_front.getEncoder()
 
         for enc in (self.left_encoder, self.right_encoder):
-            enc.setPositionConversionFactor(GEAR_RATIO * WHEEL_CIRCUMFERENCE)
-            enc.setVelocityConversionFactor(GEAR_RATIO * WHEEL_CIRCUMFERENCE / 60)
+            enc.setPositionConversionFactor(WHEEL_CIRCUMFERENCE / GEAR_RATIO)
+            enc.setVelocityConversionFactor(WHEEL_CIRCUMFERENCE / GEAR_RATIO / 60)
 
         self.left_pid: rev.CANPIDController = self.left_front.getPIDController()
         self.right_pid: rev.CANPIDController = self.right_front.getPIDController()
