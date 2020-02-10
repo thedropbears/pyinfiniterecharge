@@ -92,7 +92,7 @@ class ShooterController:
             old_turret_angle = self.turret.azimuth_at_time(self.vision.timestamp)
             current_turret_angle = self.turret.azimuth_at_time(time.monotonic())
             delta_since_vision = current_turret_angle - old_turret_angle
-            target_angle = vision_data.angle + delta_since_vision
+            target_angle = vision_data.angle - delta_since_vision
             if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
                 self.turret.slew(target_angle)
