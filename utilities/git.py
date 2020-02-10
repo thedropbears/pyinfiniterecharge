@@ -8,12 +8,12 @@ def describe() -> str:
     fname = robot_dir / "gitid"
     if os.path.isdir(".git"):
         desc = subprocess.check_output(
-            ("git", "describe", "--always", "--tags", "--dirty"), encoding="utf-8"
+            ("git", "describe", "--broken", "--always", "--tags", "--dirty"),
+            encoding="utf-8",
         )
         # would use a hidden file here, but deploy skips dotfiles
         with open(fname, "w") as f:
             f.write(desc)
         return desc
-    else:
-        with open(fname) as f:
-            return f.read()
+    with open(fname) as f:
+        return f.read()
