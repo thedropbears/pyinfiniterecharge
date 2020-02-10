@@ -270,3 +270,9 @@ class Turret:
             return (
                 self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
             )
+
+        def get_azimuth(self) -> int:
+            """Get the current azimuth in radians"""
+            return (
+                self.motor.getSelectedSensorPosition() / self.COUNTS_PER_TURRET_RADIAN
+            )

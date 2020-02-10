@@ -1,5 +1,4 @@
 import math
-import time
 
 # from magicbot import StateMachine, state
 from magicbot import feedback
@@ -89,8 +88,11 @@ class ShooterController:
             # self.next_state("searching")
             self.state = self.searching
         else:
+            current_turret_angle = self.turret.get_azimuth()
             old_turret_angle = self.turret.azimuth_at_time(self.vision.timestamp)
-            current_turret_angle = self.turret.azimuth_at_time(time.monotonic())
+            if old_turret_angle is None:
+                # data has timed out
+                self.state = self.searching
             delta_since_vision = current_turret_angle - old_turret_angle
             target_angle = vision_data.angle - delta_since_vision
             if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
