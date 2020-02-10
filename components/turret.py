@@ -255,21 +255,17 @@ class Turret:
 
         self._slew_to_counts(current_target)
 
-        def azimuth_at_time(self, t: float) -> Optional(int):
-            """Get the stored azimuth (in radians) of the turret at a specified
-            time. Returns None if the requested time is not in history
-            @param t: time that we want data for
-            """
-            current_time = time.monotonic()
-            control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
-            if control_loops_ago > len(self.azimuth_history):
-                return None
-            return (
-                self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
-            )
+    def azimuth_at_time(self, t: float) -> Optional[int]:
+        """Get the stored azimuth (in radians) of the turret at a specified
+        time. Returns None if the requested time is not in history
+        @param t: time that we want data for
+        """
+        current_time = time.monotonic()
+        control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
+        if control_loops_ago > len(self.azimuth_history):
+            return None
+        return self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
 
-        def get_azimuth(self) -> int:
-            """Get the current azimuth in radians"""
-            return (
-                self.motor.getSelectedSensorPosition() / self.COUNTS_PER_TURRET_RADIAN
-            )
+    def get_azimuth(self) -> int:
+        """Get the current azimuth in radians"""
+        return self.motor.getSelectedSensorPosition() / self.COUNTS_PER_TURRET_RADIAN
