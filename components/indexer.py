@@ -39,10 +39,13 @@ class Indexer:
         self.intaking = False
         self.left_shimmy = True
 
-    def on_enable(self) -> None:
         self.shimmy_count = 0
         self.intake_motor_speed = 1.0
         self.shimmy_speed = 1.0
+        self.intaking = False
+
+    def on_enable(self) -> None:
+        self.shimmy_count = 0
         self.intaking = True
 
     def execute(self) -> None:
