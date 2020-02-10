@@ -200,7 +200,7 @@ class Turret:
 
         self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
 
-        self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition() * self.COUNTS_PER_TURRET_RADIAN)
+        self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
         if len(self.azimuth_history) >= self.AZIMUTH_HISTORY_LEN:
             # track the last second of azimuths
             self.azimuth_history.pop()
@@ -266,4 +266,4 @@ class Turret:
             control_loops_ago = int((current_time - t) / 0.02)
             if control_loops_ago > len(self.azimuth_history):
                 return None
-            return self.azimuth_history[control_loops_ago]
+            return self.azimuth_history[control_loops_ago] * self.COUNTS_PER_TURRET_RADIAN
