@@ -98,7 +98,9 @@ class Vision:
         data = None
         data = self.vision_data_entry.getDoubleArray(None)
         if data is not None:
-            self.vision_data = VisionData(data[0], data[1], data[2] + self.visionComms.latency)
+            self.vision_data = VisionData(
+                data[0], data[1], data[2] + self.visionComms.latency
+            )
             # add latency to vision timestamp
 
         self.nt.flush()
