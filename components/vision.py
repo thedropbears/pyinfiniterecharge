@@ -102,10 +102,11 @@ class Vision:
 
         self.nt.flush()
 
-    @property
     def target_in_sight(self) -> bool:
         return (
-            time.monotonic() - (self.vision_data.timestamp + self.visionComms.latency)
+            self.vision_data is not None
+            and time.monotonic()
+            - (self.vision_data.timestamp + self.visionComms.latency)
             < 0.1
         )
 
@@ -113,7 +114,7 @@ class Vision:
     def is_ready(self) -> bool:
         if (
             self.vision_data_entry.exists()
-            and self.vision_data != None
+            and self.vision_data is not None
             and self.target_in_sight
         ):
             return True
