@@ -76,6 +76,9 @@ class VisionComms:
 
 
 class Vision:
+
+    MEMORY_CONSTANT: int
+
     def __init__(self) -> None:
 
         self.nt = NetworkTables
@@ -110,7 +113,7 @@ class Vision:
             self.vision_data is not None
             and time.monotonic()
             - (self.vision_data.timestamp + self.visionComms.latency)
-            < 0.1
+            < self.MEMORY_CONSTANT
         )
 
     @feedback

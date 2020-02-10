@@ -25,6 +25,9 @@ class Turret:
     centre_index: wpilib.DigitalInput
     motor: ctre.WPI_TalonSRX
 
+    MEMORY_CONSTANT: int
+    control_loop_wait_time: float
+
     # Possible states
     SLEWING = 0
     SCANNING = 1
@@ -77,8 +80,6 @@ class Turret:
     )  # counts per 100ms
 
     PI_OVER_4_IN_COUNTS = int(math.pi / 4 * COUNTS_PER_TURRET_RADIAN)
-
-    AZIMUTH_HISTORY_LEN = 50  # remember 1s of azimuths
 
     def on_enable(self) -> None:
         self.motor.configPeakOutputForward(1.0, 10)
@@ -201,8 +202,8 @@ class Turret:
         self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
 
         self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
-        if len(self.azimuth_history) >= self.AZIMUTH_HISTORY_LEN:
-            # track the last second of azimuths
+        if len(self.azimuth_history) >= self.MEMORY_CONSTANT:
+            # track past azimuths
             self.azimuth_history.pop()
 
     def _handle_indices(self) -> None:
@@ -263,9 +264,9 @@ class Turret:
             @param t: time that we want data for
             """
             current_time = time.monotonic()
-            control_loops_ago = int((current_time - t) / 0.02)
+            control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
             if control_loops_ago > len(self.azimuth_history):
                 return None
             return (
-                self.azimuth_history[control_loops_ago] * self.COUNTS_PER_TURRET_RADIAN
+                self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
             )
