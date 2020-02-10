@@ -13,6 +13,7 @@ class Shooter:
 
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
     centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
+    outer_rpms = (5000, 5000, 5000, 5000, 5000, 5000)
 
     outer_rpm = tunable(0)
     centre_rpm = tunable(0)
@@ -95,7 +96,7 @@ class Shooter:
             dist = min(self.ranges[-1], max(dist, self.ranges[0]))
             self.in_range = False
         self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
-        self.outer_rpm = 5000
+        self.outer_rpm = interp(dist, self.ranges, self.outer_rpms)
 
     @feedback
     def is_at_speed(self) -> bool:
