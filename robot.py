@@ -209,7 +209,7 @@ class MyRobot(magicbot.MagicRobot):
             self.hang.execute()
 
         if self.driver_joystick.getTrigger():
-            self.indexer.enable_indexing()
+            self.indexer.enable_intaking()
 
         if self.driver_joystick.getRawButtonPressed(7):
             self.indexer.shimmy_speed += 0.1
