@@ -27,7 +27,7 @@ class Chassis:
     imu: navx.AHRS
 
     vx = magicbot.will_reset_to(0.0)
-    vy = magicbot.will_reset_to(0.0)
+    vz = magicbot.will_reset_to(0.0)
 
     def setup(self) -> None:
         self.left_front.setInverted(False)
