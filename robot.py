@@ -97,7 +97,7 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         """Executed every cycle"""
-        self.handle_indexer_inputs(self.driver_joystick)
+        self.handle_intake_inputs(self.driver_joystick)
         self.handle_chassis_inputs(self.driver_joystick)
         self.handle_spinner_inputs(self.driver_joystick)
         self.handle_shooter_inputs(self.driver_joystick)
