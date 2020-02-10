@@ -9,7 +9,7 @@ class Colour:
         self.green = green
         self.blue = blue
 
-    def dist(self, c) -> tuple:
+    def dist(self, c) -> float:
         # finds the "distance" of one colour from another
         # the "distance" is the sum of the differences in rgb value
         return (
@@ -48,13 +48,15 @@ class Spinner:
         self.spinner_motor.set(0)
         self.raise_wheel()
         self.rotations = 0
-        # self.state = None
+        self.state = self.idle
         self.piston_state = "down"
         self.required_colour = "B"
         self.lastCol = "Y"
+        self.motor_speed = 0
 
     def on_enable(self) -> None:
         self.spinner_motor.set(0)
+        self.motor_speed = 0
         self.raise_wheel()
 
     def raise_wheel(self) -> None:  # moves wheel up
@@ -72,11 +74,12 @@ class Spinner:
         for col_name, col_value in self.WHEEL_COLOURS.items():
             distances[col_name] = col_value.dist(self.sensed_colour)
 
+        smallest_dist = min(distances, key=lambda col: distances[col])
         if (
-            distances[min(distances, key=lambda col: distances[col])]
+            distances[smallest_dist]
             < self.MAX_COLOUR_DIST
         ):
-            return min(distances, key=lambda col: distances[col])
+            return smallest_dist
 
     def get_wheel_dist(self) -> int:
         # find the distance of the colour wheel from desired state in segments
@@ -95,24 +98,23 @@ class Spinner:
             return distance - 4
         return distance
 
-    def go_to_colour(self, colour: str) -> bool:  # do position control
+    def position_run(self):  # do position control
+        self.lower_wheel()
         self.required_colour = colour
         distance = self.get_wheel_dist()
-        self.spinner_motor.set(distance * self.POSITION_SPIN_FACTOR)
+        self.motor_speed = distance * self.POSITION_SPIN_FACTOR
 
         if distance == 0:
-            return True
-        else:
-            return False
+            self.state = self.idle
 
-    def do_rotation(self) -> bool:
-        spin_speed = 1 - (
+    def rotation_run(self):
+        self.lower_wheel()
+        self.motor_speed = 1 - (
             self.ROTATION_SPIN_FACTOR
             ** (self.rotations - self.ROTATION_TARGET_ROTATIONS)
             * self.ROTATION_MAX_SPEED
         )
-        # speed slows down as it gets closer to required revolutions
-        self.spinner_motor.set(spin_speed)
+        # speed slows down as it gets closer to required revolution
 
         current_colour = self.get_current_colour()
         if self.lastCol != current_colour:  # if it has moved along in segments
@@ -121,10 +123,22 @@ class Spinner:
 
         if self.rotations >= 3.5:
             self.rotations = 0
-            self.spinner_motor.set(0)
-            return True
-        else:
-            return False
+            self.state = self.idle
+
+    def got_to_colour(self, colour: str):
+        self.state = self.position_run
+        self.required_colour = colour
+
+    def do_rotation_control(self):
+        self.state = self.position_run
+
+    def is_complete(self) -> bool:
+        return self.state == self.idle
+
+    def idle(self):
+        self.raise_wheel()
+        self.motor_speed = 0
 
     def execute(self):
-        pass
+        self.state()
+        self.spinner_motor.set(self.motor_speed)
