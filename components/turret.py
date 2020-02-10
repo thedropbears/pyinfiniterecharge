@@ -127,7 +127,7 @@ class Turret:
         self.current_state = self.SLEWING
         self.finding_indices = True
 
-        self.azimuth_history = deque()
+        self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point. Note that this is 180 degrees offset from the
@@ -202,9 +202,6 @@ class Turret:
         self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
 
         self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
-        if len(self.azimuth_history) >= self.MEMORY_CONSTANT:
-            # track past azimuths
-            self.azimuth_history.pop()
 
     def _handle_indices(self) -> None:
         # Check if we're at a known position
