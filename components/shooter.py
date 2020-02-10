@@ -51,9 +51,9 @@ class Shooter:
         self.centre_pid.setFF(0.000156)
 
         self.led_length = 72
-        self.led_speed = wpilib._wpilib.AddressableLED.LEDData(255, 0, 0)
-        self.led_ball = wpilib._wpilib.AddressableLED.LEDData(0, 255, 0)
-        self.led_vision = wpilib._wpilib.AddressableLED.LEDData(0, 0, 255)
+        self.led_speed = wpilib.AddressableLED.LEDData(255, 0, 0)
+        self.led_ball = wpilib.AddressableLED.LEDData(0, 255, 0)
+        self.led_vision = wpilib.AddressableLED.LEDData(0, 0, 255)
         self.led.setLength(self.led_length)
         self.led_vals = (
             [self.led_speed] * int(self.led_length / 3)
