@@ -209,7 +209,7 @@ class MyRobot(magicbot.MagicRobot):
             self.hang.execute()
 
         if self.driver_joystick.getTrigger():
-            self.indexer.enable_indexing()
+            self.indexer.enable_intaking()
 
         if self.driver_joystick.getRawButtonPressed(7):
             self.indexer.shimmy_speed += 0.1
@@ -220,7 +220,7 @@ class MyRobot(magicbot.MagicRobot):
             self.indexer.shimmy_speed -= 0.1
             if self.indexer.shimmy_speed < 0:
                 self.indexer.shimmy_speed = 0
-        if self.indexer.indexing:
+        if self.indexer.intaking:
             self.indexer.intake_motor_speed = (
                 self.driver_joystick.getThrottle() + 1
             ) / 2
