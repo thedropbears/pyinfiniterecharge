@@ -1,4 +1,7 @@
+import time
+from collections import deque
 from enum import Enum
+from typing import Optional
 
 import wpilib
 import ctre
@@ -75,6 +78,8 @@ class Turret:
 
     PI_OVER_4_IN_COUNTS = int(math.pi / 4 * COUNTS_PER_TURRET_RADIAN)
 
+    AZIMUTH_HISTORY_LEN = 50  # remember 1s of azimuths
+
     def on_enable(self) -> None:
         self.motor.configPeakOutputForward(1.0, 10)
         self.motor.configPeakOutputReverse(-1.0, 10)
@@ -120,6 +125,8 @@ class Turret:
         self.previous_index = Index.NOT_FOUND
         self.current_state = self.SLEWING
         self.finding_indices = True
+
+        self.azimuth_history = deque()
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point. Note that this is 180 degrees offset from the
@@ -193,6 +200,11 @@ class Turret:
 
         self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
 
+        self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition() * self.COUNTS_PER_TURRET_RADIAN)
+        if len(self.azimuth_history) >= self.AZIMUTH_HISTORY_LEN:
+            # track the last second of azimuths
+            self.azimuth_history.pop()
+
     def _handle_indices(self) -> None:
         # Check if we're at a known position
         # If so, update the encoder position on the motor controller
@@ -244,3 +256,14 @@ class Turret:
             current_target += self.current_scan_delta
 
         self._slew_to_counts(current_target)
+
+        def azimuth_at_time(self, t: float) -> Optional(int):
+            """Get the stored azimuth (in radians) of the turret at a specified
+            time. Returns None if the requested time is not in history
+            @param t: time that we want data for
+            """
+            current_time = time.monotonic()
+            control_loops_ago = int((current_time - t) / 0.02)
+            if control_loops_ago > len(self.azimuth_history):
+                return None
+            return self.azimuth_history[control_loops_ago]
