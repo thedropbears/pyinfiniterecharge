@@ -220,7 +220,7 @@ class MyRobot(magicbot.MagicRobot):
             self.indexer.shimmy_speed -= 0.1
             if self.indexer.shimmy_speed < 0:
                 self.indexer.shimmy_speed = 0
-        if self.indexer.indexing:
+        if self.indexer.intaking:
             self.indexer.intake_motor_speed = (
                 self.driver_joystick.getThrottle() + 1
             ) / 2
