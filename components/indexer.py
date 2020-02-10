@@ -3,8 +3,6 @@ from typing import Sequence
 from magicbot import feedback
 import ctre
 import wpilib
-from magicbot import feedback, will_reset_to
-import wpilib
 
 
 class Indexer:
