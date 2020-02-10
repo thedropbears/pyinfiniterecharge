@@ -150,6 +150,12 @@ class MyRobot(magicbot.MagicRobot):
 
         self.vision.execute()
 
+        self.shooter.execute()
+
+        if self.driver_joystick.getRawButtonPressed(10):
+            self.shooter.fire()
+            self.indexer.enable_intaking()
+
         # Slew the turret
         slew_increment = math.radians(5)  # radians
         if self.driver_joystick.getRawButtonPressed(6):
