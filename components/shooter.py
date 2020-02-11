@@ -42,13 +42,13 @@ class Shooter:
         self.outer_pid = self.outer_motor.getPIDController()
 
         self.outer_pid.setP(0.958 / 3600)
-        self.outer_pid.setI(1e-7)
+        self.outer_pid.setI(0)
         self.outer_pid.setD(0)
-        self.outer_pid.setFF(0.000156)
+        self.outer_pid.setFF(1 / 5676)
         self.centre_pid.setP(0.959 / 3600)
-        self.centre_pid.setI(1e-7)
+        self.centre_pid.setI(0)
         self.centre_pid.setD(0)
-        self.centre_pid.setFF(0.000156)
+        self.centre_pid.setFF(1 / 5676)
 
         self.led_length = 72
         self.led_speed = wpilib.AddressableLED.LEDData(255, 0, 0)
