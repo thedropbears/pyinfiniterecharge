@@ -89,7 +89,7 @@ class ShooterController:
             self.state = self.searching
         else:
             current_turret_angle = self.turret.get_azimuth()
-            old_turret_angle = self.turret.azimuth_at_time(self.vision.timestamp)
+            old_turret_angle = self.turret.azimuth_at_time(vision_data.timestamp)
             if old_turret_angle is None:
                 # data has timed out
                 self.state = self.searching
