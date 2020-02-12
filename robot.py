@@ -88,6 +88,9 @@ class MyRobot(magicbot.MagicRobot):
         # operator interface
         self.driver_joystick = wpilib.Joystick(0)
 
+        self.MEMORY_CONSTANT = int(0.1 / self.control_loop_wait_time)
+        # how long before data times out
+
     def teleopInit(self):
         """Executed at the start of teleop mode"""
 

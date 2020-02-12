@@ -1,8 +1,11 @@
+import math
+import time
+from collections import deque
 from enum import Enum
+from typing import Optional
 
 import wpilib
 import ctre
-import math
 
 
 class Index(Enum):
@@ -21,6 +24,9 @@ class Turret:
     # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
     motor: ctre.WPI_TalonSRX
+
+    MEMORY_CONSTANT: int
+    control_loop_wait_time: float
 
     # Possible states
     SLEWING = 0
@@ -121,6 +127,8 @@ class Turret:
         self.current_state = self.SLEWING
         self.finding_indices = True
 
+        self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
+
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point. Note that this is 180 degrees offset from the
     # robot.
@@ -193,6 +201,8 @@ class Turret:
 
         self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
 
+        self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
+
     def _handle_indices(self) -> None:
         # Check if we're at a known position
         # If so, update the encoder position on the motor controller
@@ -224,6 +234,9 @@ class Turret:
         delta = self.current_target_counts - current_count
         self.motor.setSelectedSensorPosition(counts)
         # Reset any current target using the new absolute azimuth
+        for entry in self.azimuth_history:
+            entry += current_count - counts
+            # update old measurements
         self._slew_to_counts(counts + delta)
         self.index_found = True
 
@@ -244,3 +257,18 @@ class Turret:
             current_target += self.current_scan_delta
 
         self._slew_to_counts(current_target)
+
+    def azimuth_at_time(self, t: float) -> Optional[int]:
+        """Get the stored azimuth (in radians) of the turret at a specified
+        time. Returns None if the requested time is not in history
+        @param t: time that we want data for
+        """
+        current_time = time.monotonic()
+        control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
+        if control_loops_ago >= len(self.azimuth_history):
+            return None
+        return self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
+
+    def get_azimuth(self) -> int:
+        """Get the current azimuth in radians"""
+        return self.motor.getSelectedSensorPosition() / self.COUNTS_PER_TURRET_RADIAN

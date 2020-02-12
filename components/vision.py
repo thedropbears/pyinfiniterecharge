@@ -76,6 +76,9 @@ class VisionComms:
 
 
 class Vision:
+
+    MEMORY_CONSTANT: int
+
     def __init__(self) -> None:
 
         self.nt = NetworkTables
@@ -98,7 +101,10 @@ class Vision:
         data = None
         data = self.vision_data_entry.getDoubleArray(None)
         if data is not None:
-            self.vision_data = VisionData(*data)
+            self.vision_data = VisionData(
+                data[0], data[1], data[2] + self.visionComms.latency
+            )
+            # add latency to vision timestamp
 
         self.nt.flush()
 
@@ -107,7 +113,7 @@ class Vision:
             self.vision_data is not None
             and time.monotonic()
             - (self.vision_data.timestamp + self.visionComms.latency)
-            < 0.1
+            < self.MEMORY_CONSTANT
         )
 
     @feedback
