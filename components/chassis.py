@@ -47,20 +47,22 @@ class Chassis:
         self.left_encoder: rev.CANEncoder = self.left_front.getEncoder()
         self.right_encoder: rev.CANEncoder = self.right_front.getEncoder()
 
+        rev_to_m = WHEEL_CIRCUMFERENCE / GEAR_RATIO
+
         for enc in (self.left_encoder, self.right_encoder):
-            enc.setPositionConversionFactor(WHEEL_CIRCUMFERENCE / GEAR_RATIO)
-            enc.setVelocityConversionFactor(WHEEL_CIRCUMFERENCE / GEAR_RATIO / 60)
+            enc.setPositionConversionFactor(rev_to_m)
+            enc.setVelocityConversionFactor(rev_to_m / 60)
 
         self.left_pid: rev.CANPIDController = self.left_front.getPIDController()
         self.right_pid: rev.CANPIDController = self.right_front.getPIDController()
 
         for pid in (self.left_pid, self.right_pid):
             # TODO: needs tuning
-            pid.setP(1)
+            pid.setP(0.1)
             pid.setI(0)
             pid.setD(0)
             pid.setIZone(0)
-            pid.setFF(0.000156)
+            pid.setFF(1 / (5676 * rev_to_m / 60))
             pid.setOutputRange(-1, 1)
 
         self.kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
@@ -101,6 +103,14 @@ class Chassis:
     def get_pose(self) -> Pose2d:
         """Get the current position of the robot on the field."""
         return self.odometry.getPose()
+
+    @magicbot.feedback
+    def get_left_velocity(self) -> float:
+        return self.left_encoder.getVelocity()
+
+    @magicbot.feedback
+    def get_right_velocity(self) -> float:
+        return self.right_encoder.getVelocity()
 
     def reset_odometry(self, pose: Pose2d) -> None:
         """Resets the odometry to start with the given pose.
