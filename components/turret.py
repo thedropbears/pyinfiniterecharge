@@ -234,6 +234,9 @@ class Turret:
         delta = self.current_target_counts - current_count
         self.motor.setSelectedSensorPosition(counts)
         # Reset any current target using the new absolute azimuth
+        for entry in self.azimuth_history:
+            entry += current_count - counts
+            # update old measurements
         self._slew_to_counts(counts + delta)
         self.index_found = True
 
