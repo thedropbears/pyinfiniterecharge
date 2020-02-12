@@ -30,6 +30,9 @@ class ShooterController:
     OFFSET = TOTAL_RADIUS / math.sin(math.pi / 3)
     TRUE_TARGET_RADIUS = TARGET_RADIUS - OFFSET
 
+    VISON_CONVERSION_FACTOR = 0.5  # a magic number for the vision angle
+    # TODO fix vision so this isn't nessecary, requires tuning
+
     def __init__(self) -> None:
         # super().__init__()
         self.state = self.searching
@@ -93,8 +96,11 @@ class ShooterController:
             if old_turret_angle is None:
                 # data has timed out
                 self.state = self.searching
+                return
             delta_since_vision = current_turret_angle - old_turret_angle
-            target_angle = vision_data.angle - delta_since_vision
+            target_angle = (
+                vision_data.angle - delta_since_vision * self.VISON_CONVERSION_FACTOR
+            )
             if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
                 self.turret.slew(target_angle)
