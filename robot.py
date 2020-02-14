@@ -77,8 +77,8 @@ class MyRobot(magicbot.MagicRobot):
 
         self.led_screen_led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.Solenoid(0)
-        self.shooter_centre_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
-        self.shooter_outer_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
+        self.shooter_centre_motor = ctre.WPI_TalonFX(3)
+        self.shooter_outer_motor = ctre.WPI_TalonFX(2)
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.spinner_motor = wpilib.Spark(2)
