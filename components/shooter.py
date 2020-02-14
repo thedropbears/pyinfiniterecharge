@@ -13,8 +13,8 @@ class Shooter:
     centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
     outer_rpms = (5000, 5000, 5000, 5000, 5000, 5000)
 
-    outer_rpm = tunable(0)
-    centre_rpm = tunable(0)
+    outer_target = tunable(0)
+    centre_target = tunable(0)
 
     COUNTS_PER_REV = 2048
     RPM_TO_CTRE_UNITS = COUNTS_PER_REV / 60 / 10  # counts per 100ms
@@ -38,14 +38,14 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0.958 / 3600)
-        self.outer_motor.config_kI(1e-7)
-        self.outer_motor.config_kD(0)
-        self.outer_motor.config_kF(0.000156)
-        self.centre_motor.config_kP(0.959 / 3600)
-        self.centre_motor.config_kI(1e-7)
-        self.centre_motor.config_kD(0)
-        self.centre_motor.config_kF(0.000156)
+        self.outer_motor.config_kP(0, 0.958 / 3600)
+        self.outer_motor.config_kI(0, 1e-7)
+        self.outer_motor.config_kD(0, 0)
+        self.outer_motor.config_kF(0, 0.000156)
+        self.centre_motor.config_kP(0, 0.959 / 3600)
+        self.centre_motor.config_kI(0, 1e-7)
+        self.centre_motor.config_kD(0, 0)
+        self.centre_motor.config_kF(0, 0.000156)
 
     def execute(self) -> None:
         self.centre_motor.set(ctre.ControlMode.Velocity, self.centre_target)
