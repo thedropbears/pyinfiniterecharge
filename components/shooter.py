@@ -63,8 +63,12 @@ class Shooter:
             # clamp the range between our minimum and maximum
             dist = min(self.ranges[-1], max(dist, self.ranges[0]))
             self.in_range = False
-        self.centre_target = interp(dist, self.ranges, self.centre_rpms) * self.RPM_TO_CTRE_UNITS
-        self.outer_target = interp(dist, self.ranges, self.outer_rpms) * self.RPM_TO_CTRE_UNITS
+        self.centre_target = (
+            interp(dist, self.ranges, self.centre_rpms) * self.RPM_TO_CTRE_UNITS
+        )
+        self.outer_target = (
+            interp(dist, self.ranges, self.outer_rpms) * self.RPM_TO_CTRE_UNITS
+        )
 
     @feedback
     def is_at_speed(self) -> bool:
