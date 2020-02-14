@@ -85,6 +85,8 @@ class MyRobot(magicbot.MagicRobot):
         self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
 
         self.turret_centre_index = wpilib.DigitalInput(0)
+        self.turret_right_index = wpilib.DigitalInput(1)
+        self.turret_left_index = wpilib.DigitalInput(2)
         self.turret_motor = ctre.WPI_TalonSRX(10)
 
         # operator interface
@@ -168,50 +170,6 @@ class MyRobot(magicbot.MagicRobot):
             self.turret.execute()
         elif self.driver_joystick.getRawButtonPressed(5):
             self.turret.slew(slew_increment)
-            self.turret.execute()
-        if self.driver_joystick.getRawButtonPressed(2):
-            self.turret.scan()
-        if self.turret.current_state == self.turret.SCANNING:
-            self.turret.execute()
-
-        # Find the width of a hall effect sensor
-        if self.driver_joystick.getRawButtonPressed(12):
-            if not self.testing_hall_effect_width:
-                # self.turret.motor.set(ctre.ControlMode.PercentOutput, 0.25)
-                self.turret.setFindingIndices(False)
-                self.testing_hall_effect_width = True
-                self.turret.SCAN_CRUISE_VELOCITY = 500
-                self.turret.scan()
-            else:
-                # stop the scanning
-                self.turret.slew(0)
-                self.turret.setFindingIndices(True)
-                self.turret.SCAN_CRUISE_VELOCITY = 1500
-                self.testing_hall_effect_width = False
-
-        if self.testing_hall_effect_width:
-            if (
-                self.turret.centre_index.get() == self.turret.HALL_EFFECT_CLOSED
-                and not self.test_hall_effect_found
-            ):
-                self.start_hall_effect_count = (
-                    self.turret.motor.getSelectedSensorPosition()
-                )
-                self.test_hall_effect_found = True
-            if (
-                self.turret.centre_index.get() != self.turret.HALL_EFFECT_CLOSED
-                and self.test_hall_effect_found
-            ):
-                self.end_hall_effect_count = (
-                    self.turret.motor.getSelectedSensorPosition()
-                )
-                self.test_hall_effect_found = False
-                # self.turret.motor.stopMotor()
-                # self.testing_hall_effect_width = False
-                print(
-                    f"Hall effect detected starting at count: {self.start_hall_effect_count}"
-                    + f" and ending at count: {self.end_hall_effect_count}"
-                )
             self.turret.execute()
 
         # Pay out the winch after a match

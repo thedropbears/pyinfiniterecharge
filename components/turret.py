@@ -14,8 +14,6 @@ class Index(Enum):
     CENTRE = 1
     RIGHT = 2
     LEFT = 3
-    BACK = 4
-
 
 class Turret:
     # TODO - There should be 4 indexes total: left, right, front and rear hall-effect
@@ -23,6 +21,8 @@ class Turret:
     # left_index: wpilib.DigitalInput
     # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
+    right_index: wpilib.DigitalInput
+    left_index: wpilib.DigitalInput
     motor: ctre.WPI_TalonSRX
 
     MEMORY_CONSTANT: int
@@ -44,7 +44,6 @@ class Turret:
         Index.CENTRE: 0,
         Index.LEFT: int(math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
         Index.RIGHT: int(-math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
-        Index.BACK: int(math.pi * COUNTS_PER_TURRET_RADIAN),
     }
     HALL_EFFECT_CLOSED = False
     HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
@@ -52,7 +51,7 @@ class Turret:
     # Limit to prevent turret from rotating too far.
     # This assumes that the centre index is at a count of 0.
     # Temporarily imit the travel to 60 degrees away from 0 while debugging.
-    MAX_TURRET_COUNT = int(math.radians(60) * COUNTS_PER_TURRET_RADIAN)
+    MAX_TURRET_COUNT = int(math.radians(190) * COUNTS_PER_TURRET_RADIAN)
 
     # PID values
     # Open loop tests give a turret speed of ~930counts/100ms at 25% throttle
@@ -92,6 +91,11 @@ class Turret:
         else:
             self.motor.setSelectedSensorPosition(0)
             self.motor.set(ctre.ControlMode.MotionMagic, 0)
+            # Handle the case where we start out on an index. This might change
+            # index_found.
+            self._handle_indices()
+            if not self.index_found:
+                self.scan()
 
     def setup(self) -> None:
         self.motor.configSelectedFeedbackSensor(
@@ -125,21 +129,19 @@ class Turret:
         self.index_found = False
         self.previous_index = Index.NOT_FOUND
         self.current_state = self.SLEWING
-        self.finding_indices = True
 
         self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point. Note that this is 180 degrees offset from the
-    # robot.
+    # robot. If no index has been seen yet, we have no reference for the angle,
+    # so we ignore the command.
+    # TODO: perhaps we should return an error so the calling code can know?
     def slew_to_azimuth(self, angle: float) -> None:
         if self.index_found:
             self.current_state = self.SLEWING
             self.motor._slew_to_counts(int(angle * self.COUNTS_PER_TURRET_RADIAN))
         else:
-            # self.logger.warning(
-            #    "slew_to_azimuth() called before index found"
-            # )  # pylint: disable=no-member
             print("slew_to_azimuth() called before index found")
 
     # Slew the given angle (in radians) from the current position
@@ -157,7 +159,7 @@ class Turret:
 
     def scan(self, azimuth=0.0) -> None:
         """
-        Slew the turret back and forth looking for a target.
+        Slew the turret back and forth looking for a target
         """
         # If we haven't hit an index yet, we just have to scan
         # about the current position.
@@ -185,13 +187,8 @@ class Turret:
             < self.ACCEPTABLE_ERROR_SPEED
         )
 
-    # Disable/enable resetting the encoder when an index is encountered.
-    # Use this only for testing, and only when necessary.
-    def setFindingIndices(self, val: bool) -> None:
-        self.finding_indices = val
-
     def execute(self) -> None:
-        if self.finding_indices:
+        if not self.index_found:
             self._handle_indices()
         if self.current_state == self.SCANNING:
             self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 10)
@@ -207,26 +204,34 @@ class Turret:
         # Check if we're at a known position
         # If so, update the encoder position on the motor controller
         # and change the current setpoint with the applied delta.
+        # We do this only once, as indicated by the index_found flag.
         index = self._get_current_index()
-        if index != Index.NOT_FOUND and self.previous_index == Index.NOT_FOUND:
-            # Last tick we didn't have an index triggered, and now we do
+        if index != Index.NOT_FOUND:
             count = self._index_to_counts(index)
             self._reset_encoder(count)
+            self.index_found = True
+            print("found an index and reset encoder")
         self.previous_index = index
 
     def _get_current_index(self) -> Index:
         if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
             return Index.CENTRE
-        # TODO: Repeat for other index marks
+        if self.right_index.get() == self.HALL_EFFECT_CLOSED:
+            return Index.RIGHT
+        if self.left_index.get() == self.HALL_EFFECT_CLOSED:
+            return Index.LEFT
         return Index.NOT_FOUND
 
     def _index_to_counts(self, index: Index) -> int:
         # We need to account for the width of the sensor.
         # This means we use the direction of travel to work out
         # which side we are approaching from
-        middle = self.INDEX_POSITIONS[index]
-        direction = 1 if self.motor.getSelectedSensorVelocity() > 0 else -1
-        count = middle + direction * self.HALL_EFFECT_HALF_WIDTH_COUNTS
+        # if we aren't moving at all, we assume we are in the middle
+        count = self.INDEX_POSITIONS[index]
+        velocity = self.motor.getSelectedSensorVelocity()
+        if velocity != 0:
+            direction = 1 if velocity > 0 else -1
+            count += direction * self.HALL_EFFECT_HALF_WIDTH_COUNTS
         return count
 
     def _reset_encoder(self, counts) -> None:
@@ -238,7 +243,6 @@ class Turret:
             entry += current_count - counts
             # update old measurements
         self._slew_to_counts(counts + delta)
-        self.index_found = True
 
     def _do_scanning(self) -> None:
         # Check if we've finished a scan pass
