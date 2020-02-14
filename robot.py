@@ -20,7 +20,7 @@ from components.shooter import Shooter
 from components.spinner import Spinner
 from components.turret import Turret
 from components.vision import Vision
-from components.led_screen import LEDscreen
+from components.led_screen import LEDScreen
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities import git
@@ -44,7 +44,7 @@ class MyRobot(magicbot.MagicRobot):
     shooter: Shooter
     spinner: Spinner
     turret: Turret
-    led_screen: LEDscreen
+    led_screen: LEDScreen
 
     def createObjects(self):
         """Robot initialization function"""

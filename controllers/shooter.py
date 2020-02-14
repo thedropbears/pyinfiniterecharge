@@ -8,7 +8,7 @@ from components.indexer import Indexer
 from components.shooter import Shooter
 from components.turret import Turret
 from components.vision import Vision
-from components.led_screen import LEDscreen
+from components.led_screen import LEDScreen
 
 
 # class ShooterController(StateMachine):
@@ -20,7 +20,7 @@ class ShooterController:
     shooter: Shooter
     turret: Turret
     vision: Vision
-    led_screen: LEDscreen
+    led_screen: LEDScreen
 
     TARGET_RADIUS = (3 * 12 + 3.25) / 2 * 0.0254  # Circumscribing radius of target
     BALL_RADIUS = 7 / 2 * 0.0254

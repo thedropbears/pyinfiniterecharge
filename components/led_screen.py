@@ -1,7 +1,7 @@
 import wpilib
 
 
-class LEDscreen:
+class LEDScreen:
     led: wpilib.AddressableLED
 
     def __init__(self):
