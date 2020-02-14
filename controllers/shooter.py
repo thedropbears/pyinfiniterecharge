@@ -8,6 +8,7 @@ from components.indexer import Indexer
 from components.shooter import Shooter
 from components.turret import Turret
 from components.vision import Vision
+from components.led_screen import LEDScreen
 
 
 # class ShooterController(StateMachine):
@@ -19,6 +20,7 @@ class ShooterController:
     shooter: Shooter
     turret: Turret
     vision: Vision
+    led_screen: LEDScreen
 
     TARGET_RADIUS = (3 * 12 + 3.25) / 2 * 0.0254  # Circumscribing radius of target
     BALL_RADIUS = 7 / 2 * 0.0254
@@ -50,22 +52,22 @@ class ShooterController:
 
     def update_LED(self) -> None:
         if self.shooter.is_ready():
-            self.shooter.set_flywheel_led(0, 255, 0)
+            self.led_screen.set_bottom_row(0, 255, 0)
         else:
-            self.shooter.set_flywheel_led(255, 0, 0)
+            self.led_screen.set_bottom_row(255, 0, 0)
 
         if self.indexer.is_ready():
-            self.shooter.set_ball_ready_led(0, 255, 0)
+            self.led_screen.set_middle_row(0, 255, 0)
         else:
-            self.shooter.set_ball_ready_led(255, 0, 0)
+            self.led_screen.set_middle_row(255, 0, 0)
 
         if self.vision.is_ready():
             if self.turret.is_ready():
-                self.shooter.set_vision_led(0, 255, 0)
+                self.led_screen.set_top_row(0, 255, 0)
             else:
-                self.shooter.set_vision_led(255, 128, 0)
+                self.led_screen.set_top_row(255, 128, 0)
         else:
-            self.shooter.set_vision_led(255, 0, 0)
+            self.led_screen.set_top_row(255, 0, 0)
 
     # @state(first=True)
     def searching(self) -> None:

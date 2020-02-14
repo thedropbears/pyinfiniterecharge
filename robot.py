@@ -20,6 +20,7 @@ from components.shooter import Shooter
 from components.spinner import Spinner
 from components.turret import Turret
 from components.vision import Vision
+from components.led_screen import LEDScreen
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities import git
@@ -43,6 +44,7 @@ class MyRobot(magicbot.MagicRobot):
     shooter: Shooter
     spinner: Spinner
     turret: Turret
+    led_screen: LEDScreen
 
     def createObjects(self):
         """Robot initialization function"""
@@ -73,7 +75,7 @@ class MyRobot(magicbot.MagicRobot):
         self.intake_left_motor = wpilib.Spark(5)
         self.intake_right_motor = wpilib.Spark(6)
 
-        self.led = wpilib.AddressableLED(0)
+        self.led_screen_led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.Solenoid(0)
         self.shooter_centre_motor = rev.CANSparkMax(3, rev.MotorType.kBrushless)
         self.shooter_outer_motor = rev.CANSparkMax(2, rev.MotorType.kBrushless)
