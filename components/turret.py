@@ -15,6 +15,7 @@ class Index(Enum):
     RIGHT = 2
     LEFT = 3
 
+
 class Turret:
     # TODO - There should be 4 indexes total: left, right, front and rear hall-effect
     # sensors. Right now there is only one hall-effect sensor at the front.
