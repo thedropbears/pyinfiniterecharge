@@ -35,6 +35,9 @@ class Shooter:
         self.outer_motor.setInverted(True)
         self.centre_motor.setInverted(False)
 
+        self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
+        self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
+
         self.outer_motor.config_kP(0.958 / 3600)
         self.outer_motor.config_kI(1e-7)
         self.outer_motor.config_kD(0)
