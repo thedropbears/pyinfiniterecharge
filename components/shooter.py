@@ -48,8 +48,12 @@ class Shooter:
         self.centre_motor.config_kF(0, 0.000156)
 
     def execute(self) -> None:
-        self.centre_motor.set(ctre.ControlMode.Velocity, self.centre_target)
-        self.outer_motor.set(ctre.ControlMode.Velocity, self.outer_target)
+        self.centre_motor.set(
+            ctre.ControlMode.Velocity, self.centre_target * self.RPM_TO_CTRE_UNITS
+        )
+        self.outer_motor.set(
+            ctre.ControlMode.Velocity, self.outer_target * self.RPM_TO_CTRE_UNITS
+        )
 
         if self.inject:
             self.loading_piston.startPulse()
@@ -66,12 +70,8 @@ class Shooter:
             # clamp the range between our minimum and maximum
             dist = min(self.ranges[-1], max(dist, self.ranges[0]))
             self.in_range = False
-        self.centre_target = (
-            interp(dist, self.ranges, self.centre_rpms) * self.RPM_TO_CTRE_UNITS
-        )
-        self.outer_target = (
-            interp(dist, self.ranges, self.outer_rpms) * self.RPM_TO_CTRE_UNITS
-        )
+        self.centre_target = interp(dist, self.ranges, self.centre_rpms)
+        self.outer_target = interp(dist, self.ranges, self.outer_rpms)
 
     @feedback
     def is_at_speed(self) -> bool:
@@ -81,18 +81,20 @@ class Shooter:
         Considers the rotation rates of the flywheels compared with their setpoints
         """
         return (
-            abs(self.centre_target - self.centre_motor.getSelectedSensorVelocity())
+            abs(self.centre_target - self.get_centre_velocity())
             <= self.centre_target * self.velocity_tolerance
-            and abs(self.outer_target - self.outer_motor.getSelectedSensorVelocity())
+            and abs(self.outer_target - self.get_outer_velocity())
             <= self.outer_target * self.velocity_tolerance
         )
 
     @feedback
     def get_centre_velocity(self):
+        """Returns velocity in rpm"""
         return self.outer_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPM
 
     @feedback
     def get_outer_velocity(self):
+        """Returns velocity in rpm"""
         return self.outer_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPM
 
     @feedback
