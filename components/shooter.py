@@ -1,4 +1,5 @@
 import wpilib
+from wpilib import controller
 import ctre
 from numpy import interp
 from magicbot import feedback, tunable
@@ -17,8 +18,8 @@ class Shooter:
     centre_target = tunable(0)
 
     COUNTS_PER_REV = 2048
-    RPM_TO_CTRE_UNITS = COUNTS_PER_REV / 60 / 10  # counts per 100ms
-    CTRE_UNITS_TO_RPM = 1 / RPM_TO_CTRE_UNITS
+    RPS_TO_CTRE_UNITS = COUNTS_PER_REV / 10  # counts per 100ms
+    CTRE_UNITS_TO_RPS = 1 / RPS_TO_CTRE_UNITS
 
     def __init__(self):
         self.inject = False
@@ -38,21 +39,36 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 0.00394 * self.COUNTS_PER_REV / 10)
+        self.outer_motor.config_kP(0, 0.00394 * self.RPS_TO_CTRE_UNITS / 10)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
-        self.centre_motor.config_kP(0, 0.0042 * self.COUNTS_PER_REV / 10)
+        self.outer_ff_calculator = controller.SimpleMotorFeedforward(kS=0.187, kV=0.11)
+        self.centre_motor.config_kP(0, 0.0042 * self.RPS_TO_CTRE_UNITS / 10)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
+        self.centre_ff_calculator = controller.SimpleMotorFeedforward(kS=0.158, kV=0.11)
 
     def execute(self) -> None:
+        voltage = wpilib.RobotController.getInputVoltage()
+        centre_feed_forward = (
+            self.centre_ff_calculator.calculate(self.centre_target) / voltage
+        )
+        outer_feed_forward = (
+            self.outer_ff_calculator.calculate(self.outer_target) / voltage
+        )
         self.centre_motor.set(
-            ctre.ControlMode.Velocity, self.centre_target * self.RPM_TO_CTRE_UNITS
+            ctre.ControlMode.Velocity,
+            self.centre_target * self.RPS_TO_CTRE_UNITS,
+            ctre.DemandType.ArbitraryFeedForward,
+            centre_feed_forward,
         )
         self.outer_motor.set(
-            ctre.ControlMode.Velocity, self.outer_target * self.RPM_TO_CTRE_UNITS
+            ctre.ControlMode.Velocity,
+            self.outer_target * self.RPS_TO_CTRE_UNITS,
+            ctre.DemandType.ArbitraryFeedForward,
+            outer_feed_forward,
         )
 
         if self.inject:
@@ -89,13 +105,13 @@ class Shooter:
 
     @feedback
     def get_centre_velocity(self):
-        """Returns velocity in rpm"""
-        return self.outer_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPM
+        """Returns velocity in rps"""
+        return self.centre_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPS
 
     @feedback
     def get_outer_velocity(self):
-        """Returns velocity in rpm"""
-        return self.outer_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPM
+        """Returns velocity in rps"""
+        return self.outer_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPS
 
     @feedback
     def is_firing(self) -> bool:
