@@ -21,15 +21,13 @@ class Indexer:
                 ctre.LimitSwitchSource.FeedbackConnector,
                 ctre.LimitSwitchNormal.NormallyOpen,
             )
-        # Motor on the injector needs reversing
-        self.indexer_motors[-1].setInverted(True)
 
         self.intake_main_motor.setInverted(False)
         self.intake_left_motor.setInverted(False)
         self.intake_right_motor.setInverted(False)
 
         self.indexer_speed = 0.6
-        self.injector_speed = 1.0
+        self.injector_speed = 0.7
 
         # We have a delay because the distance between the second last
         # stage of the indexer and the injector is longer than others
