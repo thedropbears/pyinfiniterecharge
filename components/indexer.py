@@ -15,16 +15,18 @@ class Indexer:
 
     def setup(self):
         for motor in self.indexer_motors:
-            motor.setInverted(False)
+            motor.setInverted(True)
             motor.setNeutralMode(ctre.NeutralMode.Brake)
             motor.configForwardLimitSwitchSource(
                 ctre.LimitSwitchSource.FeedbackConnector,
                 ctre.LimitSwitchNormal.NormallyOpen,
             )
 
-        self.intake_main_motor.setInverted(False)
+        self.intake_main_motor.setInverted(True)
         self.intake_left_motor.setInverted(False)
         self.intake_right_motor.setInverted(False)
+
+        self.indexer_motors[-1].setInverted(False)
 
         self.indexer_speed = 0.6
         self.injector_speed = 0.7
