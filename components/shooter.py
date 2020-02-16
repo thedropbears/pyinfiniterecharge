@@ -1,20 +1,25 @@
 import wpilib
-import rev
+from wpilib import controller
+import ctre
 from numpy import interp
 from magicbot import feedback, tunable
 
 
 class Shooter:
-    outer_motor: rev.CANSparkMax
-    centre_motor: rev.CANSparkMax
+    outer_motor: ctre.WPI_TalonFX
+    centre_motor: ctre.WPI_TalonFX
     loading_piston: wpilib.Solenoid
 
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
     centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
     outer_rpms = (5000, 5000, 5000, 5000, 5000, 5000)
 
-    outer_rpm = tunable(0)
-    centre_rpm = tunable(0)
+    outer_target = tunable(0)
+    centre_target = tunable(0)
+
+    COUNTS_PER_REV = 2048
+    RPS_TO_CTRE_UNITS = COUNTS_PER_REV / 10  # counts per 100ms
+    CTRE_UNITS_TO_RPS = 1 / RPS_TO_CTRE_UNITS
 
     def __init__(self):
         self.inject = False
@@ -27,32 +32,44 @@ class Shooter:
 
     def setup(self) -> None:
         self.loading_piston.setPulseDuration(0.5)
-        self.outer_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
-        self.centre_motor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
 
         self.outer_motor.setInverted(True)
         self.centre_motor.setInverted(False)
 
-        self.outer_encoder = self.outer_motor.getEncoder()
-        self.centre_encoder = self.centre_motor.getEncoder()
+        self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
+        self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.centre_pid = self.centre_motor.getPIDController()
-        self.outer_pid = self.outer_motor.getPIDController()
-
-        self.outer_pid.setP(0.958 / 3600)
-        self.outer_pid.setI(1e-7)
-        self.outer_pid.setD(0)
-        self.outer_pid.setFF(0.000156)
-        self.centre_pid.setP(0.959 / 3600)
-        self.centre_pid.setI(1e-7)
-        self.centre_pid.setD(0)
-        self.centre_pid.setFF(0.000156)
+        self.outer_motor.config_kP(0, 0.00394 * self.RPS_TO_CTRE_UNITS / 10)
+        self.outer_motor.config_kI(0, 0)
+        self.outer_motor.config_kD(0, 0)
+        self.outer_motor.config_kF(0, 0)
+        self.outer_ff_calculator = controller.SimpleMotorFeedforward(kS=0.187, kV=0.11)
+        self.centre_motor.config_kP(0, 0.0042 * self.RPS_TO_CTRE_UNITS / 10)
+        self.centre_motor.config_kI(0, 0)
+        self.centre_motor.config_kD(0, 0)
+        self.centre_motor.config_kF(0, 0)
+        self.centre_ff_calculator = controller.SimpleMotorFeedforward(kS=0.158, kV=0.11)
 
     def execute(self) -> None:
-        # self.centre_rpm = 2000
-        # self.outer_rpm = 5000
-        self.centre_pid.setReference(self.centre_rpm, rev.ControlType.kVelocity)
-        self.outer_pid.setReference(self.outer_rpm, rev.ControlType.kVelocity)
+        voltage = wpilib.RobotController.getInputVoltage()
+        centre_feed_forward = (
+            self.centre_ff_calculator.calculate(self.centre_target) / voltage
+        )
+        outer_feed_forward = (
+            self.outer_ff_calculator.calculate(self.outer_target) / voltage
+        )
+        self.centre_motor.set(
+            ctre.ControlMode.Velocity,
+            self.centre_target * self.RPS_TO_CTRE_UNITS,
+            ctre.DemandType.ArbitraryFeedForward,
+            centre_feed_forward,
+        )
+        self.outer_motor.set(
+            ctre.ControlMode.Velocity,
+            self.outer_target * self.RPS_TO_CTRE_UNITS,
+            ctre.DemandType.ArbitraryFeedForward,
+            outer_feed_forward,
+        )
 
         if self.inject:
             self.loading_piston.startPulse()
@@ -69,8 +86,8 @@ class Shooter:
             # clamp the range between our minimum and maximum
             dist = min(self.ranges[-1], max(dist, self.ranges[0]))
             self.in_range = False
-        self.centre_rpm = interp(dist, self.ranges, self.centre_rpms)
-        self.outer_rpm = interp(dist, self.ranges, self.outer_rpms)
+        self.centre_target = interp(dist, self.ranges, self.centre_rpms)
+        self.outer_target = interp(dist, self.ranges, self.outer_rpms)
 
     @feedback
     def is_at_speed(self) -> bool:
@@ -80,19 +97,21 @@ class Shooter:
         Considers the rotation rates of the flywheels compared with their setpoints
         """
         return (
-            abs(self.centre_rpm - self.centre_encoder.getVelocity())
-            <= self.centre_rpm * self.velocity_tolerance
-            and abs(self.outer_rpm - self.outer_encoder.getVelocity())
-            <= self.outer_rpm * self.velocity_tolerance
+            abs(self.centre_target - self.get_centre_velocity())
+            <= self.centre_target * self.velocity_tolerance
+            and abs(self.outer_target - self.get_outer_velocity())
+            <= self.outer_target * self.velocity_tolerance
         )
 
     @feedback
     def get_centre_velocity(self):
-        return self.centre_encoder.getVelocity()
+        """Returns velocity in rps"""
+        return self.centre_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPS
 
     @feedback
     def get_outer_velocity(self):
-        return self.outer_encoder.getVelocity()
+        """Returns velocity in rps"""
+        return self.outer_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPS
 
     @feedback
     def is_firing(self) -> bool:
