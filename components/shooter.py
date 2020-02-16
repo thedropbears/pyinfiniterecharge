@@ -38,14 +38,14 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 0.958 / 3600)
-        self.outer_motor.config_kI(0, 1e-7)
+        self.outer_motor.config_kP(0, 0.00394 * self.COUNTS_PER_REV / 10)
+        self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
-        self.outer_motor.config_kF(0, 0.000156)
-        self.centre_motor.config_kP(0, 0.959 / 3600)
-        self.centre_motor.config_kI(0, 1e-7)
+        self.outer_motor.config_kF(0, 0)
+        self.centre_motor.config_kP(0, 0.0042 * self.COUNTS_PER_REV / 10)
+        self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
-        self.centre_motor.config_kF(0, 0.000156)
+        self.centre_motor.config_kF(0, 0)
 
     def execute(self) -> None:
         self.centre_motor.set(
