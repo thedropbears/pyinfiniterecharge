@@ -44,8 +44,8 @@ class Chassis:
         self.left_rear.follow(self.left_front)
         self.right_rear.follow(self.right_front)
 
-        self.left_encoder: rev.CANEncoder = self.left_front.getEncoder()
-        self.right_encoder: rev.CANEncoder = self.right_front.getEncoder()
+        self.left_encoder = rev.CANEncoder(self.left_front)
+        self.right_encoder = rev.CANEncoder(self.right_front)
 
         rev_to_m = WHEEL_CIRCUMFERENCE / GEAR_RATIO
 
