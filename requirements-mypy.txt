@@ -1,0 +1,5 @@
+# This file is intended to be consumed by CI
+--extra-index-url https://devpi.vovo.id.au/robotpy/bionic/+simple/
+mypy
+pynetworktables ~= 2020.0.3
+robotpy-wpilib-utilities ~= 2020.1.4
