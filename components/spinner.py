@@ -125,7 +125,7 @@ class Spinner:
             self.rotations = 0
             self.state = self.idle
 
-    def got_to_colour(self, colour: str):
+    def go_to_colour(self, colour: str):
         self.state = self.position_run
         self.required_colour = colour
 
