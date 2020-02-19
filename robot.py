@@ -23,6 +23,7 @@ from components.vision import Vision
 from components.led_screen import LEDScreen
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
+from controllers.localiser import Localiser
 from utilities import git
 from utilities.scale_value import scale_value
 
@@ -45,6 +46,7 @@ class MyRobot(magicbot.MagicRobot):
     spinner: Spinner
     turret: Turret
     led_screen: LEDScreen
+    localiser: Localiser
 
     def createObjects(self):
         """Robot initialization function"""
