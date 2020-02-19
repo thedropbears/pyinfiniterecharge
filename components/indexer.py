@@ -54,19 +54,19 @@ class Indexer:
         if self.intaking:
             injector = self.indexer_motors[-1]
             feeder = self.indexer_motors[-2]
-            if (
-                not injector.isFwdLimitSwitchClosed()
-                and feeder.isFwdLimitSwitchClosed()
-            ):
-                # Transferring
-                self.transfer_to_injector = True
             if injector.isFwdLimitSwitchClosed():
                 self.transfer_to_injector = False
+            elif feeder.isFwdLimitSwitchClosed():
+                # Transferring
+                self.transfer_to_injector = True
 
             # Turn on all motors and let the limit switches stop it
             for motor in self.indexer_motors:
                 motor.set(self.indexer_speed)
-            self.indexer_motors[-1].set(self.injector_speed)
+            if self.is_piston_retracted():
+                injector.set(self.injector_speed)
+            else:
+                injector.stopMotor()
 
             # Override any limit switches where the next cell is vacant
             for first, second in zip(self.indexer_motors, self.indexer_motors[1:]):
@@ -131,6 +131,9 @@ class Indexer:
     def balls_loaded(self) -> int:
         balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.indexer_motors)
         return balls
+
+    def is_piston_retracted(self) -> bool:
+        return not self.piston_switch.get()
 
     @feedback
     def is_ready(self) -> bool:
