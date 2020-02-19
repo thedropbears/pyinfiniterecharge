@@ -1,10 +1,12 @@
+from typing import Sequence
+
 from magicbot import feedback
 import ctre
 import wpilib
 
 
 class Indexer:
-    indexer_motors: list
+    indexer_motors: Sequence[ctre.WPI_TalonSRX]
     piston_switch: wpilib.DigitalInput
 
     intake_arm_piston: wpilib.Solenoid
