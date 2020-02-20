@@ -2,7 +2,7 @@ import math
 import time
 from collections import deque
 from enum import Enum
-from typing import Optional
+from typing import Deque, Optional
 
 import wpilib
 import ctre
@@ -190,7 +190,7 @@ class Turret:
             self.turnaround_direction = self.NEGATIVE
         self._slew_to_counts(target)
 
-    def scan(self, azimuth=math.pi) -> None:
+    def scan(self, azimuth: float = math.pi) -> None:
         """
         Slew the turret back and forth up to 90 degrees on either side, centred
         at the given azimuth.
@@ -208,7 +208,8 @@ class Turret:
         # If we are starting a new scan, the following is the first pass.
         # If we are adjusting an existing scan, this is the next adjusted pass.
         self._slew_to_counts(
-            turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.current_scan_delta
+            int(turret_azimuth) * self.COUNTS_PER_TURRET_RADIAN
+            + self.current_scan_delta
         )
         self.current_state = self.SCANNING
 
@@ -322,7 +323,7 @@ class Turret:
             ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
         )
         self.current_target_counts = 0
-        self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
+        self.azimuth_history: Deque[int] = deque(maxlen=self.MEMORY_CONSTANT)
         self._setup_indexing()
 
     def _setup_indexing(self) -> None:
