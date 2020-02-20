@@ -74,18 +74,17 @@ class Vision:
 
         self.visionComms = VisionComms(self.table)
 
-        self.vision_data = None
+        self.vision_data: Optional[VisionData] = None
 
     def get_data(self) -> Optional[VisionData]:
         """Returns the latest vision data.
 
         Returns None if there is no vision data.
-         """
+        """
         return self.vision_data
 
     def execute(self) -> None:
         self.visionComms.heart_beat()
-        data = None
         data = self.vision_data_entry.getDoubleArray(None)
         if data is not None:
             self.vision_data = VisionData(
