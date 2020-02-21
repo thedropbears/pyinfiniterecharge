@@ -55,6 +55,8 @@ class Localiser:
             start_cov = self.default_start_cov
         self.ukf.x = start_pos
         self.ukf.P = start_cov
+        self.last_heading = self.chassis.getPose().rotation().radians()
+        self.last_counts = (self.left_encoder.getPosition() + self.right_encoder.getPosition())/2.
 
     def execute(self):
 
@@ -62,21 +64,26 @@ class Localiser:
         dt = t - self.last_t
         self.last_t = dt
 
-        pose = chassis.get_pose()
-        delta_trans = (pose - last_pose).translation()
-        delta = np.array([delta_trans.X(), delta_trans.Y(), delta_trans.rotation().radians()])
-        self.last_pose = pose
+        # wrong b/c the robot angle should be used from the state....
+        counts = (self.left_encoder.getPosition() + self.right_encoder.getPosition())/2.
+        delta_counts = count - self.last_counts
+        self.last_counts = counts
+
+        heading = self.chassis.getPose().rotation().radians()
+        delta_heading = heading - last_heading
+        self.last_heading = heading
 
         v = (self.chassis.get_left_velocity() + self.chassis.get_right_velocity()) / 2.0
         noise = self.process_noise_vel_P * v
 
-        self.history.push([t, dt, delta, noise])
+        self.history.push([t, dt, delta_counts, delta_imu, noise])
 
         # prevent unbounded growth of the queue size in absence of vision update calls
         if len(self.history) > 25: # max history len, ~0.5sec
-            [t, dt, delta_np, noise] = self.history.popleft()
+            [t, dt, delta_counts, delta_imu, noise] = self.history.popleft()
             self.ukf.Q = noise
-            self.ukf.predict(dt=dt)
+            u = np.array([delta_counts, delta_imu]).reshape(-1, 1)
+            self.ukf.predict(dt=dt, u=u)
 
         self.predict_to_now()
 
@@ -106,9 +113,10 @@ class Localiser:
         # nb this approach is problematic if a second camera's update comes after the first's
         # but is further back in time.
         while not self.history.is_empty():
-            [t, dt, delta_np, noise] = self.history.popleft()
+            [t, dt, delta_counts, delta_imu, noise] = self.history.popleft()
             self.ukf.Q = noise
-            self.ukf.predict(dt=dt)
+            u = np.array([delta_counts, delta_imu]).reshape(-1, 1)
+            self.ukf.predict(dt=dt, u=u)
             if t < measurement_tm:
                 # filterpy has a 'bug' which does not allow you to update the residual types
                 # for different types of measurements
@@ -148,7 +156,8 @@ class Localiser:
 
 # predict model, x_t+1 = x + delta_x (where delta_x = [dx; dy])
 def predict_f(x, dt, u):
-    return x + u
+    v = np.array([u[0,0]*np.cos(x[2,0]+u[1,0]/2), u[0,0]*np.sin(x[2,0]+u[1,0]/2), u[1,0]])
+    return x + u[0][0]*v.reshape(-1, 1)
 
 # observation model, identity minus a constant offset as we are observing the output from SolvePnP
 def h_position(x, offset=np.zeros(1, 3)):
