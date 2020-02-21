@@ -150,8 +150,8 @@ class MyRobot(magicbot.MagicRobot):
     def testInit(self):
         self.turret.motor.configPeakOutputForward(1.0, 10)
         self.turret.motor.configPeakOutputReverse(-1.0, 10)
-        self.test_hall_effect_found = False
-        self.testing_hall_effect_width = False
+        self.finding_indices = False
+        self.indices_found = [False, False, False]
 
     def testPeriodic(self):
 
@@ -171,6 +171,37 @@ class MyRobot(magicbot.MagicRobot):
         elif self.driver_joystick.getRawButtonPressed(5):
             self.turret.slew(slew_increment)
             self.turret.execute()
+
+        # Find all three indexes by rotating 360 degrees. Each time an index is
+        # found, record it and tell the turret that no index was found so it
+        # will find the next one.
+        if not self.finding_indices and self.driver_joystick.getRawButtonPressed(12):
+            self.finding_indices = True
+            self.indices_found = [False, False, False]
+            self.turret.SLEW_CRUISE_VELOCITY = 500
+            # Start turning an entire revolution; the limits and the indices
+            # should ensure that it doesn't go all the way
+            self.turrent.slew(math.tau)
+        else:  # We are in the process of looking
+            # stop if the button has been pressed again
+            if self.driver_joystick.getRawButtonPressed(12):
+                self.finding_indices = False
+                self.turret.SLEW_CRUISE_VELOCITY = 1500
+                self.turret.slew(0.0)
+            elif self.turret.index_found:
+                # Index uses 0 as NOT_FOUND, so subtract 1 from an Index to
+                # index the array of indices found. :-)
+                index = int(self.previous_index) - 1
+                if self.indices_found[index] is False:
+                    print(f"found index {self.previous_index}")
+                    self.indices_found[index] = True
+                    if False not in self.indices_found:
+                        self.finding_indices = False
+                        self.turret.SLEW_CRUISE_VELOCITY = 1500
+                        self.turret.slew(0.0)
+                        print("All three indices found")
+                    else:  # keep looking
+                        self.turret.index_found = False
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):

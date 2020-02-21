@@ -17,10 +17,6 @@ class Index(Enum):
 
 
 class Turret:
-    # TODO - There should be 4 indexes total: left, right, front and rear hall-effect
-    # sensors. Right now there is only one hall-effect sensor at the front.
-    # left_index: wpilib.DigitalInput
-    # right_index: wpilib.DigitalInput
     centre_index: wpilib.DigitalInput
     right_index: wpilib.DigitalInput
     left_index: wpilib.DigitalInput
@@ -49,9 +45,8 @@ class Turret:
     HALL_EFFECT_CLOSED = False
     HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
 
-    # Limit to prevent turret from rotating too far.
-    # This assumes that the centre index is at a count of 0.
-    # Temporarily imit the travel to 60 degrees away from 0 while debugging.
+    # Limit to prevent turret from rotating too far. Note that this allows for
+    # a total coverage > 360 degrees.
     MAX_TURRET_COUNT = int(math.radians(190) * COUNTS_PER_TURRET_RADIAN)
 
     # PID values
@@ -135,8 +130,10 @@ class Turret:
 
     # Slew to the given absolute angle (in radians). An angle of 0 corresponds
     # to the centre index point. Note that this is 180 degrees offset from the
-    # robot. If no index has been seen yet, we have no reference for the angle,
-    # so we ignore the command.
+    # robot, though the coordinate system is otherwise the same, i.e. positive
+    # rotations are anti-clockwise from above.
+    # If no index has been seen yet, we have no reference for the angle, so we
+    # ignore the command.
     # TODO: perhaps we should return an error so the calling code can know?
     def slew_to_azimuth(self, angle: float) -> None:
         if self.index_found:
@@ -149,9 +146,16 @@ class Turret:
     def slew(self, angle: float) -> None:
         self.current_state = self.SLEWING
         current_pos = self.motor.getSelectedSensorPosition()
-        self._slew_to_counts(current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN))
+        target = current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN)
+        if target < -self.MAX_TURRET_COUNT:
+            target += self.COUNTS_PER_TURRET_REV
+        elif target > self.MAX_TURRET_COUNT:
+            target += -self.COUNTS_PER_TURRET_REV
+        self._slew_to_counts(target)
 
     def _slew_to_counts(self, counts: int) -> None:
+        # Callers should ensure that the target is in range, but this is
+        # defense in depth to not damage the robot.
         if counts < -self.MAX_TURRET_COUNT:
             counts = -self.MAX_TURRET_COUNT
         if counts > self.MAX_TURRET_COUNT:
