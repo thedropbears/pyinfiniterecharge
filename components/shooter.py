@@ -45,7 +45,7 @@ class Shooter:
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
         self.outer_ff_calculator = controller.SimpleMotorFeedforward(kS=0.187, kV=0.11)
-        self.centre_motor.config_kP(0, 0.0042 * self.RPS_TO_CTRE_UNITS / 10)
+        self.centre_motor.config_kP(0, 0.0034 * self.RPS_TO_CTRE_UNITS / 10)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
@@ -89,8 +89,8 @@ class Shooter:
             # clamp the range between our minimum and maximum
             dist = min(self.ranges[-1], max(dist, self.ranges[0]))
             self.in_range = False
-        self.centre_target = interp(dist, self.ranges, self.centre_rpms)
-        self.outer_target = interp(dist, self.ranges, self.outer_rpms)
+        self.centre_target = interp(dist, self.ranges, self.centre_lookup)
+        self.outer_target = interp(dist, self.ranges, self.outer_lookup)
 
     @feedback
     def is_at_speed(self) -> bool:
