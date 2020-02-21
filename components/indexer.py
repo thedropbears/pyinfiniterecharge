@@ -61,11 +61,13 @@ class Indexer:
                 self.transfer_to_injector = True
 
             # Turn on all motors and let the limit switches stop it
-            for motor in self.indexer_motors:
+            for motor in self.indexer_motors[:-2]:
                 motor.set(self.indexer_speed)
             if self.is_piston_retracted():
+                feeder.set(self.indexer_speed)
                 injector.set(self.injector_speed)
             else:
+                feeder.stopMotor()
                 injector.stopMotor()
 
             # Override any limit switches where the next cell is vacant
