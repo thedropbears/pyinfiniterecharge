@@ -71,8 +71,8 @@ class MyRobot(magicbot.MagicRobot):
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
         self.intake_arm_piston = wpilib.Solenoid(1)
         self.intake_main_motor = ctre.WPI_TalonSRX(18)
-        self.intake_left_motor = wpilib.Spark(5)
-        self.intake_right_motor = wpilib.Spark(6)
+        self.intake_left_motor = rev.CANSparkMax(8, rev.MotorType.kBrushless)
+        self.intake_right_motor = rev.CANSparkMax(9, rev.MotorType.kBrushless)
 
         self.led_screen_led = wpilib.AddressableLED(0)
         self.loading_piston = wpilib.DoubleSolenoid(6, 7)
