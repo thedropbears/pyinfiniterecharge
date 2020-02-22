@@ -99,20 +99,22 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         """Executed every cycle"""
-        self.handle_indexer_inputs(self.driver_joystick)
+        self.handle_intake_inputs(self.driver_joystick)
         self.handle_chassis_inputs(self.driver_joystick)
         self.handle_spinner_inputs(self.driver_joystick)
         self.handle_shooter_inputs(self.driver_joystick)
         self.handle_hang_inputs(self.driver_joystick)
 
-    def handle_indexer_inputs(self, joystick: wpilib.Joystick) -> None:
+        self.shooter_controller.engage()
+
+    def handle_intake_inputs(self, joystick: wpilib.Joystick) -> None:
         if joystick.getRawButtonPressed(6):
             if self.indexer.intaking:
                 self.indexer.disable_intaking()
             else:
                 self.indexer.enable_intaking()
 
-    def handle_spinner_inputs(self, joystick):
+    def handle_spinner_inputs(self, joystick: wpilib.Joystick) -> None:
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
             print(f"Spinner Running")
@@ -126,21 +128,19 @@ class MyRobot(magicbot.MagicRobot):
             print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
-    def handle_chassis_inputs(self, joystick):
+    def handle_chassis_inputs(self, joystick: wpilib.Joystick) -> None:
         scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
         vx = scale_value(joystick.getY(), 1, -1, -3, 3, 2) * scaled_throttle
         vz = scale_value(joystick.getX(), 1, -1, -3, 3, 2) * scaled_throttle
         self.chassis.drive(vx, vz)
 
-    def handle_shooter_inputs(self, joystick: wpilib.Joystick):
-        if joystick.getTriggerPressed():
-            self.shooter_controller.driver_input(True)
-        if joystick.getTriggerReleased():
-            self.shooter_controller.driver_input(False)
+    def handle_shooter_inputs(self, joystick: wpilib.Joystick) -> None:
+        if joystick.getTrigger():
+            self.shooter_controller.fire_input()
         if joystick.getRawButtonPressed(5):
             self.shooter_controller.spin_input()
 
-    def handle_hang_inputs(self, joystick: wpilib.Joystick):
+    def handle_hang_inputs(self, joystick: wpilib.Joystick) -> None:
         if joystick.getRawButtonPressed(3) and joystick.getRawButtonPressed(4):
             self.hang.raise_hook()
         if self.hang.fire_hook and joystick.getRawButton(4):

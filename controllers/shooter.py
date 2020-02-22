@@ -1,7 +1,7 @@
 import math
 
-# from magicbot import StateMachine, state
-from magicbot import feedback
+from magicbot import feedback, StateMachine, state, will_reset_to
+import wpilib.geometry
 
 from components.chassis import Chassis
 from components.indexer import Indexer
@@ -11,8 +11,7 @@ from components.vision import Vision
 from components.led_screen import LEDScreen
 
 
-# class ShooterController(StateMachine):
-class ShooterController:
+class ShooterController(StateMachine):
     """Statemachine for high level control of the shooter and injector"""
 
     chassis: Chassis
@@ -21,6 +20,8 @@ class ShooterController:
     turret: Turret
     vision: Vision
     led_screen: LEDScreen
+
+    fire_command = will_reset_to(False)
 
     TARGET_RADIUS = (3 * 12 + 3.25) / 2 * 0.0254  # Circumscribing radius of target
     BALL_RADIUS = 7 / 2 * 0.0254
@@ -32,22 +33,18 @@ class ShooterController:
     OFFSET = TOTAL_RADIUS / math.sin(math.pi / 3)
     TRUE_TARGET_RADIUS = TARGET_RADIUS - OFFSET
 
-    VISON_CONVERSION_FACTOR = 0.5  # a magic number for the vision angle
-    # TODO fix vision so this isn't nessecary, requires tuning
+    TARGET_POSITION = wpilib.geometry.Pose2d(
+        0, -2.404, wpilib.geometry.Rotation2d(math.pi)
+    )
+    # in field co ordinates
 
     def __init__(self) -> None:
-        # super().__init__()
-        self.state = self.searching
-        self.input_command = False
+        super().__init__()
         self.spin_command = False
         self.distance = None
-        self.initial_call = True
 
     def execute(self) -> None:
-        """
-        tempoary replacement of magicbot statemachine
-        """
-        self.state()
+        super().execute()
         self.update_LED()
 
     def update_LED(self) -> None:
@@ -69,29 +66,36 @@ class ShooterController:
         else:
             self.led_screen.set_top_row(255, 0, 0)
 
-    # @state(first=True)
+    @state(first=True)
     def searching(self) -> None:
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        heading = self.chassis.get_pose().rotation().radians()
-        self.turret.scan(heading)
-
-        if self.vision.get_data() is not None:
+        if self.vision.target_in_sight():
             # means no data is available
-            # self.next_state("tracking")
-            self.state = self.tracking
+            # print(f"searching -> tracking {self.vision.get_vision_data()}")
+            self.next_state("tracking")
+        else:
+            # TODO test this
+            # pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
+            # rel: wpilib.geometry.Pose2d = self.TARGET_POSITION.relativeTo(pose)
+            # rel_heading = rel.rotation().radians()
+            # self.turret.scan(rel_heading)
 
-    # @state
-    def tracking(self) -> None:
+            self.turret.scan(0)  # TODO remove this
+
+    @state
+    def tracking(self, initial_call) -> None:
         """
         Aiming towards a vision target and spining up flywheels
         """
+        if initial_call:
+            self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
-        if vision_data is None:
-            # self.next_state("searching")
-            self.state = self.searching
+        if self.vision.target_in_sight():
+            self.next_state("searching")
+            # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
             current_turret_angle = self.turret.get_azimuth()
             old_turret_angle = self.turret.azimuth_at_time(vision_data.timestamp)
@@ -100,59 +104,37 @@ class ShooterController:
                 self.state = self.searching
                 return
             delta_since_vision = current_turret_angle - old_turret_angle
-            target_angle = (
-                vision_data.angle - delta_since_vision * self.VISON_CONVERSION_FACTOR
-            )
+            target_angle = vision_data.angle - delta_since_vision
             if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
-                self.turret.slew(target_angle)
-            if self.ready_to_spin():
-                # self.next_state("firing")
-                self.distance = vision_data.distance
-                self.state = self.spining_up
+                self.turret.slew(vision_data.angle)
+            self.shooter.set_range(vision_data.distance)
+            if self.ready_to_fire() and self.fire_command:
+                self.next_state("firing")
 
-    def spining_up(self) -> None:
-        if self.initial_call:
-            self.shooter.set_range(self.distance)
-            self.initial_call = False
-        if self.ready_to_fire() and self.input_command:
-            self.distance = None
-            self.initial_call = True
-            # print(f"spining_up -> firing {self.vision.get_vision_data()}")
-            self.state = self.firing
-
-    # @state
-    def firing(self) -> None:
+    @state(must_finish=True)
+    def firing(self, initial_call) -> None:
         """
         Positioned to fire, inject and expel a single ball
         """
-        self.shooter.fire()
-        # self.next_state("tracking")
-        self.state = self.tracking
+        if initial_call:
+            self.shooter.fire()
+        elif not self.shooter.is_firing():
+            self.next_state("tracking")
 
-    def driver_input(self, command: bool) -> None:
+    def fire_input(self) -> None:
         """
         Called by robot.py to indicate the fire button has been pressed
         """
-        self.input_command = command
-
-    def spin_input(self) -> None:
-        """
-        Called by robot.py to indicate the fire button has been pressed
-        """
-        self.spin_command = not self.spin_command
+        self.fire_command = True
 
     @feedback
     def ready_to_fire(self) -> bool:
         return (
             self.shooter.is_ready()
-            and self.indexer.is_ready()
             and self.turret.is_ready()
+            and self.indexer.is_ready()
         )
-
-    @feedback
-    def ready_to_spin(self) -> bool:
-        return self.indexer.is_ready() and self.turret.is_ready() and self.spin_command
 
     def find_allowable_angle(self, dist: float) -> float:
         """

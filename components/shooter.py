@@ -9,12 +9,13 @@ from magicbot import feedback, tunable
 class Shooter:
     outer_motor: ctre.WPI_TalonFX
     centre_motor: ctre.WPI_TalonFX
-    loading_piston: wpilib.DoubleSolenoid
     indexer_motors: Sequence[ctre.WPI_TalonSRX]
+    loading_piston: wpilib.DoubleSolenoid
+    piston_switch: wpilib.DigitalInput
 
-    ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
-    centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
-    outer_rpms = (5000, 5000, 5000, 5000, 5000, 5000)
+    ranges = (2, 3, 4)  # TODO remove 0 and add more data points
+    centre_rpms = (20, 30, 25)
+    outer_rpms = (70, 50, 50)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
@@ -122,7 +123,7 @@ class Shooter:
 
         based off of the pistons current state
         """
-        return self.loading_piston.get()
+        return self.piston_switch.get()
 
     @feedback
     def is_in_range(self) -> bool:
@@ -150,3 +151,7 @@ class Shooter:
 
     def is_ball_cleared(self) -> bool:
         return not self.indexer_motors[-1].isFwdLimitSwitchClosed()
+
+    def stop_motors(self) -> None:
+        self.centre_target = 0
+        self.outer_target = 0
