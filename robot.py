@@ -17,6 +17,7 @@ from components.hang import Hang
 from components.indexer import Indexer
 from components.shooter import Shooter
 from components.spinner import Spinner
+from components.range_finder import RangeFinder
 from components.turret import Turret
 from components.vision import Vision
 from components.led_screen import LEDScreen
@@ -45,6 +46,7 @@ class MyRobot(magicbot.MagicRobot):
     spinner: Spinner
     turret: Turret
     led_screen: LEDScreen
+    range_finder: RangeFinder
 
     def createObjects(self):
         """Robot initialization function"""
@@ -78,6 +80,8 @@ class MyRobot(magicbot.MagicRobot):
         self.loading_piston = wpilib.DoubleSolenoid(6, 7)
         self.shooter_centre_motor = ctre.WPI_TalonFX(2)
         self.shooter_outer_motor = ctre.WPI_TalonFX(3)
+
+        self.range_counter = wpilib.Counter(6)
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.spinner_motor = wpilib.Spark(2)
