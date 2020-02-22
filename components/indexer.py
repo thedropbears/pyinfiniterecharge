@@ -11,8 +11,8 @@ class Indexer:
 
     intake_arm_piston: wpilib.Solenoid
     intake_main_motor: ctre.WPI_TalonSRX
-    intake_left_motor: wpilib.Spark  # Looking from behind the robot
-    intake_right_motor: wpilib.Spark  # Looking from behind the robot
+    intake_left_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
+    intake_right_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
     SHIMMY_TICKS = int(50 * 0.5)
 
     def setup(self):
@@ -25,7 +25,7 @@ class Indexer:
             )
 
         self.intake_main_motor.setInverted(True)
-        self.intake_left_motor.setInverted(False)
+        self.intake_left_motor.setInverted(True)
         self.intake_right_motor.setInverted(False)
 
         self.indexer_motors[-1].setInverted(False)
@@ -43,7 +43,7 @@ class Indexer:
 
         self.shimmy_count = 0
         self.intake_motor_speed = 1.0
-        self.shimmy_speed = 1.0
+        self.shimmy_speed = 0.7
         self.intaking = False
 
     def on_enable(self) -> None:
@@ -81,20 +81,24 @@ class Indexer:
                     first.overrideLimitSwitchesEnable(True)
 
             self.intake_main_motor.set(self.intake_motor_speed)
-            if self.left_shimmy:
-                self.intake_left_motor.set(self.shimmy_speed)
-                self.intake_right_motor.set(0)
-                self.shimmy_count += 1
-                if self.shimmy_count > self.SHIMMY_TICKS:
-                    self.left_shimmy = False
-                    self.shimmy_count = 0
+            if not self.intake_main_motor.isFwdLimitSwitchClosed():
+                if self.left_shimmy:
+                    self.intake_left_motor.set(self.shimmy_speed)
+                    self.intake_right_motor.set(0)
+                    self.shimmy_count += 1
+                    if self.shimmy_count > self.SHIMMY_TICKS:
+                        self.left_shimmy = False
+                        self.shimmy_count = 0
+                else:
+                    self.intake_left_motor.set(0)
+                    self.intake_right_motor.set(self.shimmy_speed)
+                    self.shimmy_count += 1
+                    if self.shimmy_count > self.SHIMMY_TICKS:
+                        self.left_shimmy = True
+                        self.shimmy_count = 0
             else:
+                self.intake_right_motor.set(0)
                 self.intake_left_motor.set(0)
-                self.intake_right_motor.set(self.shimmy_speed)
-                self.shimmy_count += 1
-                if self.shimmy_count > self.SHIMMY_TICKS:
-                    self.left_shimmy = True
-                    self.shimmy_count = 0
         else:
             # Move balls through if we have them, but don't take in more
             ball_in_previous = False
