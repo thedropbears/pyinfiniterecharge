@@ -13,9 +13,9 @@ class Shooter:
     loading_piston: wpilib.DoubleSolenoid
     piston_switch: wpilib.DigitalInput
 
-    ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
-    centre_rpms = (0, 880/60, 1120/60, 1500/60, 2150/60, 2400/60)
-    outer_rpms = (5000/60, 5000/60, 5000/60, 5000/60, 5000/60, 5000/60)
+    ranges = (2, 3, 4)  # TODO remove 0 and add more data points
+    centre_rpms = (20, 30, 25)
+    outer_rpms = (70, 50, 50)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
@@ -123,7 +123,7 @@ class Shooter:
 
         based off of the pistons current state
         """
-        return self.piston_switch.get() or self.loading_piston.get()
+        return self.piston_switch.get()
 
     @feedback
     def is_in_range(self) -> bool:

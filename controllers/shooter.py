@@ -126,8 +126,6 @@ class ShooterController(StateMachine):
         elif not self.shooter.is_firing():
             self.next_state("tracking")
 
-        self.indexer.jog()
-
     def fire_input(self) -> None:
         """
         Called by robot.py to indicate the fire button has been pressed
