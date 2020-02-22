@@ -62,8 +62,7 @@ class Indexer:
 
             # Turn on all motors and let the limit switches stop it
             for motor in self.indexer_motors[:-2]:
-                pass
-                # motor.set(self.indexer_speed)
+                motor.set(self.indexer_speed)
             if self.is_piston_retracted():
                 feeder.set(self.indexer_speed)
                 injector.set(self.injector_speed)
