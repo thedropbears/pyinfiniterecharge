@@ -67,7 +67,6 @@ class MyRobot(magicbot.MagicRobot):
             ctre.WPI_TalonSRX(14),
         ]
         self.piston_switch = wpilib.DigitalInput(4)  # checks if injector retracted
-        self.injector_switch = wpilib.DigitalInput(9)
         self.injector_master_motor = ctre.WPI_TalonSRX(3)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
         self.intake_arm_piston = wpilib.Solenoid(1)
@@ -76,9 +75,9 @@ class MyRobot(magicbot.MagicRobot):
         self.intake_right_motor = wpilib.Spark(6)
 
         self.led_screen_led = wpilib.AddressableLED(0)
-        self.loading_piston = wpilib.Solenoid(0)
-        self.shooter_centre_motor = ctre.WPI_TalonFX(3)
-        self.shooter_outer_motor = ctre.WPI_TalonFX(2)
+        self.loading_piston = wpilib.DoubleSolenoid(6, 7)
+        self.shooter_centre_motor = ctre.WPI_TalonFX(2)
+        self.shooter_outer_motor = ctre.WPI_TalonFX(3)
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.spinner_motor = wpilib.Spark(2)
