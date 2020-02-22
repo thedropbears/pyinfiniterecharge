@@ -10,12 +10,12 @@ class Shooter:
     outer_motor: ctre.WPI_TalonFX
     centre_motor: ctre.WPI_TalonFX
     indexer_motors: Sequence[ctre.WPI_TalonSRX]
-    loading_piston: wpilib.Solenoid
+    loading_piston: wpilib.DoubleSolenoid
     piston_switch: wpilib.DigitalInput
 
     ranges = (0, 7, 8, 9, 10, 11)  # TODO remove 0 and add more data points
-    centre_rpms = (0, 880, 1120, 1500, 2150, 2400)
-    outer_rpms = (5000, 5000, 5000, 5000, 5000, 5000)
+    centre_rpms = (0, 880/60, 1120/60, 1500/60, 2150/60, 2400/60)
+    outer_rpms = (5000/60, 5000/60, 5000/60, 5000/60, 5000/60, 5000/60)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
