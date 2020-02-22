@@ -9,7 +9,6 @@ import math
 
 import ctre
 import magicbot
-import navx
 import rev.color
 import wpilib
 
@@ -25,6 +24,7 @@ from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities import git
 from utilities.scale_value import scale_value
+from utilities.nav_x import NavX
 
 GIT_COMMIT = git.describe()
 
@@ -54,7 +54,7 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
         self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
-        self.imu = navx.AHRS.create_spi(update_rate_hz=50)
+        self.imu = NavX()
 
         self.hang_winch_motor_master = ctre.WPI_TalonSRX(21)
         self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)

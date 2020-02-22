@@ -1,8 +1,9 @@
 import math
 
 import magicbot
-import navx
 import rev
+
+from utilities.nav_x import NavX
 
 from wpilib.geometry import Pose2d, Rotation2d
 from wpilib.kinematics import (
@@ -24,7 +25,7 @@ class Chassis:
     right_rear: rev.CANSparkMax
     right_front: rev.CANSparkMax
 
-    imu: navx.AHRS
+    imu: NavX
 
     vx = magicbot.will_reset_to(0.0)
     vz = magicbot.will_reset_to(0.0)
@@ -97,8 +98,11 @@ class Chassis:
         self.vz = vz
 
     def _get_heading(self) -> Rotation2d:
-        """Get the current heading of the robot from the IMU, anticlockwise positive."""
-        return Rotation2d.fromDegrees(-self.imu.getYaw())
+        """Get the current heading of the robot from the IMU. Note that this
+        uses our wrapper around the broken navx API, so it returns radians in
+        the robot coordinate system.
+        """
+        return Rotation2d(self.imu.getYaw())
 
     def get_pose(self) -> Pose2d:
         """Get the current position of the robot on the field."""
