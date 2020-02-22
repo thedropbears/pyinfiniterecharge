@@ -98,10 +98,7 @@ class Chassis:
         self.vz = vz
 
     def _get_heading(self) -> Rotation2d:
-        """Get the current heading of the robot from the IMU. Note that this
-        uses our wrapper around the broken navx API, so it returns radians in
-        the robot coordinate system.
-        """
+        """Get the current heading of the robot from the IMU, anticlockwise positive."""
         return Rotation2d(self.imu.getYaw())
 
     def get_pose(self) -> Pose2d:
