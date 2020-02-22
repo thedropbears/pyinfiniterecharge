@@ -14,8 +14,8 @@ class Shooter:
     piston_switch: wpilib.DigitalInput
 
     ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10, 11)  # TODO add more data points
-    centre_lookup = (20, 30, 48, 1500/60, 2150/60, 2400/60, 0, 0, 0, 0, 0)
-    outer_lookup = (70, 50, 30, 5000/60, 5000/60, 5000/60, 0, 0, 0, 0, 0)
+    centre_lookup = (20, 30, 40, 1500/60, 2150/60, 2400/60, 0, 0, 0, 0, 0)
+    outer_lookup = (70, 50, 40, 40, 5000/60, 5000/60, 0, 0, 0, 0, 0)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
@@ -28,10 +28,6 @@ class Shooter:
         self.inject = False
         self.in_range = False
         self.velocity_tolerance = 0.05  # of setpoint
-
-    def on_enable(self) -> None:
-        self.centre_motor.stopMotor()
-        self.outer_motor.stopMotor()
 
     def setup(self) -> None:
         self.outer_motor.setInverted(True)
@@ -141,7 +137,8 @@ class Shooter:
         Checks the speed, range and whether the piston is moving
         """
         # print(f"in range {self.is_in_range()} at speed {self.is_at_speed()} is firing {self.is_firing()}")
-        return self.is_in_range() and self.is_at_speed() and not self.is_firing()
+        # self.is_in_range() and
+        return self.is_at_speed() and not self.is_firing()
 
     def fire(self) -> None:
         """
