@@ -84,6 +84,7 @@ class Vision:
         self.nt = NetworkTables
         self.table = self.nt.getTable("/vision")
         self.vision_data_entry = self.table.getEntry("data")
+        self.system_lag_entry = self.table.getEntry("system_lag")
 
         self.visionComms = VisionComms(self.table)
 
@@ -105,6 +106,7 @@ class Vision:
                 data[0], data[1], data[2] + self.visionComms.latency
             )
             # add latency to vision timestamp
+            self.system_lag_entry.setDouble(self.system_lag_calculation())
 
         self.nt.flush()
 
@@ -116,3 +118,21 @@ class Vision:
             - (self.vision_data.timestamp + self.visionComms.latency)
             < self.MEMORY_CONSTANT
         )
+<<<<<<< HEAD
+=======
+
+    @feedback
+    def is_ready(self) -> bool:
+        if (
+            self.vision_data_entry.exists()
+            and self.vision_data is not None
+            and self.target_in_sight()
+        ):
+            return True
+        return False  # no network tables, so no target
+
+    def system_lag_calculation(self) -> float:
+        return time.monotonic() - (
+            self.vision_data.timestamp + self.visionComms.latency
+        )
+>>>>>>> added nt entry to calculate time delay for processing vision
