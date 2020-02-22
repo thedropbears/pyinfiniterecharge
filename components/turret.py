@@ -175,7 +175,7 @@ class Turret:
                 )
             else:
                 current_count = self.motor.getSelectedSensorPosition()
-                self._slew_to_counts(current_count * +self.scan_increment)
+                self._slew_to_counts(current_count + self.scan_increment)
             self.current_state = self.SCANNING
 
     def is_ready(self) -> bool:
