@@ -10,7 +10,7 @@ class Indexer:
     piston_switch: wpilib.DigitalInput
 
     intake_arm_piston: wpilib.Solenoid
-    intake_main_motor: wpilib.interfaces.SpeedController
+    intake_main_motor: ctre.WPI_TalonSRX
     intake_left_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
     intake_right_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
     SHIMMY_TICKS = int(50 * 0.5)
