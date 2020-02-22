@@ -4,13 +4,14 @@ from magicbot import feedback
 
 
 class RangeFinder:
-    range_counter = wpilib.Counter
+    range_counter: wpilib.Counter
 
     def __init__(self):
         self.distance = 0
 
     def setup(self):
-        pass
+        self.range_counter.setSemiPeriodMode(highSemiPeriod=True)
+        self.range_counter.setSamplesToAverage(10)
 
     def _get_distance(self):
         # 10 usec is 1cm, return as metres
@@ -19,8 +20,8 @@ class RangeFinder:
     def execute(self):
         # get the distance and smooth it
         d = self._get_distance()
-        if d > 40:  # Max range is around 40m
-            d = 40
+        if d > 40.0:  # Max range is around 40m
+            d = 40.0
         self.distance = d
 
     @feedback
