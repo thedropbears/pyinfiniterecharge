@@ -77,14 +77,14 @@ class ShooterController(StateMachine):
             # means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             self.next_state("tracking")
+        else:
+            # TODO test this
+            # pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
+            # rel: wpilib.geometry.Pose2d = self.TARGET_POSITION.relativeTo(pose)
+            # rel_heading = rel.rotation().radians()
+            # self.turret.scan(rel_heading)
 
-        # TODO test this
-        # pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
-        # rel: wpilib.geometry.Pose2d = self.TARGET_POSITION.relativeTo(pose)
-        # rel_heading = rel.rotation().radians()
-        # self.turret.scan(rel_heading)
-
-        self.turret.scan(0)  # TODO remove this
+            self.turret.scan(0)  # TODO remove this
 
     @state
     def tracking(self, initial_call) -> None:
