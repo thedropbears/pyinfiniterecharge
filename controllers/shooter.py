@@ -73,7 +73,7 @@ class ShooterController(StateMachine):
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        if self.vision.get_data() is not None:
+        if self.vision.target_in_sight():
             # means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             self.next_state("tracking")
@@ -95,7 +95,7 @@ class ShooterController(StateMachine):
             self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
-        if vision_data is None:
+        if self.vision.target_in_sight():
             self.next_state("searching")
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:

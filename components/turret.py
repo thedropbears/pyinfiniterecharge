@@ -171,13 +171,13 @@ class Turret:
             if self.index_found:
                 # set the first pass
                 self._slew_to_counts(
-                    (azimuth + self.scan_increment) * self.COUNTS_PER_TURRET_RADIAN
+                    azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment
                 )
             else:
                 current_count = self.motor.getSelectedSensorPosition()
                 self._slew_to_counts(
-                    current_count
-                    + (self.scan_increment * self.COUNTS_PER_TURRET_RADIAN)
+                    current_count *
+                    + self.scan_increment
                 )
             self.current_state = self.SCANNING
 
