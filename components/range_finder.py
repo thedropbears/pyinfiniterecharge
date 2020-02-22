@@ -8,15 +8,13 @@ class RangeFinder:
 
     def __init__(self):
         self.distance = 0
-    
+
     def setup(self):
         pass
 
     def _get_distance(self):
         # 10 usec is 1cm, return as metres
         return self.range_counter.getPeriod() * 1000000 / 1000
-
-  
 
     def execute(self):
         # get the distance and smooth it
