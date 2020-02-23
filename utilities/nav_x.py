@@ -30,10 +30,6 @@ class NavX:
         raw = self.ahrs.getRoll()
         return -math.radians(raw)
 
-    def resetHeading(self):
-        """Zero the yaw."""
-        self.ahrs.reset()
-
     def getHeadingRate(self):
         """Get the rate of change of yaw in radians per second."""
         # multiply by update freq because NavX does not normalise per timestep
