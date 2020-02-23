@@ -118,21 +118,10 @@ class Vision:
             - (self.vision_data.timestamp + self.visionComms.latency)
             < self.MEMORY_CONSTANT
         )
-<<<<<<< HEAD
-=======
 
     @feedback
-    def is_ready(self) -> bool:
-        if (
-            self.vision_data_entry.exists()
-            and self.vision_data is not None
-            and self.target_in_sight()
-        ):
-            return True
-        return False  # no network tables, so no target
-
     def system_lag_calculation(self) -> float:
         return time.monotonic() - (
             self.vision_data.timestamp + self.visionComms.latency
         )
->>>>>>> added nt entry to calculate time delay for processing vision
+
