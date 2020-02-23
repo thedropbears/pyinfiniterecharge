@@ -108,20 +108,11 @@ class Vision:
 
         self.nt.flush()
 
-    def target_in_sight(self) -> bool:
+    @feedback
+    def is_ready(self) -> bool:
         return (
             self.vision_data is not None
             and time.monotonic()
             - (self.vision_data.timestamp + self.visionComms.latency)
             < self.MEMORY_CONSTANT
         )
-
-    @feedback
-    def is_ready(self) -> bool:
-        if (
-            self.vision_data_entry.exists()
-            and self.vision_data is not None
-            and self.target_in_sight()
-        ):
-            return True
-        return False  # no network tables, so no target
