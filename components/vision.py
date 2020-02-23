@@ -85,7 +85,6 @@ class Vision:
         self.nt = NetworkTables
         self.table = self.nt.getTable("/vision")
         self.vision_data_entry = self.table.getEntry("data")
-        self.system_lag_entry = self.table.getEntry("system_lag")
 
         self.visionComms = VisionComms(self.table)
 
@@ -107,7 +106,6 @@ class Vision:
                 data[0], data[1], data[2] + self.visionComms.latency
             )
             # add latency to vision timestamp
-            self.system_lag_entry.setDouble(self.system_lag_calculation())
 
         self.nt.flush()
 
@@ -118,8 +116,6 @@ class Vision:
     @feedback
     def system_lag_calculation(self) -> float:
         if self.vision_data is not None:
-            return time.monotonic() - (
-                self.vision_data.timestamp + self.visionComms.latency
-            )
+            return time.monotonic() - self.vision_data.timestamp
         else:
             return math.inf
