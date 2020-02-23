@@ -40,6 +40,8 @@ class ShooterController(StateMachine):
     )
     # in field co ordinates
 
+    CAMERA_TO_LIDAR = 0.15
+
     def __init__(self) -> None:
         super().__init__()
         self.spin_command = False
@@ -111,7 +113,10 @@ class ShooterController(StateMachine):
                 # print(f"Telling turret to slew by {delta_angle}")
                 self.turret.slew(vision_data.angle)
             if self.turret.is_ready():
-                self.shooter.set_range(self.range_finder.get_distance())
+                self.shooter.set_range(
+                    self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
+                )
+                print(f"just set shooter range")
             if self.ready_to_fire() and self.fire_command:
                 self.next_state("firing")
 
