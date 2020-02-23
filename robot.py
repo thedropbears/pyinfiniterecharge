@@ -41,12 +41,12 @@ class MyRobot(magicbot.MagicRobot):
     # List components (which represent physical subsystems) here.
     chassis: Chassis
     hang: Hang
+    range_finder: RangeFinder
     indexer: Indexer
     shooter: Shooter
     spinner: Spinner
     turret: Turret
     led_screen: LEDScreen
-    range_finder: RangeFinder
 
     def createObjects(self):
         """Robot initialization function"""
