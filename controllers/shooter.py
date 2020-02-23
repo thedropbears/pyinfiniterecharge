@@ -6,6 +6,7 @@ import wpilib.geometry
 from components.chassis import Chassis
 from components.indexer import Indexer
 from components.shooter import Shooter
+from components.range_finder import RangeFinder
 from components.turret import Turret
 from components.vision import Vision
 from components.led_screen import LEDScreen
@@ -20,6 +21,7 @@ class ShooterController(StateMachine):
     turret: Turret
     vision: Vision
     led_screen: LEDScreen
+    range_finder: RangeFinder
 
     fire_command = will_reset_to(False)
 
@@ -93,7 +95,7 @@ class ShooterController(StateMachine):
             self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
-        if self.vision.target_in_sight():
+        if not self.vision.target_in_sight():
             self.next_state("searching")
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
@@ -108,7 +110,8 @@ class ShooterController(StateMachine):
             if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
                 self.turret.slew(vision_data.angle)
-            self.shooter.set_range(vision_data.distance)
+            if self.vision.is_ready() and self.turret.is_ready():
+                self.shooter.set_range(self.range_finder.get_distance())
             if self.ready_to_fire() and self.fire_command:
                 self.next_state("firing")
 
