@@ -87,11 +87,8 @@ class Turret:
         else:
             self.motor.setSelectedSensorPosition(0)
             self.motor.set(ctre.ControlMode.MotionMagic, 0)
-            # Handle the case where we start out on an index. This might change
-            # index_found.
+            # Handle the case where we start out on an index.
             self._handle_indices()
-            if not self.index_found:
-                self.scan()
 
     def setup(self) -> None:
         self.motor.configSelectedFeedbackSensor(
