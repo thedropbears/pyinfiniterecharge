@@ -194,10 +194,10 @@ class Turret:
         if not self.index_found:
             self._handle_indices()
         if self.current_state == self.SCANNING:
-            self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 10)
+            self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
             self._do_scanning()
         else:
-            self.motor.configMotionCruiseVelocity(self.SLEW_CRUISE_VELOCITY, 10)
+            self.motor.configMotionCruiseVelocity(self.SLEW_CRUISE_VELOCITY, 0)
 
         self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
 
