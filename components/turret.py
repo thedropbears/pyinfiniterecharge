@@ -125,14 +125,19 @@ class Turret:
 
         self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
 
-    # Slew to the given absolute angle (in radians). An angle of 0 corresponds
-    # to the centre index point. Note that this is 180 degrees offset from the
-    # robot, though the coordinate system is otherwise the same, i.e. positive
-    # rotations are anti-clockwise from above.
+    # Slew to the given absolute angle in radians in the robot coordinate system.
+    # We assume that the angle is between -pi and pi
     # If no index has been seen yet, we have no reference for the angle, so we
     # ignore the command.
+    #
     # TODO: perhaps we should return an error so the calling code can know?
     def slew_to_azimuth(self, angle: float) -> None:
+        angle -= math.pi  # This converts to turret coordinate system
+        # Now we normalise to +- pi
+        while angle < -math.pi:
+            angle += math.tau
+        while angle > math.pi:
+            angle -= math.tau
         if self.index_found:
             self.current_state = self.SLEWING
             self.motor._slew_to_counts(int(angle * self.COUNTS_PER_TURRET_RADIAN))
