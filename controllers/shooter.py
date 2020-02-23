@@ -89,12 +89,10 @@ class ShooterController(StateMachine):
             self.turret.scan(0)  # TODO remove this
 
     @state
-    def tracking(self, initial_call) -> None:
+    def tracking(self) -> None:
         """
         Aiming towards a vision target and spining up flywheels
         """
-        if initial_call:
-            self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
         if not self.vision.is_ready():
@@ -116,7 +114,6 @@ class ShooterController(StateMachine):
                 self.shooter.set_range(
                     self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
                 )
-                print(f"just set shooter range")
             if self.ready_to_fire() and self.fire_command:
                 self.next_state("firing")
 
