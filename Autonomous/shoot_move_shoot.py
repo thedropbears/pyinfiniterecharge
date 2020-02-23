@@ -1,6 +1,4 @@
 import math
-import time
-from typing import Optional
 
 from wpilib import controller
 from wpilib import geometry
@@ -9,6 +7,7 @@ from magicbot import AutonomousStateMachine, state
 
 from components.chassis import Chassis
 from components.indexer import Indexer
+from components.shooter import Shooter
 from controllers.shooter import ShooterController
 
 
@@ -26,31 +25,40 @@ class ShootMoveShootBase(AutonomousStateMachine):
 
     chassis: Chassis
     indexer: Indexer
+    shooter: Shooter
+
+    TARGET_POSITION = geometry.Pose2d(
+        0, -2.404, geometry.Rotation2d(0)
+    )
 
     def __init__(self) -> None:
         super().__init__()
         self.controller = controller.RamseteController()
+        self.start_pose = to_pose(0, 0, math.pi)
         tolerance = to_pose(0.1, 0.1, math.pi / 18)
         self.controller.setTolerance(tolerance)
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1, maxAcceleration=1
         )
         self.gen = trajectory.TrajectoryGenerator()
-        self.trajectory_num = 0
-        self.trajectory_max = 1
 
     def setup(self):
         self.trajectory_config.setKinematics(self.chassis.kinematics)
+        self.trajectory_num = 0
+        self.trajectory_max = 1
 
     def on_enable(self) -> None:
-        self.chassis.reset_odometry(geometry.Pose2d())
+        self.chassis.reset_odometry(self.start_pose)
         super().on_enable()
 
     @state(first=True)
-    def shoot(self) -> None:
+    def shoot(self, initial_call) -> None:
         """
         Shoot all balls that we currently have
         """
+        if initial_call:
+            if self.trajectory_num == 0:
+                self.shooter.set_range(3)
         self.shooter_controller.engage()
         self.shooter_controller.fire_input()
         if self.indexer.balls_loaded() == 0:
@@ -64,7 +72,9 @@ class ShootMoveShootBase(AutonomousStateMachine):
         """
         Follow the trajectory defined by our waypoints
         """
-        if state_tm > self.path.totalTime():
+        if initial_call:
+            self.shooter.set_range(self.end_range)
+        if state_tm > self.path.totalTime() or self.indexer.balls_loaded() >= 3:
             print(f"Calculated path time: {self.path.totalTime()}")
             self.chassis.drive(0, 0)
             self.next_state("shoot")
@@ -85,9 +95,9 @@ class test(ShootMoveShootBase):
 
     def setup(self):
         super().setup()
-        self.start_pose = to_pose(0, 0, 0)
+        self.start_pose = to_pose(0, 0, math.pi)
         self.chassis.reset_odometry(self.start_pose)
-        self.end_pose = to_pose(2, 0, 0)
+        self.end_pose = to_pose(2, 0, math.pi)
         self.waypoints = [geometry.Translation2d(1, 0)]
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1, maxAcceleration=1
@@ -95,3 +105,21 @@ class test(ShootMoveShootBase):
         self.path = self.gen.generateTrajectory(
             self.start_pose, self.waypoints, self.end_pose, self.trajectory_config
         )
+
+
+class _3Right3(ShootMoveShootBase):
+    MODE_NAME= "3RIGHT3"
+
+    def setup(self):
+        super().setup()
+        self.start_pose = to_pose(3.459, -0.705, 0)
+        self.chassis.reset_odometry(self.start_pose)
+        self.end_pose = to_pose(8.163, -0.705, 0)
+        self.waypoints = [geometry.Translation2d(7.077, -0.705), geometry.Translation2d(7.992, -0.705)]
+        self.trajectory_config = trajectory.TrajectoryConfig(
+            maxVelocity=1.5, maxAcceleration=1
+        )
+        self.path = self.gen.generateTrajectory(
+            self.start_pose, self.waypoints, self.end_pose, self.trajectory_config
+        )
+        self.end_range = (self.TARGET_POSITION - self.end_pose).translation().norm()
