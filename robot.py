@@ -145,7 +145,7 @@ class MyRobot(magicbot.MagicRobot):
             self.shooter_controller.spin_input()
 
     def handle_hang_inputs(self, joystick: wpilib.Joystick) -> None:
-        if joystick.getRawButtonPressed(3) and joystick.getRawButtonPressed(4):
+        if joystick.getRawButton(3) and joystick.getRawButton(4):
             self.hang.raise_hook()
         if self.hang.fire_hook and joystick.getRawButton(4):
             self.hang.winch()
