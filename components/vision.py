@@ -1,4 +1,5 @@
 import time
+import math
 
 from networktables import NetworkTables, NetworkTable
 from typing import Optional
@@ -77,7 +78,7 @@ class VisionComms:
 
 class Vision:
 
-    MEMORY_CONSTANT: int
+    SYSTEM_LAG_THRESHOLD = 0.200
 
     def __init__(self) -> None:
 
@@ -112,16 +113,13 @@ class Vision:
 
     @feedback
     def is_ready(self) -> bool:
-        return (
-            self.vision_data is not None
-            and time.monotonic()
-            - (self.vision_data.timestamp + self.visionComms.latency)
-            < self.MEMORY_CONSTANT
-        )
+        return self.system_lag_calculation() < self.SYSTEM_LAG_THRESHOLD
 
     @feedback
     def system_lag_calculation(self) -> float:
-        return time.monotonic() - (
-            self.vision_data.timestamp + self.visionComms.latency
-        )
-
+        if self.vision_data is not None:
+            return time.monotonic() - (
+                self.vision_data.timestamp + self.visionComms.latency
+            )
+        else:
+            return math.inf
