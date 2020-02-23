@@ -18,7 +18,7 @@ class RangeFinder:
         return self.range_counter.getPeriod() * 1000000 / 1000
 
     def execute(self):
-        # get the distance and smooth it
+        # get the distance and gate it at max range
         d = self._get_distance()
         if d > 40.0:  # Max range is around 40m
             d = 40.0
