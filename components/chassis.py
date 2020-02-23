@@ -97,6 +97,16 @@ class Chassis:
         self.vx = vx
         self.vz = vz
 
+    def disable_ramp_rate(self) -> None:
+        """Immediately disable the ramp rate for trajectory tracking."""
+        self.left_front.setClosedLoopRampRate(0)
+        self.right_front.setClosedLoopRampRate(0)
+
+    def enable_ramp_rate(self) -> None:
+        """Immediately set the ramp rate for driver control."""
+        self.left_front.setClosedLoopRampRate(0.1)
+        self.right_front.setClosedLoopRampRate(0.1)
+
     def _get_heading(self) -> Rotation2d:
         """Get the current heading of the robot from the IMU, anticlockwise positive."""
         return Rotation2d(self.imu.getYaw())
