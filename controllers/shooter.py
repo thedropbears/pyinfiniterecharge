@@ -73,7 +73,7 @@ class ShooterController(StateMachine):
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        if self.vision.target_in_sight():
+        if self.vision.is_ready():
             # means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             self.next_state("tracking")
@@ -95,7 +95,7 @@ class ShooterController(StateMachine):
             self.shooter.stop_motors()
         vision_data = self.vision.get_data()
         # collect data only once per loop
-        if not self.vision.target_in_sight():
+        if not self.vision.is_ready():
             self.next_state("searching")
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
@@ -110,7 +110,7 @@ class ShooterController(StateMachine):
             if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
                 self.turret.slew(vision_data.angle)
-            if self.vision.is_ready() and self.turret.is_ready():
+            if self.turret.is_ready():
                 self.shooter.set_range(self.range_finder.get_distance())
             if self.ready_to_fire() and self.fire_command:
                 self.next_state("firing")
