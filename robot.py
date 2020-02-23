@@ -63,6 +63,7 @@ class MyRobot(magicbot.MagicRobot):
         self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
         self.indexer_motors = [
+            ctre.WPI_TalonSRX(18),
             ctre.WPI_TalonSRX(11),
             ctre.WPI_TalonSRX(12),
             ctre.WPI_TalonSRX(13),
@@ -72,7 +73,6 @@ class MyRobot(magicbot.MagicRobot):
         self.injector_master_motor = ctre.WPI_TalonSRX(3)
         self.injector_slave_motor = ctre.WPI_TalonSRX(43)
         self.intake_arm_piston = wpilib.Solenoid(1)
-        self.intake_main_motor = ctre.WPI_TalonSRX(18)
         self.intake_left_motor = rev.CANSparkMax(8, rev.MotorType.kBrushless)
         self.intake_right_motor = rev.CANSparkMax(9, rev.MotorType.kBrushless)
 
@@ -98,8 +98,12 @@ class MyRobot(magicbot.MagicRobot):
         self.MEMORY_CONSTANT = int(0.1 / self.control_loop_wait_time)
         # how long before data times out
 
+    def autonomousInit(self):
+        self.indexer.shimmying = False
+
     def teleopInit(self):
         """Executed at the start of teleop mode"""
+        self.indexer.shimmying = True
 
     def teleopPeriodic(self):
         """Executed every cycle"""

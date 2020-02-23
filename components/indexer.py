@@ -10,10 +10,12 @@ class Indexer:
     piston_switch: wpilib.DigitalInput
 
     intake_arm_piston: wpilib.Solenoid
-    intake_main_motor: ctre.WPI_TalonSRX
     intake_left_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
     intake_right_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
-    SHIMMY_TICKS = int(50 * 0.5)
+    SHIMMY_TICKS = int(50 * 0.25)
+
+    def __init__(self):
+        self.shimmying = False
 
     def setup(self):
         for motor in self.indexer_motors:
@@ -24,7 +26,6 @@ class Indexer:
                 ctre.LimitSwitchNormal.NormallyOpen,
             )
 
-        self.intake_main_motor.setInverted(True)
         self.intake_left_motor.setInverted(True)
         self.intake_right_motor.setInverted(False)
 
@@ -43,7 +44,8 @@ class Indexer:
 
         self.shimmy_count = 0
         self.intake_motor_speed = 1.0
-        self.shimmy_speed = 0.7
+        self.shimmy_speed = 1.0
+        self.shimmying = False
         self.intaking = False
 
     def on_enable(self) -> None:
@@ -54,6 +56,8 @@ class Indexer:
         if self.intaking:
             injector = self.indexer_motors[-1]
             feeder = self.indexer_motors[-2]
+            intake_main_motor = self.indexer_motors[0]
+
             if injector.isFwdLimitSwitchClosed():
                 self.transfer_to_injector = False
             elif feeder.isFwdLimitSwitchClosed():
@@ -61,7 +65,8 @@ class Indexer:
                 self.transfer_to_injector = True
 
             # Turn on all motors and let the limit switches stop it
-            for motor in self.indexer_motors[:-2]:
+            intake_main_motor.set(self.intake_motor_speed)
+            for motor in self.indexer_motors[1:-2]:
                 motor.set(self.indexer_speed)
             if self.is_piston_retracted():
                 feeder.set(self.indexer_speed)
@@ -80,22 +85,26 @@ class Indexer:
                 else:
                     first.overrideLimitSwitchesEnable(True)
 
-            self.intake_main_motor.set(self.intake_motor_speed)
-            if not self.intake_main_motor.isFwdLimitSwitchClosed():
-                if self.left_shimmy:
-                    self.intake_left_motor.set(self.shimmy_speed)
-                    self.intake_right_motor.set(0)
-                    self.shimmy_count += 1
-                    if self.shimmy_count > self.SHIMMY_TICKS:
-                        self.left_shimmy = False
-                        self.shimmy_count = 0
+            if not intake_main_motor.isFwdLimitSwitchClosed():
+                if self.shimmying:
+                    if self.left_shimmy:
+                        self.intake_left_motor.set(self.shimmy_speed)
+                        self.intake_right_motor.set(0)
+                        self.shimmy_count += 1
+                        if self.shimmy_count > self.SHIMMY_TICKS:
+                            self.left_shimmy = False
+                            self.shimmy_count = 0
+                    else:
+                        self.intake_left_motor.set(0)
+                        self.intake_right_motor.set(self.shimmy_speed)
+                        self.shimmy_count += 1
+                        if self.shimmy_count > self.SHIMMY_TICKS:
+                            self.left_shimmy = True
+                            self.shimmy_count = 0
                 else:
-                    self.intake_left_motor.set(0)
+                    self.intake_left_motor.set(self.shimmy_speed)
                     self.intake_right_motor.set(self.shimmy_speed)
-                    self.shimmy_count += 1
-                    if self.shimmy_count > self.SHIMMY_TICKS:
-                        self.left_shimmy = True
-                        self.shimmy_count = 0
+
             else:
                 self.intake_right_motor.set(0)
                 self.intake_left_motor.set(0)
@@ -143,4 +152,4 @@ class Indexer:
 
     @feedback
     def is_ready(self) -> bool:
-        return self.indexer_motors[-1].isFwdLimitSwitchClosed()
+        return self.indexer_motors[-1].isFwdLimitSwitchClosed() and self.is_piston_retracted()
