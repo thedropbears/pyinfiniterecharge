@@ -41,11 +41,14 @@ class ShooterController(StateMachine):
     TRUE_TARGET_RADIUS = TARGET_RADIUS - OFFSET
 
     TARGET_POSITION = wpilib.geometry.Pose2d(
-        0, -2.404, wpilib.geometry.Rotation2d(math.pi)
+        0, -2.404, wpilib.geometry.Rotation2d(0)
     )
     # in field co ordinates
 
     TARGET_LOST_TO_SCAN = 0.5
+    VISION_GAIN = 0.8
+
+    CAMERA_TO_LIDAR = 0.15
 
     def __init__(self) -> None:
         super().__init__()
@@ -92,6 +95,20 @@ class ShooterController(StateMachine):
             self.led_screen.set_top_row(255, 0, 0)
 
     @state(first=True)
+    def startup(self, initial_call) -> None:
+        """
+        Wait for the turret to complete it's inital slew before doing anything
+        """
+        if initial_call:
+            pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
+            rel: wpilib.geometry.Pose2d = pose - self.TARGET_POSITION
+            rel_heading = math.atan2(rel.translation().Y(), rel.translation().X()) + pose.rotation().radians()
+            self.turret.slew(rel_heading)
+        if self.turret.is_ready():
+            self.next_state("searching")
+
+
+    @state
     def searching(self) -> None:
         """
         The vision system does not have a target, we try to find one using odometry
@@ -108,8 +125,20 @@ class ShooterController(StateMachine):
                 self.time_target_lost is None
                 or (time_now - self.time_target_lost) > self.TARGET_LOST_TO_SCAN
             ):
-                self.turret.scan(-self.chassis.get_heading())
-                self.time_of_last_scan = time_now
+                # Start a scan only if it's been a minimum time since we started
+                # a scan. This allows the given scan to grow enough to find the
+                # target so that we don't just start the scan over every cycle.
+                if (
+                    self.time_of_last_scan is None
+                    or (time_now - self.time_of_last_scan) > self.MIN_SCAN_PERIOD
+                ):
+                    self.turret.scan(-self.chassis.get_heading())
+                    self.time_of_last_scan = time_now
+            # TODO test this
+            # pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
+            # rel: wpilib.geometry.Pose2d = pose - self.TARGET_POSITION
+            # rel_heading = math.atan2(rel.translation().Y(), rel.translation().X()) + pose.rotation().radians()
+            # self.turret.scan(rel_heading)
 
     @state
     def tracking(self) -> None:
@@ -124,8 +153,9 @@ class ShooterController(StateMachine):
         else:
             target_data = self.target_estimator.get_data()
             # if abs(target_data.angle) > self.find_allowable_angle(target_data.distance):
-            # print(f"Telling turret to slew by {target_data.angle}")
-            self.turret.slew(target_data.angle)
+            if abs(target_data.angle) > self.find_allowable_angle(target_data.distance):
+                # print(f"Telling turret to slew by {target_data.angle}")
+                self.turret.slew(target_data.angle)
             if self.turret.is_ready():
                 self.shooter.set_range(target_data.distance)
             if self.ready_to_fire() and self.fire_command:
