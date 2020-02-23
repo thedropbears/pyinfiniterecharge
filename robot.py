@@ -24,8 +24,8 @@ from components.led_screen import LEDScreen
 from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities import git
-from utilities.scale_value import scale_value
 from utilities.nav_x import NavX
+from utilities.scalers import scale_value
 
 GIT_COMMIT = git.describe()
 
