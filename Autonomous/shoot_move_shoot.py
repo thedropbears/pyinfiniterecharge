@@ -27,9 +27,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
     indexer: Indexer
     shooter: Shooter
 
-    TARGET_POSITION = geometry.Pose2d(
-        0, -2.404, geometry.Rotation2d(0)
-    )
+    TARGET_POSITION = geometry.Pose2d(0, -2.404, geometry.Rotation2d(0))
 
     def __init__(self) -> None:
         super().__init__()
@@ -108,14 +106,17 @@ class test(ShootMoveShootBase):
 
 
 class _3Right3(ShootMoveShootBase):
-    MODE_NAME= "3RIGHT3"
+    MODE_NAME = "3RIGHT3"
 
     def setup(self):
         super().setup()
         self.start_pose = to_pose(3.459, -0.705, 0)
         self.chassis.reset_odometry(self.start_pose)
         self.end_pose = to_pose(8.163, -0.705, 0)
-        self.waypoints = [geometry.Translation2d(7.077, -0.705), geometry.Translation2d(7.992, -0.705)]
+        self.waypoints = [
+            geometry.Translation2d(7.077, -0.705),
+            geometry.Translation2d(7.992, -0.705),
+        ]
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1.5, maxAcceleration=1
         )

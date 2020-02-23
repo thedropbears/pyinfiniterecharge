@@ -40,9 +40,7 @@ class ShooterController(StateMachine):
     OFFSET = TOTAL_RADIUS / math.sin(math.pi / 3)
     TRUE_TARGET_RADIUS = TARGET_RADIUS - OFFSET
 
-    TARGET_POSITION = wpilib.geometry.Pose2d(
-        0, -2.404, wpilib.geometry.Rotation2d(0)
-    )
+    TARGET_POSITION = wpilib.geometry.Pose2d(0, -2.404, wpilib.geometry.Rotation2d(0))
     # in field co ordinates
 
     TARGET_LOST_TO_SCAN = 0.5
@@ -102,11 +100,13 @@ class ShooterController(StateMachine):
         if initial_call:
             pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
             rel: wpilib.geometry.Pose2d = pose - self.TARGET_POSITION
-            rel_heading = math.atan2(rel.translation().Y(), rel.translation().X()) + pose.rotation().radians()
+            rel_heading = (
+                math.atan2(rel.translation().Y(), rel.translation().X())
+                + pose.rotation().radians()
+            )
             self.turret.slew(rel_heading)
         if self.turret.is_ready():
             self.next_state("searching")
-
 
     @state
     def searching(self) -> None:
