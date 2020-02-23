@@ -116,7 +116,6 @@ class ShooterController(StateMachine):
                 self.shooter.set_range(
                     self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
                 )
-                print(f"just set shooter range")
             if self.ready_to_fire() and self.fire_command:
                 self.next_state("firing")
 
