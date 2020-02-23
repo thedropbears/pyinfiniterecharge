@@ -95,6 +95,8 @@ class Shooter:
 
         Considers the rotation rates of the flywheels compared with their setpoints
         """
+        if self.centre_target <= 0 or self.outer_target <= 0:
+            return False
         return (
             abs(self.centre_target - self.get_centre_velocity())
             <= self.centre_target * self.velocity_tolerance
