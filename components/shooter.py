@@ -13,9 +13,9 @@ class Shooter:
     loading_piston: wpilib.DoubleSolenoid
     piston_switch: wpilib.DigitalInput
 
-    ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10, 11)  # TODO add more data points
-    centre_lookup = (20, 30, 40, 1500/60, 2150/60, 2400/60, 0, 0, 0, 0, 0)
-    outer_lookup = (70, 50, 40, 40, 5000/60, 5000/60, 0, 0, 0, 0, 0)
+    ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10)  # TODO add more data points
+    centre_lookup = (20, 30, 40, 42, 52, 54, 60, 60, 67, 72)
+    outer_lookup = (70, 50, 40, 35, 25, 21, 21, 21, 17, 17)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
