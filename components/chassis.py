@@ -28,6 +28,7 @@ class Chassis:
 
     imu: NavX
 
+    open_loop = magicbot.tunable(False)
     vx = magicbot.will_reset_to(0.0)
     vz = magicbot.will_reset_to(0.0)
 
@@ -79,16 +80,19 @@ class Chassis:
 
         speeds = self.kinematics.toWheelSpeeds(chassis_speeds)
 
-        self.left_pid.setReference(
-            speeds.left,
-            rev.ControlType.kVelocity,
-            arbFeedforward=self.ff_calculator.calculate(speeds.left),
-        )
-        self.right_pid.setReference(
-            speeds.right,
-            rev.ControlType.kVelocity,
-            arbFeedforward=self.ff_calculator.calculate(speeds.right),
-        )
+        left_ff = self.ff_calculator.calculate(speeds.left)
+        right_ff = self.ff_calculator.calculate(speeds.right)
+
+        if self.open_loop:
+            self.left_front.setVoltage(left_ff)
+            self.right_front.setVoltage(right_ff)
+        else:
+            self.left_pid.setReference(
+                speeds.left, rev.ControlType.kVelocity, arbFeedforward=left_ff,
+            )
+            self.right_pid.setReference(
+                speeds.right, rev.ControlType.kVelocity, arbFeedforward=right_ff,
+            )
 
         self.odometry.update(
             self._get_heading(),
@@ -105,6 +109,14 @@ class Chassis:
         """
         self.vx = vx
         self.vz = vz
+
+    def disable_closed_loop(self) -> None:
+        """Run the drivetrain in open loop mode (feedforward only)."""
+        self.open_loop = True
+
+    def enable_closed_loop(self) -> None:
+        """Run the drivetrain in velocity closed loop mode."""
+        self.open_loop = False
 
     def _get_heading(self) -> Rotation2d:
         """Get the current heading of the robot from the IMU, anticlockwise positive."""

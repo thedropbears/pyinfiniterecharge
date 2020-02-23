@@ -98,11 +98,14 @@ class MyRobot(magicbot.MagicRobot):
         self.MEMORY_CONSTANT = int(0.1 / self.control_loop_wait_time)
         # how long before data times out
 
-    def autonomousInit(self):
+    def autonomousInit(self) -> None:
+        """Initialise things for all autonomous modes."""
+        self.chassis.enable_closed_loop()
         self.indexer.shimmying = False
 
-    def teleopInit(self):
-        """Executed at the start of teleop mode"""
+    def teleopInit(self) -> None:
+        """Initialise things for driver control."""
+        self.chassis.disable_closed_loop()
         self.indexer.shimmying = True
 
     def teleopPeriodic(self):
