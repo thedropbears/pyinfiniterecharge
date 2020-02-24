@@ -7,6 +7,8 @@ from typing import Optional
 import wpilib
 import ctre
 
+from utilities.functions import constrain_angle
+
 
 class Index(Enum):
     # These are relative to the turret, which faces backwards on the robot.
@@ -14,6 +16,17 @@ class Index(Enum):
     CENTRE = 1
     RIGHT = 2
     LEFT = 3
+
+
+# Convert an angle in the robot coordinate system to the turret coordinate
+# system, which is rotated by 180 degrees (i.e. 0 is backwards on the robot).
+def robot_to_turret(angle: float) -> float:
+    """
+    Convert an angle in the robot coordinate system to the turret coordinate system.
+
+    Turret angles are rotated by 180 degrees (i.e. 0 is backwards on the robot).
+    """
+    return constrain_angle(angle - math.pi)
 
 
 class Turret:
@@ -133,24 +146,12 @@ class Turret:
     def slew_to_azimuth(self, angle: float) -> None:
         if self.index_found:
             self.current_state = self.SLEWING
-            turret_angle = Turret.robot_to_turret(angle)
+            turret_angle = robot_to_turret(angle)
             self.motor._slew_to_counts(
                 int(turret_angle * self.COUNTS_PER_TURRET_RADIAN)
             )
         else:
             print("slew_to_azimuth() called before index found")
-
-    # Convert an angle in the robot coordinate system to the turret coordinate
-    # system, which is rotated by 180 degrees (i.e. 0 is backwards on the robot).
-    @staticmethod
-    def robot_to_turret(angle: float) -> float:
-        turret_angle = angle - math.pi  # This converts to turret coordinate system
-        # Now we normalise to +- pi
-        while turret_angle < -math.pi:
-            turret_angle += math.tau
-        while turret_angle > math.pi:
-            turret_angle -= math.tau
-        return turret_angle
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
@@ -186,7 +187,7 @@ class Turret:
             # First reset scan size
             self.current_scan_delta = self.scan_increment
             if self.index_found:
-                turret_azimuth = Turret.robot_to_turret(azimuth)
+                turret_azimuth = robot_to_turret(azimuth)
                 # set the first pass
                 self._slew_to_counts(
                     turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment
