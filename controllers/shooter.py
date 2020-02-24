@@ -8,7 +8,7 @@ from components.indexer import Indexer
 from components.shooter import Shooter
 from components.range_finder import RangeFinder
 from components.turret import Turret
-from components.vision import Vision
+from components.target_estimator import TargetEstimator
 from components.led_screen import LEDScreen
 
 
@@ -19,7 +19,7 @@ class ShooterController(StateMachine):
     indexer: Indexer
     shooter: Shooter
     turret: Turret
-    vision: Vision
+    target_estimator: TargetEstimator
     led_screen: LEDScreen
     range_finder: RangeFinder
 
@@ -39,8 +39,6 @@ class ShooterController(StateMachine):
         0, -2.404, wpilib.geometry.Rotation2d(math.pi)
     )
     # in field co ordinates
-
-    CAMERA_TO_LIDAR = 0.15
 
     def __init__(self) -> None:
         super().__init__()
@@ -62,7 +60,7 @@ class ShooterController(StateMachine):
         else:
             self.led_screen.set_middle_row(255, 0, 0)
 
-        if self.vision.is_ready():
+        if self.target_estimator.is_ready():
             if self.turret.is_ready():
                 self.led_screen.set_top_row(0, 255, 0)
             else:
@@ -75,7 +73,7 @@ class ShooterController(StateMachine):
         """
         The vision system does not have a target, we try to find one using odometry
         """
-        if self.vision.is_ready():
+        if self.target_estimator.is_ready():
             # means no data is available
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             self.next_state("tracking")
@@ -93,27 +91,17 @@ class ShooterController(StateMachine):
         """
         Aiming towards a vision target and spining up flywheels
         """
-        vision_data = self.vision.get_data()
         # collect data only once per loop
-        if not self.vision.is_ready():
+        if not self.target_estimator.is_ready():
             self.next_state("searching")
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
-            current_turret_angle = self.turret.get_azimuth()
-            old_turret_angle = self.turret.azimuth_at_time(vision_data.timestamp)
-            if old_turret_angle is None:
-                # data has timed out
-                self.state = self.searching
-                return
-            delta_since_vision = current_turret_angle - old_turret_angle
-            target_angle = vision_data.angle - delta_since_vision
-            if abs(target_angle) > self.find_allowable_angle(vision_data.distance):
+            target_data = self.target_estimator.get_data()
+            if abs(target_data.angle) > self.find_allowable_angle(target_data.distance):
                 # print(f"Telling turret to slew by {delta_angle}")
-                self.turret.slew(vision_data.angle)
+                self.turret.slew(target_data.angle)
             if self.turret.is_ready():
-                self.shooter.set_range(
-                    self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
-                )
+                self.shooter.set_range(target_data.distance)
             if self.ready_to_fire() and self.fire_command:
                 self.next_state("firing")
 
@@ -147,6 +135,7 @@ class ShooterController(StateMachine):
         Currently does not consider angle from target
         dist: planar distance from the target
         """
+        dist = min(dist, 14.0)
         angle = math.atan(self.TRUE_TARGET_RADIUS / dist)
         # print(f"angle tolerance +- {angle} true target radius{self.TRUE_TARGET_RADIUS}")
         return angle

@@ -15,9 +15,10 @@ import wpilib
 from components.chassis import Chassis
 from components.hang import Hang
 from components.indexer import Indexer
+from components.range_finder import RangeFinder
 from components.shooter import Shooter
 from components.spinner import Spinner
-from components.range_finder import RangeFinder
+from components.target_estimator import TargetEstimator
 from components.turret import Turret
 from components.vision import Vision
 from components.led_screen import LEDScreen
@@ -39,6 +40,7 @@ class MyRobot(magicbot.MagicRobot):
     spinner_controller: SpinnerController
 
     # List components (which represent physical subsystems) here.
+    target_estimator: TargetEstimator
     chassis: Chassis
     hang: Hang
     range_finder: RangeFinder
