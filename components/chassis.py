@@ -5,6 +5,7 @@ import rev
 
 from utilities.nav_x import NavX
 
+from wpilib.controller import SimpleMotorFeedforwardMeters
 from wpilib.geometry import Pose2d, Rotation2d
 from wpilib.kinematics import (
     ChassisSpeeds,
@@ -15,7 +16,7 @@ from wpilib.kinematics import (
 GEAR_RATIO = 10.75
 
 # measurements in metres
-TRACK_WIDTH = 0.630  # theoretical as measured
+TRACK_WIDTH = 0.579  # measured by characterisation
 WHEEL_CIRCUMFERENCE = 0.0254 * 6 * math.pi
 
 
@@ -57,13 +58,14 @@ class Chassis:
         self.left_pid: rev.CANPIDController = self.left_front.getPIDController()
         self.right_pid: rev.CANPIDController = self.right_front.getPIDController()
 
+        self.ff_calculator = SimpleMotorFeedforwardMeters(kS=0.194, kV=2.79, kA=0.457)
         for pid in (self.left_pid, self.right_pid):
             # TODO: needs tuning
-            pid.setP(0.1)
+            pid.setP(5.19 / 10)
             pid.setI(0)
             pid.setD(0)
             pid.setIZone(0)
-            pid.setFF(1 / (5676 * rev_to_m / 60))
+            pid.setFF(0)
             pid.setOutputRange(-1, 1)
 
         self.kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
@@ -77,9 +79,16 @@ class Chassis:
 
         speeds = self.kinematics.toWheelSpeeds(chassis_speeds)
 
-        # TODO: use characterisation suite to find appropriate feedforward
-        self.left_pid.setReference(speeds.left, rev.ControlType.kVelocity)
-        self.right_pid.setReference(speeds.right, rev.ControlType.kVelocity)
+        self.left_pid.setReference(
+            speeds.left,
+            rev.ControlType.kVelocity,
+            arbFeedforward=self.ff_calculator.calculate(speeds.left),
+        )
+        self.right_pid.setReference(
+            speeds.right,
+            rev.ControlType.kVelocity,
+            arbFeedforward=self.ff_calculator.calculate(speeds.right),
+        )
 
         self.odometry.update(
             self._get_heading(),
