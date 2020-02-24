@@ -126,23 +126,30 @@ class Turret:
         self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
 
     # Slew to the given absolute angle in radians in the robot coordinate system.
-    # We assume that the angle is between -pi and pi
     # If no index has been seen yet, we have no reference for the angle, so we
     # ignore the command.
     #
     # TODO: perhaps we should return an error so the calling code can know?
     def slew_to_azimuth(self, angle: float) -> None:
-        angle -= math.pi  # This converts to turret coordinate system
-        # Now we normalise to +- pi
-        while angle < -math.pi:
-            angle += math.tau
-        while angle > math.pi:
-            angle -= math.tau
         if self.index_found:
             self.current_state = self.SLEWING
-            self.motor._slew_to_counts(int(angle * self.COUNTS_PER_TURRET_RADIAN))
+            turret_angle = self.robot_to_turret(angle)
+            self.motor._slew_to_counts(
+                int(turret_angle * self.COUNTS_PER_TURRET_RADIAN)
+            )
         else:
             print("slew_to_azimuth() called before index found")
+
+    # Convert an angle in the robot coordinate system to the turret coordinate
+    # system, which is rotated by 180 degrees (i.e. 0 is backwards on the robot).
+    def robot_to_turret(self, angle: float) -> float:
+        turret_angle = angle - math.pi  # This converts to turret coordinate system
+        # Now we normalise to +- pi
+        while turret_angle < -math.pi:
+            turret_angle += math.tau
+        while turret_angle > math.pi:
+            turret_angle -= math.tau
+        return turret_angle
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
@@ -178,9 +185,10 @@ class Turret:
             # First reset scan size
             self.current_scan_delta = self.scan_increment
             if self.index_found:
+                turret_azimuth = self.robot_to_turret(azimuth)
                 # set the first pass
                 self._slew_to_counts(
-                    azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment
+                    turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment
                 )
             else:
                 current_count = self.motor.getSelectedSensorPosition()
