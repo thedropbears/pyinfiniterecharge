@@ -133,7 +133,7 @@ class Turret:
     def slew_to_azimuth(self, angle: float) -> None:
         if self.index_found:
             self.current_state = self.SLEWING
-            turret_angle = self.robot_to_turret(angle)
+            turret_angle = Turret.robot_to_turret(angle)
             self.motor._slew_to_counts(
                 int(turret_angle * self.COUNTS_PER_TURRET_RADIAN)
             )
@@ -142,7 +142,8 @@ class Turret:
 
     # Convert an angle in the robot coordinate system to the turret coordinate
     # system, which is rotated by 180 degrees (i.e. 0 is backwards on the robot).
-    def robot_to_turret(self, angle: float) -> float:
+    @staticmethod
+    def robot_to_turret(angle: float) -> float:
         turret_angle = angle - math.pi  # This converts to turret coordinate system
         # Now we normalise to +- pi
         while turret_angle < -math.pi:
@@ -185,7 +186,7 @@ class Turret:
             # First reset scan size
             self.current_scan_delta = self.scan_increment
             if self.index_found:
-                turret_azimuth = self.robot_to_turret(azimuth)
+                turret_azimuth = Turret.robot_to_turret(azimuth)
                 # set the first pass
                 self._slew_to_counts(
                     turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment
