@@ -141,8 +141,6 @@ class MyRobot(magicbot.MagicRobot):
     def handle_shooter_inputs(self, joystick: wpilib.Joystick) -> None:
         if joystick.getTrigger():
             self.shooter_controller.fire_input()
-        if joystick.getRawButtonPressed(5):
-            self.shooter_controller.spin_input()
 
     def handle_hang_inputs(self, joystick: wpilib.Joystick) -> None:
         if joystick.getRawButton(3) and joystick.getRawButton(4):
