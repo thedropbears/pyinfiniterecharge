@@ -288,7 +288,11 @@ class Turret:
         current_time = time.monotonic()
         control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
         if control_loops_ago >= len(self.azimuth_history):
-            return None
+            return (
+                self.azimuth_history[-1]
+                if len(self.azimuth_history) > 0
+                else self.get_azimuth()
+            )
         return self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
 
     def get_azimuth(self) -> int:
