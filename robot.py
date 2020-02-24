@@ -25,7 +25,7 @@ from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities import git
 from utilities.nav_x import NavX
-from utilities.scalers import scale_value
+from utilities.scalers import rescale_js, scale_value
 
 GIT_COMMIT = git.describe()
 
@@ -133,9 +133,9 @@ class MyRobot(magicbot.MagicRobot):
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
     def handle_chassis_inputs(self, joystick: wpilib.Joystick) -> None:
-        scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
-        vx = scale_value(joystick.getY(), 1, -1, -3, 3, 2) * scaled_throttle
-        vz = scale_value(joystick.getTwist(), 1, -1, -3, 3, 2) * scaled_throttle
+        throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
+        vx = 3 * throttle * rescale_js(-joystick.getY(), 0.1)
+        vz = 3 * throttle * rescale_js(-joystick.getTwist(), 0.1)
         self.chassis.drive(vx, vz)
 
     def handle_shooter_inputs(self, joystick: wpilib.Joystick) -> None:
