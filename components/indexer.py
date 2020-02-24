@@ -152,4 +152,7 @@ class Indexer:
 
     @feedback
     def is_ready(self) -> bool:
-        return self.indexer_motors[-1].isFwdLimitSwitchClosed() and self.is_piston_retracted()
+        return (
+            self.indexer_motors[-1].isFwdLimitSwitchClosed()
+            and self.is_piston_retracted()
+        )
