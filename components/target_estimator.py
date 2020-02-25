@@ -1,3 +1,4 @@
+from components.chassis import Chassis
 from components.range_finder import RangeFinder
 from components.turret import Turret
 from components.vision import Vision, VisionData
@@ -11,6 +12,7 @@ class TargetEstimator:
     ALPHA = 0.1  # Exponential smoothing fraction
     CAMERA_TO_LIDAR = 0.15
 
+    chassis: Chassis
     range_finder: RangeFinder
     turret: Turret
     vision: Vision
@@ -25,6 +27,7 @@ class TargetEstimator:
         self.angle_to_target: float = 0.0
         self.vision_range: float = 0.0
         self.previous_azimuth: float = 0.0
+        self.previous_heading: float = None
         self.previous_vision_data: VisionData = VisionData(0.0, 0.0, 0.0)
 
     def is_ready(self) -> bool:
@@ -47,12 +50,19 @@ class TargetEstimator:
         # If we have it, we add it to our current running average.
         if not self.is_ready():
             self.reset()
+        if self.previous_heading is None:
+            self.previous_heading = self.chassis.get_heading()
 
         # First, correct our estimate
         current_azimuth = self.turret.get_azimuth()
         delta = current_azimuth - self.previous_azimuth
         self.angle_to_target -= delta
+        current_heading = self.chassis.get_heading()
+        delta = current_heading - self.previous_heading
+        delta = math.atan2(math.sin(delta), math.cos(delta))  # bound values
+        self.angle_to_target -= delta
         self.previous_azimuth = current_azimuth
+        self.previous_heading = current_heading
 
         # Check for new vision data
         vision_data = self.vision.get_data()
