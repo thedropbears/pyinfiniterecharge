@@ -8,6 +8,8 @@ from utilities.functions import constrain_angle
 import math
 import time
 
+from typing import Optional
+
 
 class TargetEstimator:
 
@@ -29,7 +31,7 @@ class TargetEstimator:
         self.angle_to_target: float = 0.0
         self.vision_range: float = 0.0
         self.previous_azimuth: float = 0.0
-        self.previous_heading: float = None
+        self.previous_heading: Optional[float] = None
         self.previous_vision_data: VisionData = VisionData(0.0, 0.0, 0.0)
         self._pointing_downrange: bool = False
 
