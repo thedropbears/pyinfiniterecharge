@@ -80,7 +80,7 @@ class TargetEstimator:
         turret_in_field = constrain_angle(current_heading + current_azimuth)
         self._pointing_downrange = abs(turret_in_field) < math.pi / 2.0
         if not self._pointing_downrange:
-            # If the turret is not pointing downfield we can be getting a valid vision target
+            # If the turret is not pointing downfield we cannot be getting a valid vision target
             return
 
         vision_data = self.vision.get_data()
