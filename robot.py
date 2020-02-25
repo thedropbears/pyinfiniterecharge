@@ -130,14 +130,17 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getRawButtonPressed(2):
             if self.indexer.intaking:
                 self.indexer.disable_intaking()
+                self.indexer.raise_intake()
             else:
                 self.indexer.enable_intaking()
+                self.indexer.lower_intake()
+
         if gamepad.getAButtonPressed():
-            # TODO Dump all balls out the intake to try to clear jam, etc
-            pass
+            # Dump all balls out the intake to try to clear jam, etc
+            self.indexer.clearing = True
         else:
             # Normal operation
-            pass
+            self.indexer.clearing = False
 
     def handle_spinner_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
