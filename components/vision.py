@@ -24,22 +24,6 @@ class VisionData:
 
 class VisionComms:
     @property
-    def ping_time(self) -> float:
-        return self.ping_time_entry.getDouble(0.0)
-
-    @ping_time.setter
-    def ping_time(self, value: float) -> None:
-        self.ping_time_entry.setDouble(value)
-
-    @property
-    def rio_pong_time(self) -> float:
-        return self.rio_pong_time_entry.getDouble(0.0)
-
-    @property
-    def raspi_pong_time(self) -> float:
-        return self.raspi_pong_time_entry.getDouble(0.0)
-
-    @property
     def latency(self) -> float:
         return self.latency_entry.getDouble(0.0)
 
@@ -55,25 +39,27 @@ class VisionComms:
         self.rio_pong_time_entry = self.table.getEntry("rio_pong")
         self.raspi_pong_time_entry = self.table.getEntry("raspi_pong")
         self.latency_entry = self.table.getEntry("clock_offset")
-        self.ping_time = time.monotonic()
+
+        self.ping()
 
     def ping(self) -> None:
         """Send a ping to the RasPi to determine the connection latency."""
-        self.ping_time = time.monotonic()
+        self.ping_time_entry.setDouble(time.monotonic())
 
     def pong(self) -> None:
         """Receive a pong from the RasPi to determine the connection latency."""
-        if abs(self.rio_pong_time - self.last_pong) > 1e-4:  # Floating point comparison
+        rio_pong_time = self.rio_pong_time_entry.getDouble(0)
+        if abs(rio_pong_time - self.last_pong) > 1e-4:  # Floating point comparison
+            raspi_pong_time = self.raspi_pong_time_entry.getDouble(0)
             alpha = 0.9  # Exponential averaging
             self.latency = (1 - alpha) * self.latency + alpha * (
-                self.rio_pong_time - self.raspi_pong_time
+                rio_pong_time - raspi_pong_time
             )
-            self.last_pong = self.rio_pong_time
+            self.last_pong = rio_pong_time
 
     def heart_beat(self) -> None:
-        if self.ping_time_entry.exists():
-            self.ping()
-            self.pong()
+        self.ping()
+        self.pong()
 
 
 class Vision:
