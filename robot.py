@@ -144,16 +144,10 @@ class MyRobot(magicbot.MagicRobot):
     ) -> None:
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
-            print(f"Spinner Running")
         if joystick.getRawButtonPressed(9):
             self.spinner.piston_up()
-            print("Spinner Piston Up")
         if joystick.getRawButtonPressed(10):
             self.spinner.piston_down()
-            print("Spinner Piston Down")
-        if joystick.getRawButtonPressed(8):
-            print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
-            print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
     def handle_chassis_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
