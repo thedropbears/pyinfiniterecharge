@@ -3,16 +3,10 @@ from components.range_finder import RangeFinder
 from components.turret import Turret
 from components.vision import Vision, VisionData
 
+from utilities.functions import constrain_angle
+
 import math
 import time
-
-
-def constrain(angle: float) -> float:
-    while angle < -math.pi:
-        angle += math.tau
-    while angle > math.pi:
-        angle -= math.tau
-    return angle
 
 
 class TargetEstimator:
@@ -73,7 +67,7 @@ class TargetEstimator:
         delta = current_azimuth - self.previous_azimuth
         self.angle_to_target -= delta
         current_heading = self.chassis.get_heading()
-        delta = constrain(current_heading - self.previous_heading)
+        delta = constrain_angle(current_heading - self.previous_heading)
         self.angle_to_target -= delta
         self.previous_azimuth = current_azimuth
         self.previous_heading = current_heading
@@ -81,7 +75,7 @@ class TargetEstimator:
         # Check for new vision data
         # We only add it if it could possibly be a target
         # Calculate the turret azimuth in field coordinates
-        turret_in_field = constrain(current_heading + current_azimuth)
+        turret_in_field = constrain_angle(current_heading + current_azimuth)
         self._pointing_downrange = abs(turret_in_field) < math.pi / 2.0
         if not self._pointing_downrange:
             # If the turret is not pointing downfield we can be getting a valid vision target
@@ -91,7 +85,7 @@ class TargetEstimator:
         if vision_data is not None:
             # Is it new?
             if vision_data.timestamp != self.previous_vision_data.timestamp:
-                turret_movement = constrain(
+                turret_movement = constrain_angle(
                     self.turret.azimuth_at_time(vision_data.timestamp) - current_azimuth
                 )
                 corrected_angle = vision_data.angle - turret_movement
