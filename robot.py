@@ -168,10 +168,11 @@ class MyRobot(magicbot.MagicRobot):
     ) -> None:
         if joystick.getTrigger():
             self.shooter_controller.fire_input()
-        if gamepad.getBackButton() and gamepad.getRawButton(5):
-            # TODO disable turret in case of catastrophic malfunction
-            # TODO include way to re-enable in case of mistake!
-            pass
+        if gamepad.getBackButton() and gamepad.getRawButtonPressed(5):
+            # Disable turret in case of catastrophic malfunction
+            # Make this toggle to allow re-enabling turret in case it was accidentally disabled
+            self.shooter.disabled = not self.shooter.disabled
+            self.turret.disabled = self.shooter.disabled
 
     def handle_hang_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController

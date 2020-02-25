@@ -117,6 +117,9 @@ class Turret:
         self._setup_position()
         self.current_state = self.SLEWING
 
+    def __init__(self):
+        self.disabled = False
+
     def on_enable(self) -> None:
         self.must_finish = False
         if self.index_found:

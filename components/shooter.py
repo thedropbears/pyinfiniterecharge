@@ -27,6 +27,7 @@ class Shooter:
         self.inject = False
         self.in_range = False
         self.velocity_tolerance = 0.05  # of setpoint
+        self.disabled = False
 
     def setup(self) -> None:
         self.outer_motor.setInverted(True)
@@ -47,6 +48,10 @@ class Shooter:
         self.centre_ff_calculator = controller.SimpleMotorFeedforward(kS=0.158, kV=0.11)
 
     def execute(self) -> None:
+        if self.disabled:
+            self.stop_motors()
+            return
+
         voltage = wpilib.RobotController.getInputVoltage()
         centre_feed_forward = (
             self.centre_ff_calculator.calculate(self.centre_target) / voltage
