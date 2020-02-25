@@ -36,11 +36,11 @@ class MyRobot(magicbot.MagicRobot):
     vision: Vision
 
     # List controllers (which require components) here.
+    target_estimator: TargetEstimator
     shooter_controller: ShooterController
     spinner_controller: SpinnerController
 
     # List components (which represent physical subsystems) here.
-    target_estimator: TargetEstimator
     chassis: Chassis
     hang: Hang
     range_finder: RangeFinder
