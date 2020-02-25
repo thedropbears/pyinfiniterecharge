@@ -17,24 +17,25 @@ class Index(Enum):
     LEFT = 3
 
 
+# Turret angles are rotated by 180 degrees (i.e. 0 is backwards on the robot).
+ROBOT_TO_TURRET_OFFSET = math.pi
+
 # Convert an angle in the robot coordinate system to the turret coordinate
-# system, which is rotated by 180 degrees (i.e. 0 is backwards on the robot).
-def robot_to_turret(angle: float) -> float:
+# system.
+def _robot_to_turret(angle: float) -> float:
     """
     Convert an angle in the robot coordinate system to the turret coordinate system.
-
-    Turret angles are rotated by 180 degrees (i.e. 0 is backwards on the robot).
     """
-    return constrain_angle(angle - math.pi)
+    return constrain_angle(angle - ROBOT_TO_TURRET_OFFSET)
 
 
-def turret_to_robot(angle: float) -> float:
+# Convert an angle in the turret coordinate system to the robot coordinate
+# system.
+def _turret_to_robot(angle: float) -> float:
     """
     Convert an angle in the turret coordinate system to the robot coordinate system.
-
-    Turret angles are rotated by 180 degrees (i.e. 0 is backwards on the robot).
     """
-    return constrain_angle(angle + math.pi)
+    return constrain_angle(angle + ROBOT_TO_TURRET_OFFSET)
 
 
 class Turret:
@@ -148,7 +149,7 @@ class Turret:
     # Slew to the given absolute angle in radians in the robot coordinate system.
     def slew_to_azimuth(self, angle: float) -> None:
         self.current_state = self.SLEWING
-        turret_angle = robot_to_turret(angle)
+        turret_angle = _robot_to_turret(angle)
         self.motor._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
 
     # Slew the given angle (in radians) from the current position
@@ -172,7 +173,7 @@ class Turret:
         if self.current_state != self.SCANNING:
             # First reset scan size
             self.current_scan_delta = self.SCAN_INCREMENT
-            turret_azimuth = robot_to_turret(azimuth)
+            turret_azimuth = _robot_to_turret(azimuth)
             # set the first pass
             self._slew_to_counts(
                 turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.SCAN_INCREMENT
@@ -191,19 +192,15 @@ class Turret:
         control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
         if control_loops_ago >= len(self.azimuth_history):
             return (
-                turret_to_robot(self.azimuth_history[-1])
+                self._sensor_to_robot(self.azimuth_history[-1])
                 if len(self.azimuth_history) > 0
                 else self.get_azimuth()
             )
-        return turret_to_robot(
-            self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
-        )
+        return self._sensor_to_robot(self.azimuth_history[control_loops_ago])
 
     def get_azimuth(self) -> float:
         """Get the current azimuth in radians"""
-        return turret_to_robot(
-            self.motor.getSelectedSensorPosition() / self.COUNTS_PER_TURRET_RADIAN
-        )
+        return self._sensor_to_robot(self.motor.getSelectedSensorPosition())
 
     #### Internal methods from here on
 
@@ -377,3 +374,6 @@ class Turret:
             entry += current_count - counts
             # update old measurements
         self._slew_to_counts(counts + delta)
+
+    def _sensor_to_robot(self, counts: int) -> float:
+        return _turret_to_robot(counts / self.COUNTS_PER_TURRET_RADIAN)
