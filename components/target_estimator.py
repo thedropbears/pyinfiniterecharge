@@ -19,7 +19,7 @@ class TargetEstimator:
     turret: Turret
     vision: Vision
 
-    def setup(self) -> None:
+    def __init__(self) -> None:
         self.reset()
 
     def on_enable(self) -> None:
