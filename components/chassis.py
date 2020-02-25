@@ -41,7 +41,7 @@ class Chassis:
             self.right_front,
             self.right_rear,
         ):
-            motor.setIdleMode(rev.IdleMode.kBrake)
+            motor.setIdleMode(rev.IdleMode.kCoast)
 
         self.left_rear.follow(self.left_front)
         self.right_rear.follow(self.right_front)
