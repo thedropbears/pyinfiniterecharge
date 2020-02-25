@@ -7,6 +7,14 @@ import math
 import time
 
 
+def constrain(angle: float) -> float:
+    while angle < -math.pi:
+        angle += math.tau
+    while angle > math.pi:
+        angle -= math.tau
+    return angle
+
+
 class TargetEstimator:
 
     ALPHA = 0.1  # Exponential smoothing fraction
@@ -29,9 +37,16 @@ class TargetEstimator:
         self.previous_azimuth: float = 0.0
         self.previous_heading: float = None
         self.previous_vision_data: VisionData = VisionData(0.0, 0.0, 0.0)
+        self._pointing_downrange: bool = False
 
     def is_ready(self) -> bool:
+        return self.is_pointing_downrange() and self.has_vision()
+
+    def has_vision(self) -> bool:
         return self.vision.is_ready()
+
+    def is_pointing_downrange(self) -> bool:
+        return self._pointing_downrange
 
     def get_data(self) -> VisionData:
         if abs(self.angle_to_target) < math.radians(5.0):
@@ -58,18 +73,25 @@ class TargetEstimator:
         delta = current_azimuth - self.previous_azimuth
         self.angle_to_target -= delta
         current_heading = self.chassis.get_heading()
-        delta = current_heading - self.previous_heading
-        delta = math.atan2(math.sin(delta), math.cos(delta))  # bound values
+        delta = constrain(current_heading - self.previous_heading)
         self.angle_to_target -= delta
         self.previous_azimuth = current_azimuth
         self.previous_heading = current_heading
 
         # Check for new vision data
+        # We only add it if it could possibly be a target
+        # Calculate the turret azimuth in field coordinates
+        turret_in_field = constrain(current_heading + current_azimuth)
+        self._pointing_downrange = abs(turret_in_field) < math.pi / 2.0
+        if not self._pointing_downrange:
+            # If the turret is not pointing downfield we can be getting a valid vision target
+            return
+
         vision_data = self.vision.get_data()
         if vision_data is not None:
             # Is it new?
             if vision_data.timestamp != self.previous_vision_data.timestamp:
-                turret_movement = (
+                turret_movement = constrain(
                     self.turret.azimuth_at_time(vision_data.timestamp) - current_azimuth
                 )
                 corrected_angle = vision_data.angle - turret_movement
