@@ -94,6 +94,7 @@ class MyRobot(magicbot.MagicRobot):
 
         # operator interface
         self.driver_joystick = wpilib.Joystick(0)
+        self.codriver_gamepad = wpilib.XboxController(1)
 
         self.MEMORY_CONSTANT = int(0.1 / self.control_loop_wait_time)
         # how long before data times out
@@ -117,7 +118,7 @@ class MyRobot(magicbot.MagicRobot):
         self.handle_chassis_inputs(self.driver_joystick)
         self.handle_spinner_inputs(self.driver_joystick)
         self.handle_shooter_inputs(self.driver_joystick)
-        self.handle_hang_inputs(self.driver_joystick)
+        self.handle_hang_inputs(self.codriver_gamepad)
 
         self.shooter_controller.engage()
 
@@ -152,10 +153,10 @@ class MyRobot(magicbot.MagicRobot):
         if joystick.getTrigger():
             self.shooter_controller.fire_input()
 
-    def handle_hang_inputs(self, joystick: wpilib.Joystick) -> None:
-        if joystick.getRawButton(3) and joystick.getRawButton(4):
+    def handle_hang_inputs(self, gamepad: wpilib.XboxController) -> None:
+        if gamepad.getStartButton() and gamepad.getRawButton(5):
             self.hang.raise_hook()
-        if self.hang.fire_hook and joystick.getRawButton(4):
+        if self.hang.fire_hook and gamepad.getBackButton():
             self.hang.winch()
 
     def testInit(self):
