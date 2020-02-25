@@ -153,6 +153,7 @@ class MyRobot(magicbot.MagicRobot):
     def testInit(self):
         self.turret.motor.configPeakOutputForward(1.0, 10)
         self.turret.motor.configPeakOutputReverse(-1.0, 10)
+        self.track_target = False
 
     def testPeriodic(self):
 
@@ -160,26 +161,29 @@ class MyRobot(magicbot.MagicRobot):
 
         self.shooter.execute()
 
-        if self.driver_joystick.getRawButtonPressed(10):
-            self.shooter.fire()
+        if self.track_target:
+            self.target_estimator.execute()
+            self.shooter_controller.execute()
+
+        if self.driver_joystick.getTrigger():
             self.indexer.enable_intaking()
 
-        # Slew the turret
-        slew_increment = math.radians(5)  # radians
-        if self.driver_joystick.getRawButtonPressed(6):
-            self.turret.slew(-slew_increment)
-            self.turret.execute()
-        elif self.driver_joystick.getRawButtonPressed(5):
-            self.turret.slew(slew_increment)
-            self.turret.execute()
+        if self.driver_joystick.getRawButtonPressed(3):
+            self.track_target = not self.track_target
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):
             self.hang.pay_out()
             self.hang.execute()
 
-        if self.driver_joystick.getTrigger():
-            self.indexer.enable_intaking()
+        # Slew the turret
+        slew_increment = math.radians(5)  # radians
+        if self.driver_joystick.getRawButtonPressed(5):
+            self.turret.slew(slew_increment)
+            self.turret.execute()
+        elif self.driver_joystick.getRawButtonPressed(6):
+            self.turret.slew(-slew_increment)
+            self.turret.execute()
 
         if self.driver_joystick.getRawButtonPressed(7):
             self.indexer.shimmy_speed += 0.1
@@ -195,6 +199,10 @@ class MyRobot(magicbot.MagicRobot):
                 self.driver_joystick.getThrottle() + 1
             ) / 2
             self.indexer.execute()
+
+        if self.driver_joystick.getRawButtonPressed(10):
+            self.shooter.fire()
+            self.indexer.enable_intaking()
 
 
 if __name__ == "__main__":
