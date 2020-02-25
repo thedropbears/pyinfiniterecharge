@@ -13,6 +13,8 @@ import rev.color
 import wpilib
 from wpilib import geometry
 
+from wpilib.interfaces import GenericHID
+
 from components.chassis import Chassis
 from components.hang import Hang
 from components.indexer import Indexer
@@ -114,22 +116,32 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         """Executed every cycle"""
-        self.handle_intake_inputs(self.driver_joystick)
-        self.handle_chassis_inputs(self.driver_joystick)
-        self.handle_spinner_inputs(self.driver_joystick)
-        self.handle_shooter_inputs(self.driver_joystick)
-        self.handle_hang_inputs(self.codriver_gamepad)
+        self.handle_intake_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_chassis_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_spinner_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_shooter_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_hang_inputs(self.driver_joystick, self.codriver_gamepad)
 
         self.shooter_controller.engage()
 
-    def handle_intake_inputs(self, joystick: wpilib.Joystick) -> None:
-        if joystick.getRawButtonPressed(6):
+    def handle_intake_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
+        if joystick.getRawButtonPressed(2):
             if self.indexer.intaking:
                 self.indexer.disable_intaking()
             else:
                 self.indexer.enable_intaking()
+        if gamepad.getAButtonPressed():
+            # TODO Dump all balls out the intake to try to clear jam, etc
+            pass
+        else:
+            # Normal operation
+            pass
 
-    def handle_spinner_inputs(self, joystick: wpilib.Joystick) -> None:
+    def handle_spinner_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
             print(f"Spinner Running")
@@ -143,20 +155,36 @@ class MyRobot(magicbot.MagicRobot):
             print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
             print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
-    def handle_chassis_inputs(self, joystick: wpilib.Joystick) -> None:
-        throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
-        vx = 3 * throttle * rescale_js(-joystick.getY(), 0.1)
-        vz = 3 * throttle * rescale_js(-joystick.getTwist(), 0.1)
+    def handle_chassis_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
+        scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
+        vx = scale_value(joystick.getY(), 1, -1, -3, 3, 2) * scaled_throttle
+        vz = scale_value(joystick.getTwist(), 1, -1, -3, 3, 2) * scaled_throttle
         self.chassis.drive(vx, vz)
+        if joystick.getRawButtonPressed(3):
+            # TODO reset heading
+            pass
 
-    def handle_shooter_inputs(self, joystick: wpilib.Joystick) -> None:
+    def handle_shooter_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
         if joystick.getTrigger():
             self.shooter_controller.fire_input()
+        if gamepad.getBackButton() and gamepad.getRawButton(5):
+            # TODO disable turret in case of catastrophic malfunction
+            # TODO include way to re-enable in case of mistake!
+            pass
 
-    def handle_hang_inputs(self, gamepad: wpilib.XboxController) -> None:
-        if gamepad.getStartButton() and gamepad.getRawButton(5):
+    def handle_hang_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
+        if gamepad.getStartButton() and gamepad.getBumper(GenericHID.Hand.kRightHand):
             self.hang.raise_hook()
-        if self.hang.fire_hook and gamepad.getBackButton():
+        if self.hang.fire_hook and (
+            gamepad.getTriggerAxis(GenericHID.Hand.kLeftHand) > 0.9
+            or gamepad.getTriggerAxis(GenericHID.Hand.kRightHand) > 0.9
+        ):
             self.hang.winch()
 
     def testInit(self):
