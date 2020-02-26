@@ -11,7 +11,7 @@ from utilities.functions import constrain_angle
 
 class Index(Enum):
     # These are relative to the turret, which faces backwards on the robot.
-    NOT_FOUND = 0
+    NO_INDEX = 0
     CENTRE = 1
     RIGHT = 2
     LEFT = 3
@@ -122,7 +122,7 @@ class Turret:
             )
         else:
             index = self._get_current_index()
-            if index is not Index.NOT_FOUND:
+            if index is not Index.NO_INDEX:
                 # We are starting on an index
                 self._handle_index(index)
             else:
@@ -131,11 +131,11 @@ class Turret:
                 # are probably close, or the robot hasn't been set up properly.
                 self.motor.setSelectedSensorPosition(self.DEFAULT_START_POSITION)
                 self.motor.set(ctre.ControlMode.MotionMagic, 0)
-                self.index_hit = Index.NOT_FOUND
+                self.index_hit = Index.NO_INDEX
                 self._enable_index_interrupts()
 
     def execute(self) -> None:
-        if not self.index_found and self.index_hit != Index.NOT_FOUND:
+        if not self.index_found and self.index_hit != Index.NO_INDEX:
             self._handle_index(self.index_hit)
         if self.current_state == self.SCANNING:
             self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
@@ -285,7 +285,7 @@ class Turret:
 
     def _setup_indexing(self) -> None:
         self.index_found = False
-        self.index_hit = Index.NOT_FOUND  # Interrupt will change this
+        self.index_hit = Index.NO_INDEX  # Interrupt will change this
         # set up interrupts on all three indices, on both edges, with separate
         # handlers for each DIO so we know which one triggered.
         self.centre_index.requestInterrupts(self._centre_isr)
@@ -336,7 +336,7 @@ class Turret:
             return Index.RIGHT
         if self.left_index.get() == self.HALL_EFFECT_CLOSED:
             return Index.LEFT
-        return Index.NOT_FOUND
+        return Index.NO_INDEX
 
     def _handle_index(self, index: Index) -> None:
         # Update the encoder position on the motor controller
