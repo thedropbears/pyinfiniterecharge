@@ -131,6 +131,7 @@ class Turret:
                 # are probably close, or the robot hasn't been set up properly.
                 self.motor.setSelectedSensorPosition(self.DEFAULT_START_POSITION)
                 self.motor.set(ctre.ControlMode.MotionMagic, 0)
+                self.index_hit = Index.NOT_FOUND
                 self._enable_index_interrupts()
 
     def execute(self) -> None:
@@ -345,7 +346,7 @@ class Turret:
         self._reset_encoder(count)
         self.index_found = True
         self._disable_index_interrupts()
-        print("found an index and reset encoder")
+        print(f"found index {index} and reset encoder")
 
     def _index_to_counts(self, index: Index) -> int:
         # We need to account for the width of the sensor.
