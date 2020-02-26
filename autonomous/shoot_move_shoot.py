@@ -40,14 +40,23 @@ class ShootMoveShootBase(AutonomousStateMachine):
         )
         self.gen = trajectory.TrajectoryGenerator()
         self.trajectory_num = 0
-        self.trajectory_max = 1
 
     def setup(self):
         self.trajectory_config.setKinematics(self.chassis.kinematics)
-        self.path = self.gen.generateTrajectory(
-            self.start_pose, self.waypoints, self.end_pose, self.trajectory_config
-        )
-        self.end_range = (self.TARGET_POSITION - self.end_pose).translation().norm()
+        self.end_ranges = []
+        self.paths = []
+        for i in range(self.trajectory_max):
+            path = self.gen.generateTrajectory(
+                self.start_pose[i],
+                self.waypoints[i],
+                self.end_pose[i],
+                self.trajectory_config,
+            )
+            self.paths.append(path)
+            self.end_ranges.append(
+                (self.TARGET_POSITION - self.end_pose).translation().norm()
+            )
+        self.path = self.paths[0]
 
     def on_enable(self) -> None:
         self.chassis.reset_odometry(self.start_pose)
@@ -64,7 +73,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
         self.shooter_controller.engage()
         self.shooter_controller.fire_input()
         if self.indexer.balls_loaded() == 0:
-            if self.trajectory_num >= self.trajectory_max:
+            if self.trajectory_num > len(self.paths):
                 self.done()
             else:
                 self.next_state("move")
@@ -75,7 +84,8 @@ class ShootMoveShootBase(AutonomousStateMachine):
         Follow the trajectory defined by our waypoints
         """
         if initial_call:
-            self.shooter.set_range(self.end_range)
+            self.path = self.paths[self.trajectory_num]
+            self.shooter.set_range(self.end_ranges[self.trajectory_num])
         if state_tm > self.path.totalTime() or self.indexer.balls_loaded() >= 3:
             print(f"Calculated path time: {self.path.totalTime()}")
             self.chassis.drive(0, 0)
@@ -92,27 +102,31 @@ class test(ShootMoveShootBase):
     MODE_NAME = "Test"
     DEFAULT = True
 
-    def on_enable(self):
-        self.start_pose = to_pose(0, 0, math.pi)
-        self.end_pose = to_pose(2, 0, math.pi)
-        self.waypoints = [geometry.Translation2d(1, 0)]
+    def setup(self):
+        self.start_poses = [to_pose(0, 0, math.pi)]
+        self.end_poses = [to_pose(2, 0, math.pi)]
+        self.waypoints = [[geometry.Translation2d(1, 0)]]
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1, maxAcceleration=1
         )
-        super().on_enable()
+        self.trajectory_max = 1
+        super().setup()
 
 
 class _3Right3(ShootMoveShootBase):
     MODE_NAME = "3RIGHT3"
 
-    def on_enable(self):
-        self.start_pose = to_pose(3.459, -0.705, 0)
-        self.end_pose = to_pose(8.163, -0.705, 0)
+    def setup(self):
+        self.start_pose = [to_pose(3.459, -0.705, 0)]
+        self.end_pose = [to_pose(8.163, -0.705, 0)]
         self.waypoints = [
-            geometry.Translation2d(7.077, -0.705),
-            geometry.Translation2d(7.992, -0.705),
+            [
+                geometry.Translation2d(7.077, -0.705),
+                geometry.Translation2d(7.992, -0.705),
+            ]
         ]
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1.5, maxAcceleration=1
         )
-        super().on_enable()
+        self.trajectory_max = 1
+        super().setup()
