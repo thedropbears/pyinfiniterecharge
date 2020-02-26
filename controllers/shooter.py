@@ -4,7 +4,6 @@ import time
 from typing import Optional
 
 from magicbot import feedback, StateMachine, state, will_reset_to
-import wpilib.geometry
 
 from components.chassis import Chassis
 from components.indexer import Indexer
@@ -40,11 +39,8 @@ class ShooterController(StateMachine):
     OFFSET = TOTAL_RADIUS / math.sin(math.pi / 3)
     TRUE_TARGET_RADIUS = TARGET_RADIUS - OFFSET
 
-    TARGET_POSITION = wpilib.geometry.Pose2d(0, -2.404, wpilib.geometry.Rotation2d(0))
-    # in field co ordinates
-
+    MIN_SCAN_PERIOD = 3.0
     TARGET_LOST_TO_SCAN = 0.5
-    VISION_GAIN = 0.8
 
     CAMERA_TO_LIDAR = 0.15
 
@@ -98,13 +94,8 @@ class ShooterController(StateMachine):
         Wait for the turret to complete it's inital slew before doing anything
         """
         if initial_call:
-            pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
-            rel: wpilib.geometry.Pose2d = pose - self.TARGET_POSITION
-            rel_heading = (
-                math.atan2(rel.translation().Y(), rel.translation().X())
-                + pose.rotation().radians()
-            )
-            self.turret.slew(rel_heading)
+            target_angle = self.chassis.angle_to_target()
+            self.turret.slew(target_angle)
         if self.turret.is_ready():
             self.next_state("searching")
 
@@ -135,10 +126,8 @@ class ShooterController(StateMachine):
                     self.turret.scan(-self.chassis.get_heading())
                     self.time_of_last_scan = time_now
             # TODO test this
-            # pose: wpilib.geometry.Pose2d = self.chassis.get_pose()
-            # rel: wpilib.geometry.Pose2d = pose - self.TARGET_POSITION
-            # rel_heading = math.atan2(rel.translation().Y(), rel.translation().X()) + pose.rotation().radians()
-            # self.turret.scan(rel_heading)
+            # target_angle = self.chassis.angle_to_target()
+            # self.turret.scan(target_angle)
 
     @state
     def tracking(self) -> None:

@@ -6,7 +6,7 @@ import rev
 from utilities.nav_x import NavX
 
 from wpilib.controller import SimpleMotorFeedforwardMeters
-from wpilib.geometry import Pose2d, Rotation2d
+from wpilib.geometry import Pose2d, Rotation2d, Transform2d
 from wpilib.kinematics import (
     ChassisSpeeds,
     DifferentialDriveKinematics,
@@ -18,6 +18,9 @@ GEAR_RATIO = 10.75
 # measurements in metres
 TRACK_WIDTH = 0.579  # measured by characterisation
 WHEEL_CIRCUMFERENCE = 0.0254 * 6 * math.pi
+
+TARGET_POSITION = Pose2d(0, -2.404, Rotation2d(0))
+# in field co ordinates
 
 
 class Chassis:
@@ -150,3 +153,11 @@ class Chassis:
         self.left_encoder.setPosition(0)
         self.right_encoder.setPosition(0)
         self.odometry.resetPosition(pose, self._get_heading())
+
+    def angle_to_target(self) -> float:
+        """Return the theoretical angle (in radians) to the target based on odometry"""
+        pose: Pose2d = self.chassis.get_pose()
+        rel: Transform2d = pose - self.TARGET_POSITION
+        translation = rel.translation()
+        rel_heading = Rotation2d(translation.y, translation.x) + pose.rotation()
+        return rel_heading.radians()
