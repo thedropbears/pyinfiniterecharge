@@ -39,11 +39,15 @@ class ShootMoveShootBase(AutonomousStateMachine):
             maxVelocity=1, maxAcceleration=1
         )
         self.gen = trajectory.TrajectoryGenerator()
+        self.trajectory_num = 0
+        self.trajectory_max = 1
 
     def setup(self):
         self.trajectory_config.setKinematics(self.chassis.kinematics)
-        self.trajectory_num = 0
-        self.trajectory_max = 1
+        self.path = self.gen.generateTrajectory(
+            self.start_pose, self.waypoints, self.end_pose, self.trajectory_config
+        )
+        self.end_range = (self.TARGET_POSITION - self.end_pose).translation().norm()
 
     def on_enable(self) -> None:
         self.chassis.reset_odometry(self.start_pose)
@@ -88,30 +92,21 @@ class test(ShootMoveShootBase):
     MODE_NAME = "Test"
     DEFAULT = True
 
-    def __init__(self) -> None:
-        super().__init__()
-
-    def setup(self):
-        super().setup()
+    def on_enable(self):
         self.start_pose = to_pose(0, 0, math.pi)
-        self.chassis.reset_odometry(self.start_pose)
         self.end_pose = to_pose(2, 0, math.pi)
         self.waypoints = [geometry.Translation2d(1, 0)]
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1, maxAcceleration=1
         )
-        self.path = self.gen.generateTrajectory(
-            self.start_pose, self.waypoints, self.end_pose, self.trajectory_config
-        )
+        super().on_enable()
 
 
 class _3Right3(ShootMoveShootBase):
     MODE_NAME = "3RIGHT3"
 
-    def setup(self):
-        super().setup()
+    def on_enable(self):
         self.start_pose = to_pose(3.459, -0.705, 0)
-        self.chassis.reset_odometry(self.start_pose)
         self.end_pose = to_pose(8.163, -0.705, 0)
         self.waypoints = [
             geometry.Translation2d(7.077, -0.705),
@@ -120,7 +115,4 @@ class _3Right3(ShootMoveShootBase):
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1.5, maxAcceleration=1
         )
-        self.path = self.gen.generateTrajectory(
-            self.start_pose, self.waypoints, self.end_pose, self.trajectory_config
-        )
-        self.end_range = (self.TARGET_POSITION - self.end_pose).translation().norm()
+        super().on_enable()
