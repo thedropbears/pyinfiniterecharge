@@ -2,7 +2,6 @@ import math
 import time
 from collections import deque
 from enum import Enum
-from typing import Optional
 
 import wpilib
 import ctre
@@ -12,24 +11,36 @@ from utilities.functions import constrain_angle
 
 class Index(Enum):
     # These are relative to the turret, which faces backwards on the robot.
-    NOT_FOUND = 0
+    NO_INDEX = 0
     CENTRE = 1
     RIGHT = 2
     LEFT = 3
 
 
+# Turret angles are rotated by 180 degrees (i.e. 0 is backwards on the robot).
+ROBOT_TO_TURRET_OFFSET = math.pi
+
 # Convert an angle in the robot coordinate system to the turret coordinate
-# system, which is rotated by 180 degrees (i.e. 0 is backwards on the robot).
-def robot_to_turret(angle: float) -> float:
+# system.
+def _robot_to_turret(angle: float) -> float:
     """
     Convert an angle in the robot coordinate system to the turret coordinate system.
-
-    Turret angles are rotated by 180 degrees (i.e. 0 is backwards on the robot).
     """
-    return constrain_angle(angle - math.pi)
+    return constrain_angle(angle - ROBOT_TO_TURRET_OFFSET)
+
+
+# Convert an angle in the turret coordinate system to the robot coordinate
+# system.
+def _turret_to_robot(angle: float) -> float:
+    """
+    Convert an angle in the turret coordinate system to the robot coordinate system.
+    """
+    return constrain_angle(angle + ROBOT_TO_TURRET_OFFSET)
 
 
 class Turret:
+    #### Magicbot injections
+
     centre_index: wpilib.DigitalInput
     right_index: wpilib.DigitalInput
     left_index: wpilib.DigitalInput
@@ -37,6 +48,8 @@ class Turret:
 
     MEMORY_CONSTANT: int
     control_loop_wait_time: float
+
+    #### Constants
 
     # Possible states
     SLEWING = 0
@@ -55,6 +68,8 @@ class Turret:
         Index.LEFT: int(math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
         Index.RIGHT: int(-math.pi / 2 * COUNTS_PER_TURRET_RADIAN),
     }
+    # The following is used only if we don't start on an index
+    DEFAULT_START_POSITION = INDEX_POSITIONS[Index.RIGHT]
     HALL_EFFECT_CLOSED = False
     HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
 
@@ -88,25 +103,111 @@ class Turret:
     )  # counts per 100ms
 
     PI_OVER_4_IN_COUNTS = int(math.pi / 4 * COUNTS_PER_TURRET_RADIAN)
+    SCAN_INCREMENT = int(math.radians(10.0) * COUNTS_PER_TURRET_RADIAN)
+
+    #### API
+
+    def setup(self) -> None:
+        self._setup_motor()
+        self._setup_position()
+        self.current_state = self.SLEWING
 
     def on_enable(self) -> None:
         self.motor.configPeakOutputForward(1.0, 10)
         self.motor.configPeakOutputReverse(-1.0, 10)
         if self.index_found:
-            # Don't throw away previously found indices
+            # Don't throw away previously found index
             self.motor.set(
                 ctre.ControlMode.MotionMagic, self.motor.getSelectedSensorPosition()
             )
         else:
-            self.motor.setSelectedSensorPosition(0)
-            self.motor.set(ctre.ControlMode.MotionMagic, 0)
-            # Handle the case where we start out on an index.
-            self._handle_indices()
+            index = self._get_current_index()
+            if index is not Index.NO_INDEX:
+                # We are starting on an index
+                self._handle_index(index)
+            else:
+                # We assume we are on the default start position.
+                # We aren't actually there or there would be an index, but we
+                # are probably close, or the robot hasn't been set up properly.
+                self.motor.setSelectedSensorPosition(self.DEFAULT_START_POSITION)
+                self.motor.set(ctre.ControlMode.MotionMagic, 0)
+                self.index_hit = Index.NO_INDEX
+                self._enable_index_interrupts()
 
-    def setup(self) -> None:
-        self.motor.configSelectedFeedbackSensor(
-            ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
-        )
+    def execute(self) -> None:
+        if not self.index_found and self.index_hit != Index.NO_INDEX:
+            self._handle_index(self.index_hit)
+        if self.current_state == self.SCANNING:
+            self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
+            self._do_scanning()
+        else:
+            self.motor.configMotionCruiseVelocity(self.SLEW_CRUISE_VELOCITY, 0)
+
+        self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
+
+        self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
+
+    # Slew to the given absolute angle in radians in the robot coordinate system.
+    def slew_to_azimuth(self, angle: float) -> None:
+        self.current_state = self.SLEWING
+        turret_angle = _robot_to_turret(angle)
+        self.motor._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
+
+    # Slew the given angle (in radians) from the current position
+    def slew(self, angle: float) -> None:
+        self.current_state = self.SLEWING
+        current_pos = self.motor.getSelectedSensorPosition()
+        target = current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN)
+        if target < -self.MAX_TURRET_COUNT:
+            target += self.COUNTS_PER_TURRET_REV
+        elif target > self.MAX_TURRET_COUNT:
+            target += -self.COUNTS_PER_TURRET_REV
+        self._slew_to_counts(target)
+
+    def scan(self, azimuth=math.pi) -> None:
+        """
+        Slew the turret back and forth looking for a target
+        """
+        # The target must be downfield from us, so scan up to
+        # 90 degrees either side of the given heading
+
+        if self.current_state != self.SCANNING:
+            # First reset scan size
+            self.current_scan_delta = self.SCAN_INCREMENT
+            turret_azimuth = _robot_to_turret(azimuth)
+            # set the first pass
+            self._slew_to_counts(
+                turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.SCAN_INCREMENT
+            )
+            self.current_state = self.SCANNING
+
+    def is_ready(self) -> bool:
+        return self.current_state != self.SCANNING and self._motor_is_finished()
+
+    def azimuth_at_time(self, t: float) -> float:
+        """Get the stored azimuth (in radians) of the turret at a specified
+        time. Returns None if the requested time is not in history
+        @param t: time that we want data for
+        """
+        current_time = time.monotonic()
+        control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
+        if control_loops_ago >= len(self.azimuth_history):
+            return (
+                self._sensor_to_robot(self.azimuth_history[-1])
+                if len(self.azimuth_history) > 0
+                else self.get_azimuth()
+            )
+        return self._sensor_to_robot(self.azimuth_history[control_loops_ago])
+
+    def get_azimuth(self) -> float:
+        """Get the current azimuth in radians"""
+        return self._sensor_to_robot(self.motor.getSelectedSensorPosition())
+
+    #### Internal methods from here on
+
+    #### Motor control, slewing, scanning
+
+    def _setup_motor(self) -> None:
         # Positive motion is counterclockwise from above.
         self.motor.setInverted(ctre.InvertType.InvertMotorOutput)
         # set the peak and nominal outputs
@@ -130,39 +231,6 @@ class Turret:
         self.motor.configMotionCruiseVelocity(self.SLEW_CRUISE_VELOCITY, 10)
         self.motor.configMotionAcceleration(self.CRUISE_ACCELERATION, 10)
         # self.motor.configAllowableClosedloopError(0, self.ACCEPTABLE_ERROR_COUNTS, 10)
-        self.current_target_counts = 0
-        self.scan_increment = int(math.radians(10.0) * self.COUNTS_PER_TURRET_RADIAN)
-        self.index_found = False
-        self.previous_index = Index.NOT_FOUND
-        self.current_state = self.SLEWING
-
-        self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
-
-    # Slew to the given absolute angle in radians in the robot coordinate system.
-    # If no index has been seen yet, we have no reference for the angle, so we
-    # ignore the command.
-    #
-    # TODO: perhaps we should return an error so the calling code can know?
-    def slew_to_azimuth(self, angle: float) -> None:
-        if self.index_found:
-            self.current_state = self.SLEWING
-            turret_angle = robot_to_turret(angle)
-            self.motor._slew_to_counts(
-                int(turret_angle * self.COUNTS_PER_TURRET_RADIAN)
-            )
-        else:
-            print("slew_to_azimuth() called before index found")
-
-    # Slew the given angle (in radians) from the current position
-    def slew(self, angle: float) -> None:
-        self.current_state = self.SLEWING
-        current_pos = self.motor.getSelectedSensorPosition()
-        target = current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN)
-        if target < -self.MAX_TURRET_COUNT:
-            target += self.COUNTS_PER_TURRET_REV
-        elif target > self.MAX_TURRET_COUNT:
-            target += -self.COUNTS_PER_TURRET_REV
-        self._slew_to_counts(target)
 
     def _slew_to_counts(self, counts: int) -> None:
         # Callers should ensure that the target is in range, but this is
@@ -173,63 +241,93 @@ class Turret:
             counts = self.MAX_TURRET_COUNT
         self.current_target_counts = counts
 
-    def scan(self, azimuth=0.0) -> None:
-        """
-        Slew the turret back and forth looking for a target
-        """
-        # If we haven't hit an index yet, we just have to scan
-        # about the current position.
-        # Otherwise scan about the heading we've been given.
-        # The target must be downfield from us, so scan up to
-        # 90 degrees either side of the given heading
-
-        if self.current_state != self.SCANNING:
-            # First reset scan size
-            self.current_scan_delta = self.scan_increment
-            if self.index_found:
-                turret_azimuth = robot_to_turret(azimuth)
-                # set the first pass
-                self._slew_to_counts(
-                    turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.scan_increment
-                )
-            else:
-                current_count = self.motor.getSelectedSensorPosition()
-                self._slew_to_counts(current_count + self.scan_increment)
-            self.current_state = self.SCANNING
-
-    def is_ready(self) -> bool:
+    def _motor_is_finished(self) -> bool:
         return (
-            self.current_state != self.SCANNING
-            and abs(self.motor.getClosedLoopError()) < self.ACCEPTABLE_ERROR_COUNTS
+            abs(self.motor.getClosedLoopError()) < self.ACCEPTABLE_ERROR_COUNTS
             and abs(self.motor.getSelectedSensorVelocity())
             < self.ACCEPTABLE_ERROR_SPEED
         )
 
-    def execute(self) -> None:
-        if not self.index_found:
-            self._handle_indices()
-        if self.current_state == self.SCANNING:
-            self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
-            self._do_scanning()
-        else:
-            self.motor.configMotionCruiseVelocity(self.SLEW_CRUISE_VELOCITY, 0)
+    def _do_scanning(self) -> None:
+        # Check if we've finished a scan pass
+        # If so, reverse the direction and increase pass size if necessary
+        current_target = self.current_target_counts
+        if (
+            abs(self.motor.getSelectedSensorPosition() - self.current_target_counts)
+            < self.ACCEPTABLE_ERROR_COUNTS
+        ):
+            current_target -= self.current_scan_delta
+            if 0 < self.current_scan_delta < self.PI_OVER_4_IN_COUNTS:
+                self.current_scan_delta = self.current_scan_delta + self.SCAN_INCREMENT
+            if -self.PI_OVER_4_IN_COUNTS < self.current_scan_delta < 0:
+                self.current_scan_delta = self.current_scan_delta - self.SCAN_INCREMENT
+            self.current_scan_delta = -self.current_scan_delta
+            current_target += self.current_scan_delta
 
-        self.motor.set(ctre.ControlMode.MotionMagic, self.current_target_counts)
+        self._slew_to_counts(current_target)
 
-        self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
+    #### Position and Indexing
+    # The turret always knows where it is. Until it encounters an index it
+    # assumes it began at the DEFAULT_START_POSITION, which is -90 degrees in
+    # the robot coordinate system, because that is where we must start to keep
+    # the turret and motors from extending outside the frame perimeter.
+    # An index is encountered either at start, if the turret was placed on one,
+    # or by passing over one, which will trigger an interrupt. Once an index
+    # been encountered, in either way, interrupts are disabled.
 
-    def _handle_indices(self) -> None:
-        # Check if we're at a known position
-        # If so, update the encoder position on the motor controller
-        # and change the current setpoint with the applied delta.
-        # We do this only once, as indicated by the index_found flag.
-        index = self._get_current_index()
-        if index != Index.NOT_FOUND:
-            count = self._index_to_counts(index)
-            self._reset_encoder(count)
-            self.index_found = True
-            print("found an index and reset encoder")
-        self.previous_index = index
+    def _setup_position(self) -> None:
+        self.motor.configSelectedFeedbackSensor(
+            ctre.FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10
+        )
+        self.current_target_counts = 0
+        self.azimuth_history = deque(maxlen=self.MEMORY_CONSTANT)
+        self._setup_indexing()
+
+    def _setup_indexing(self) -> None:
+        self.index_found = False
+        self.index_hit = Index.NO_INDEX  # Interrupt will change this
+        # set up interrupts on all three indices, on both edges, with separate
+        # handlers for each DIO so we know which one triggered.
+        self.centre_index.requestInterrupts(self._centre_isr)
+        self.centre_index.setUpSourceEdge(True, True)
+        self.left_index.requestInterrupts(self._left_isr)
+        self.left_index.setUpSourceEdge(True, True)
+        self.right_index.requestInterrupts(self._right_isr)
+        self.right_index.setUpSourceEdge(True, True)
+
+    def _enable_index_interrupts(self) -> None:
+        self.centre_index.enableInterrupts()
+        self.left_index.enableInterrupts()
+        self.right_index.enableInterrupts()
+
+    def _disable_index_interrupts(self) -> None:
+        self.centre_index.disableInterrupts()
+        self.left_index.disableInterrupts()
+        self.right_index.disableInterrupts()
+
+    def _centre_isr(
+        self, wait_result: wpilib.InterruptableSensorBase.WaitResult
+    ) -> None:
+        self.index_hit = Index.CENTRE
+        self._process_isr(wait_result)
+
+    def _left_isr(self, wait_result: wpilib.InterruptableSensorBase.WaitResult) -> None:
+        self.index_hit = Index.LEFT
+        self._process_isr(wait_result)
+
+    def _right_isr(
+        self, wait_result: wpilib.InterruptableSensorBase.WaitResult
+    ) -> None:
+        self.index_hit = Index.RIGHT
+        self._process_isr(wait_result)
+
+    def _process_isr(
+        self, wait_result: wpilib.InterruptableSensorBase.WaitResult
+    ) -> None:
+        self.index_count = self.motor.getSelectedSensorPosition()
+        self.index_rising_edge = (
+            wait_result is wpilib.InterruptableSensorBase.WaitResult.kRisingEdge
+        )
 
     def _get_current_index(self) -> Index:
         if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
@@ -238,17 +336,33 @@ class Turret:
             return Index.RIGHT
         if self.left_index.get() == self.HALL_EFFECT_CLOSED:
             return Index.LEFT
-        return Index.NOT_FOUND
+        return Index.NO_INDEX
+
+    def _handle_index(self, index: Index) -> None:
+        # Update the encoder position on the motor controller
+        # and change the current setpoint with the applied delta.
+        # We do this only once, as indicated by the index_found flag.
+        count = self._index_to_counts(index)
+        self._reset_encoder(count)
+        self.index_found = True
+        self._disable_index_interrupts()
+        print(f"found index {index} and reset encoder")
 
     def _index_to_counts(self, index: Index) -> int:
         # We need to account for the width of the sensor.
-        # This means we use the direction of travel to work out
-        # which side we are approaching from
-        # if we aren't moving at all, we assume we are in the middle
+        # This means we use the direction of travel and whether we interrupted
+        # on the rising or falling edge.
         count = self.INDEX_POSITIONS[index]
         velocity = self.motor.getSelectedSensorVelocity()
+        # if velocity is 0, assume the centre
         if velocity != 0:
             direction = 1 if velocity > 0 else -1
+            # If it was the falling edge, then we want to adjust the count as
+            # though it was the rising edge in the other direction.
+            # If the turret is moving (velocity != 0), it isn't the start, so we
+            # know we processed an interrupt and index_rising_edge will be set.
+            if not self.index_rising_edge:
+                direction = -direction
             count += direction * self.HALL_EFFECT_HALF_WIDTH_COUNTS
         return count
 
@@ -262,35 +376,5 @@ class Turret:
             # update old measurements
         self._slew_to_counts(counts + delta)
 
-    def _do_scanning(self) -> None:
-        # Check if we've finished a scan pass
-        # If so, reverse the direction and increase pass size if necessary
-        current_target = self.current_target_counts
-        if (
-            abs(self.motor.getSelectedSensorPosition() - self.current_target_counts)
-            < self.ACCEPTABLE_ERROR_COUNTS
-        ):
-            current_target -= self.current_scan_delta
-            if 0 < self.current_scan_delta < self.PI_OVER_4_IN_COUNTS:
-                self.current_scan_delta = self.current_scan_delta + self.scan_increment
-            if -self.PI_OVER_4_IN_COUNTS < self.current_scan_delta < 0:
-                self.current_scan_delta = self.current_scan_delta - self.scan_increment
-            self.current_scan_delta = -self.current_scan_delta
-            current_target += self.current_scan_delta
-
-        self._slew_to_counts(current_target)
-
-    def azimuth_at_time(self, t: float) -> Optional[int]:
-        """Get the stored azimuth (in radians) of the turret at a specified
-        time. Returns None if the requested time is not in history
-        @param t: time that we want data for
-        """
-        current_time = time.monotonic()
-        control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
-        if control_loops_ago >= len(self.azimuth_history):
-            return None
-        return self.azimuth_history[control_loops_ago] / self.COUNTS_PER_TURRET_RADIAN
-
-    def get_azimuth(self) -> int:
-        """Get the current azimuth in radians"""
-        return self.motor.getSelectedSensorPosition() / self.COUNTS_PER_TURRET_RADIAN
+    def _sensor_to_robot(self, counts: int) -> float:
+        return _turret_to_robot(counts / self.COUNTS_PER_TURRET_RADIAN)

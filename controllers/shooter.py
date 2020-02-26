@@ -86,7 +86,7 @@ class ShooterController(StateMachine):
             # rel_heading = rel.rotation().radians()
             # self.turret.scan(rel_heading)
 
-            self.turret.scan(0)  # TODO remove this
+            self.turret.scan(math.pi)  # TODO remove this
 
     @state
     def tracking(self) -> None:
