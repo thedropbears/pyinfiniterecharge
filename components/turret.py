@@ -164,7 +164,7 @@ class Turret:
             target += -self.COUNTS_PER_TURRET_REV
         self._slew_to_counts(target)
 
-    def scan(self, azimuth=0.0) -> None:
+    def scan(self, azimuth=math.pi) -> None:
         """
         Slew the turret back and forth looking for a target
         """
