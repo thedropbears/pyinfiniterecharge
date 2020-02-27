@@ -181,7 +181,7 @@ class Turret:
         # The target must be downfield from us, so scan up to
         # 90 degrees either side of the given heading
 
-        if self.must_finish():
+        if self.must_finish:
             return
         if self.current_state != self.SCANNING:
             # First reset scan size

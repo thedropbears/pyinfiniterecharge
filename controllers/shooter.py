@@ -86,7 +86,8 @@ class ShooterController(StateMachine):
 
             # Scan starting straight downrange. TODO: remove this if the above
             # seems worthwhile
-            self.turret.scan(-self.chassis.get_heading())
+            # self.turret.scan(-self.chassis.get_heading())
+            self.turret.scan(math.pi)
 
     @state
     def tracking(self) -> None:
