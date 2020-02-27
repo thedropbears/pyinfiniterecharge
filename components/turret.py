@@ -102,7 +102,7 @@ class Turret:
         math.radians(0.5) * COUNTS_PER_TURRET_RADIAN
     )  # counts per 100ms
 
-    PI_OVER_4_IN_COUNTS = int(math.pi / 4 * COUNTS_PER_TURRET_RADIAN)
+    PI_OVER_2_IN_COUNTS = int(math.pi / 2 * COUNTS_PER_TURRET_RADIAN)
     SCAN_INCREMENT = int(math.radians(10.0) * COUNTS_PER_TURRET_RADIAN)
 
     #### API
@@ -115,6 +115,7 @@ class Turret:
     def on_enable(self) -> None:
         self.motor.configPeakOutputForward(1.0, 10)
         self.motor.configPeakOutputReverse(-1.0, 10)
+        self.must_finish = False
         if self.index_found:
             # Don't throw away previously found index
             self.motor.set(
@@ -147,21 +148,30 @@ class Turret:
 
         self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
 
+        if self.must_finish and self._motor_is_finished():
+            self.must_finish = False
+
     # Slew to the given absolute angle in radians in the robot coordinate system.
     def slew_to_azimuth(self, angle: float) -> None:
+        if self.must_finish:
+            return
         self.current_state = self.SLEWING
         turret_angle = _robot_to_turret(angle)
         self.motor._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
+        if self.must_finish:
+            return
         self.current_state = self.SLEWING
         current_pos = self.motor.getSelectedSensorPosition()
         target = current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN)
         if target < -self.MAX_TURRET_COUNT:
             target += self.COUNTS_PER_TURRET_REV
+            self.must_finish = True
         elif target > self.MAX_TURRET_COUNT:
             target += -self.COUNTS_PER_TURRET_REV
+            self.must_finish = True
         self._slew_to_counts(target)
 
     def scan(self, azimuth=math.pi) -> None:
@@ -171,6 +181,8 @@ class Turret:
         # The target must be downfield from us, so scan up to
         # 90 degrees either side of the given heading
 
+        if self.must_finish():
+            return
         if self.current_state != self.SCANNING:
             # First reset scan size
             self.current_scan_delta = self.SCAN_INCREMENT
@@ -254,9 +266,9 @@ class Turret:
             < self.ACCEPTABLE_ERROR_COUNTS
         ):
             current_target -= self.current_scan_delta
-            if 0 < self.current_scan_delta < self.PI_OVER_4_IN_COUNTS:
+            if 0 < self.current_scan_delta < self.PI_OVER_2_IN_COUNTS:
                 self.current_scan_delta = self.current_scan_delta + self.SCAN_INCREMENT
-            if -self.PI_OVER_4_IN_COUNTS < self.current_scan_delta < 0:
+            if -self.PI_OVER_2_IN_COUNTS < self.current_scan_delta < 0:
                 self.current_scan_delta = self.current_scan_delta - self.SCAN_INCREMENT
             self.current_scan_delta = -self.current_scan_delta
             current_target += self.current_scan_delta
