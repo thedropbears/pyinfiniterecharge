@@ -70,8 +70,6 @@ class MyRobot(magicbot.MagicRobot):
             ctre.WPI_TalonSRX(14),
         ]
         self.piston_switch = wpilib.DigitalInput(4)  # checks if injector retracted
-        self.injector_master_motor = ctre.WPI_TalonSRX(3)
-        self.injector_slave_motor = ctre.WPI_TalonSRX(43)
         self.intake_arm_piston = wpilib.Solenoid(1)
         self.intake_left_motor = rev.CANSparkMax(8, rev.MotorType.kBrushless)
         self.intake_right_motor = rev.CANSparkMax(9, rev.MotorType.kBrushless)
