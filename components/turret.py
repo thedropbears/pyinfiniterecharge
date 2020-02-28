@@ -219,9 +219,6 @@ class Turret:
         self.motor.setStatusFramePeriod(
             ctre.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, 10
         )
-        self.motor.setStatusFramePeriod(
-            ctre.StatusFrameEnhanced.Status_10_MotionMagic, 10, 10
-        )
         self.motor.config_kF(0, self.pidF, 10)
         self.motor.config_kP(0, self.pidP, 10)
         self.motor.config_IntegralZone(0, self.pidIZone, 10)
