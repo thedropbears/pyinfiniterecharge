@@ -27,7 +27,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
     indexer: Indexer
     shooter: Shooter
 
-    TARGET_POSITION = geometry.Pose2d(0, -2.404, geometry.Rotation2d(0))
+    TARGET_POSITION = geometry.Translation2d(0, -2.404)
 
     def __init__(self) -> None:
         super().__init__()
@@ -54,7 +54,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
             )
             self.paths.append(path)
             self.end_ranges.append(
-                (self.TARGET_POSITION - self.end_pose).translation().norm()
+                (self.TARGET_POSITION - self.end_pose.translation()).norm()
             )
         self.path = self.paths[0]
 
@@ -138,8 +138,16 @@ class _3Right23(ShootMoveShootBase):
 
     def setup(self):
         # TODO add correct headings
-        self.start_pose = [to_pose(3.459, -0.705, 0), to_pose(6.179, -2.981, 0), to_pose(4.698, -2.359, 0)]
-        self.end_pose = [to_pose(6.179, -2.981, 0), to_pose(4.698, -2.359, 0), to_pose(8.163, -0.705, 0)]
+        self.start_pose = [
+            to_pose(3.459, -0.705, 0),
+            to_pose(6.179, -2.981, 0),
+            to_pose(4.698, -2.359, 0),
+        ]
+        self.end_pose = [
+            to_pose(6.179, -2.981, 0),
+            to_pose(4.698, -2.359, 0),
+            to_pose(8.163, -0.705, 0),
+        ]
         self.waypoints = [
             [
                 geometry.Translation2d(4.971, -1.154),
