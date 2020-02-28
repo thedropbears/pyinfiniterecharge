@@ -87,6 +87,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
             self.path = self.paths[self.trajectory_num]
             self.shooter.set_range(self.end_ranges[self.trajectory_num])
         if state_tm > self.path.totalTime() or self.indexer.balls_loaded() >= 3:
+            # this needs to be overidden in the subclasses
             print(f"Calculated path time: {self.path.totalTime()}")
             self.chassis.drive(0, 0)
             self.next_state("shoot")
@@ -129,4 +130,26 @@ class _3Right3(ShootMoveShootBase):
             maxVelocity=1.5, maxAcceleration=1
         )
         self.trajectory_max = 1
+        super().setup()
+
+
+class _3Right23(ShootMoveShootBase):
+    MODE_NAME = "3RIGHT23"
+
+    def setup(self):
+        # TODO add correct headings
+        self.start_pose = [to_pose(3.459, -0.705, 0), to_pose(6.179, -2.981, 0), to_pose(4.698, -2.359, 0)]
+        self.end_pose = [to_pose(6.179, -2.981, 0), to_pose(4.698, -2.359, 0), to_pose(8.163, -0.705, 0)]
+        self.waypoints = [
+            [
+                geometry.Translation2d(4.971, -1.154),
+                geometry.Translation2d(5.616, -1.978),
+            ],
+            [],
+            [geometry.Translation2d(5.668, -0.988)],
+        ]
+        self.trajectory_config = trajectory.TrajectoryConfig(
+            maxVelocity=1.5, maxAcceleration=1
+        )
+        self.trajectory_max = 3
         super().setup()
