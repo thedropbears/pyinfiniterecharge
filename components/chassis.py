@@ -41,6 +41,14 @@ class Chassis:
 
         self.disable_brake_mode()
 
+        for motor in (
+            self.left_front,
+            self.left_rear,
+            self.right_front,
+            self.right_rear,
+        ):
+            motor.setOpenLoopRampRate(0.1)
+
         self.left_rear.follow(self.left_front)
         self.right_rear.follow(self.right_front)
 
