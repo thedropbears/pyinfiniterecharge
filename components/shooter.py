@@ -33,6 +33,10 @@ class Shooter:
         self.disabled = False
 
     def setup(self) -> None:
+        sendable_reg = wpilib.SendableRegistry.getInstance()
+        for dev in (self.loading_piston, self.piston_switch):
+            sendable_reg.setSubsystem(dev, "Shooter")
+
         self.outer_motor.setInverted(True)
         self.centre_motor.setInverted(False)
 
