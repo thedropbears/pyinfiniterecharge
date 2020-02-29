@@ -5,6 +5,7 @@ from enum import Enum
 
 import wpilib
 import ctre
+import magicbot
 
 from utilities.functions import constrain_angle
 
@@ -19,6 +20,7 @@ class Index(Enum):
 
 # Turret angles are rotated by 180 degrees (i.e. 0 is backwards on the robot).
 ROBOT_TO_TURRET_OFFSET = math.pi
+
 
 # Convert an angle in the robot coordinate system to the turret coordinate
 # system.
@@ -106,6 +108,8 @@ class Turret:
     SCAN_INCREMENT = int(math.radians(10.0) * COUNTS_PER_TURRET_RADIAN)
 
     #### API
+
+    index_found = magicbot.tunable(False)
 
     def setup(self) -> None:
         self._setup_motor()
@@ -198,7 +202,7 @@ class Turret:
 
     def azimuth_at_time(self, t: float) -> float:
         """Get the stored azimuth (in radians) of the turret at a specified
-        time. Returns None if the requested time is not in history
+        time. Returns the oldest data if the requested time is not in history
         @param t: time that we want data for
         """
         current_time = time.monotonic()
@@ -252,19 +256,15 @@ class Turret:
 
     def _motor_is_finished(self) -> bool:
         return (
-            abs(self.motor.getClosedLoopError()) < self.ACCEPTABLE_ERROR_COUNTS
-            and abs(self.motor.getSelectedSensorVelocity())
-            < self.ACCEPTABLE_ERROR_SPEED
+            abs(self.current_target_counts - self.motor.getSelectedSensorPosition())
+            < self.ACCEPTABLE_ERROR_COUNTS
         )
 
     def _do_scanning(self) -> None:
         # Check if we've finished a scan pass
         # If so, reverse the direction and increase pass size if necessary
         current_target = self.current_target_counts
-        if (
-            abs(self.motor.getSelectedSensorPosition() - self.current_target_counts)
-            < self.ACCEPTABLE_ERROR_COUNTS
-        ):
+        if self._motor_is_finished():
             current_target -= self.current_scan_delta
             if 0 < self.current_scan_delta < self.PI_OVER_2_IN_COUNTS:
                 self.current_scan_delta = self.current_scan_delta + self.SCAN_INCREMENT
@@ -335,7 +335,7 @@ class Turret:
     ) -> None:
         self.index_count = self.motor.getSelectedSensorPosition()
         self.index_rising_edge = (
-            wait_result is wpilib.InterruptableSensorBase.WaitResult.kRisingEdge
+            wait_result == wpilib.InterruptableSensorBase.WaitResult.kRisingEdge
         )
 
     def _get_current_index(self) -> Index:
@@ -376,14 +376,16 @@ class Turret:
         return count
 
     def _reset_encoder(self, counts) -> None:
+        print(f"========= resetting encoder to {counts} ==========")
         current_count = self.motor.getSelectedSensorPosition()
         delta = self.current_target_counts - current_count
-        self.motor.setSelectedSensorPosition(counts)
+        self.motor.setSelectedSensorPosition(counts, timeoutMs=5)
         # Reset any current target using the new absolute azimuth
-        for entry in self.azimuth_history:
-            entry += current_count - counts
+        for i, entry in enumerate(self.azimuth_history):
+            self.azimuth_history[i] = entry + current_count - counts
             # update old measurements
         self._slew_to_counts(counts + delta)
+        print(f"moved command from {self.current_target_counts} to {counts + delta}")
 
     def _sensor_to_robot(self, counts: int) -> float:
         return _turret_to_robot(counts / self.COUNTS_PER_TURRET_RADIAN)

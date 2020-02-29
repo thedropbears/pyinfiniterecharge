@@ -11,6 +11,7 @@ import ctre
 import magicbot
 import rev.color
 import wpilib
+from wpilib import geometry
 
 from components.chassis import Chassis
 from components.hang import Hang
@@ -162,6 +163,8 @@ class MyRobot(magicbot.MagicRobot):
         self.turret.on_enable()
         self.track_target = False
 
+    track_target = magicbot.tunable(False)
+
     def testPeriodic(self):
 
         self.vision.execute()
@@ -170,13 +173,17 @@ class MyRobot(magicbot.MagicRobot):
 
         if self.track_target:
             self.target_estimator.execute()
-            self.shooter_controller.execute()
+            # self.shooter_controller.engage()
+            # self.shooter_controller.execute()
+            self.turret.scan(math.pi)
+            self.turret.execute()
 
         if self.driver_joystick.getTrigger():
             self.indexer.enable_intaking()
 
         if self.driver_joystick.getRawButtonPressed(3):
             self.track_target = not self.track_target
+            self.chassis.reset_odometry(geometry.Pose2d(1, -1, geometry.Rotation2d(math.pi)))
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):

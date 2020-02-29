@@ -10,6 +10,7 @@ import time
 
 from typing import Optional
 
+from magicbot import feedback
 
 class TargetEstimator:
 
@@ -35,12 +36,14 @@ class TargetEstimator:
         self.previous_vision_data: VisionData = VisionData(0.0, 0.0, 0.0)
         self._pointing_downrange: bool = False
 
+    @feedback
     def is_ready(self) -> bool:
         return self.is_pointing_downrange() and self.has_vision()
 
     def has_vision(self) -> bool:
         return self.vision.is_ready()
 
+    @feedback
     def is_pointing_downrange(self) -> bool:
         return self._pointing_downrange
 
