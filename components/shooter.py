@@ -4,6 +4,8 @@ import ctre
 from numpy import interp
 from magicbot import feedback, tunable
 
+from utilities.ctre import TalonEncoder
+
 
 class Shooter:
     outer_motor: ctre.WPI_TalonFX
@@ -47,29 +49,33 @@ class Shooter:
         self.centre_motor.config_kF(0, 0)
         self.centre_ff_calculator = controller.SimpleMotorFeedforward(kS=0.158, kV=0.11)
 
+        self.outer_enc = TalonEncoder(
+            self.outer_motor, distance_per_edge=self.CTRE_UNITS_TO_RPS
+        )
+        self.centre_enc = TalonEncoder(
+            self.centre_motor, distance_per_edge=self.CTRE_UNITS_TO_RPS
+        )
+
     def execute(self) -> None:
         if self.disabled:
             self.stop_motors()
             return
 
+        centre_feed_forward = self.centre_ff_calculator.calculate(self.centre_target)
+        outer_feed_forward = self.outer_ff_calculator.calculate(self.outer_target)
         voltage = wpilib.RobotController.getInputVoltage()
-        centre_feed_forward = (
-            self.centre_ff_calculator.calculate(self.centre_target) / voltage
-        )
-        outer_feed_forward = (
-            self.outer_ff_calculator.calculate(self.outer_target) / voltage
-        )
+
         self.centre_motor.set(
             ctre.ControlMode.Velocity,
             self.centre_target * self.RPS_TO_CTRE_UNITS,
             ctre.DemandType.ArbitraryFeedForward,
-            centre_feed_forward,
+            centre_feed_forward / voltage,
         )
         self.outer_motor.set(
             ctre.ControlMode.Velocity,
             self.outer_target * self.RPS_TO_CTRE_UNITS,
             ctre.DemandType.ArbitraryFeedForward,
-            outer_feed_forward,
+            outer_feed_forward / voltage,
         )
         if self.inject:
             self.loading_piston.set(wpilib.DoubleSolenoid.Value.kForward)
@@ -111,12 +117,12 @@ class Shooter:
     @feedback
     def get_centre_velocity(self):
         """Returns velocity in rps"""
-        return self.centre_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPS
+        return self.centre_enc.getVelocity()
 
     @feedback
     def get_outer_velocity(self):
         """Returns velocity in rps"""
-        return self.outer_motor.getSelectedSensorVelocity() * self.CTRE_UNITS_TO_RPS
+        return self.outer_enc.getVelocity()
 
     @feedback
     def is_firing(self) -> bool:
