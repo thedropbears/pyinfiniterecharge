@@ -43,6 +43,15 @@ class Indexer:
                 ctre.LimitSwitchNormal.NormallyOpen,
             )
 
+        sendable_reg = wpilib.SendableRegistry.getInstance()
+        for dev in (self.intake_arm_piston, self.intake_main_motor):
+            sendable_reg.setSubsystem(dev, "Intake")
+
+        sendable_reg.setSubsystem(self.injector_motor, "Shooter")
+
+        for motor in self.indexer_motors:
+            sendable_reg.setSubsystem(motor, "Indexer")
+
         self.intake_left_motor.setInverted(False)
         self.intake_right_motor.setInverted(True)
 
