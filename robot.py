@@ -100,6 +100,9 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis.enable_closed_loop()
         self.indexer.shimmying = False
 
+    def disabledPeriodic(self) -> None:
+        self.vision.execute()
+
     def teleopInit(self) -> None:
         """Initialise things for driver control."""
         self.chassis.disable_closed_loop()
