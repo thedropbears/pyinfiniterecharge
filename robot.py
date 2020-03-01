@@ -175,7 +175,6 @@ class MyRobot(magicbot.MagicRobot):
             self.target_estimator.execute()
             # self.shooter_controller.engage()
             # self.shooter_controller.execute()
-            self.turret.scan(math.pi)
             self.turret.execute()
 
         if self.driver_joystick.getTrigger():
@@ -183,7 +182,10 @@ class MyRobot(magicbot.MagicRobot):
 
         if self.driver_joystick.getRawButtonPressed(3):
             self.track_target = not self.track_target
-            self.chassis.reset_odometry(geometry.Pose2d(1, -1, geometry.Rotation2d(math.pi)))
+            self.chassis.reset_odometry(
+                geometry.Pose2d(1, -1, geometry.Rotation2d(math.pi))
+            )
+            self.turret.scan(math.pi)
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):

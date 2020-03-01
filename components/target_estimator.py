@@ -12,6 +12,7 @@ from typing import Optional
 
 from magicbot import feedback
 
+
 class TargetEstimator:
 
     ALPHA = 0.1  # Exponential smoothing fraction
