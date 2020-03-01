@@ -58,8 +58,7 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
         self.imu = NavX()
 
-        self.hang_winch_motor_master = ctre.WPI_TalonSRX(21)
-        self.hang_winch_motor_slave = ctre.WPI_TalonSRX(22)
+        self.hang_winch_motor = ctre.WPI_TalonFX(30)
         self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
 
         self.indexer_motors = [
