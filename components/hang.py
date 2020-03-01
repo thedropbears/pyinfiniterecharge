@@ -17,6 +17,10 @@ class Hang:
     def setup(self) -> None:
         self.winch_motor.setInverted(True)
 
+        sendable_reg = wpilib.SendableRegistry.getInstance()
+        for dev in (self.winch_motor, self.kracken_hook_latch):
+            sendable_reg.setSubsystem(dev, "Hang")
+
     def on_disable(self) -> None:
         # stop motors
         self.winch_motor.stopMotor()
