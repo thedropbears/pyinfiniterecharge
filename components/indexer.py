@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import List
 
 from magicbot import feedback
 import ctre
@@ -6,7 +6,9 @@ import wpilib
 
 
 class Indexer:
-    indexer_motors: Sequence[ctre.WPI_TalonSRX]
+    intake_main_motor: ctre.WPI_TalonSRX
+    indexer_motors: List[ctre.WPI_TalonSRX]
+    injector_motor: ctre.WPI_TalonSRX
     piston_switch: wpilib.DigitalInput
 
     intake_arm_piston: wpilib.Solenoid
@@ -18,7 +20,12 @@ class Indexer:
         self.shimmying = False
 
     def setup(self):
-        for motor in self.indexer_motors:
+        # All the motors that comprise indexer cells, in order from intake
+        self.all_motors: List[ctre.WPI_TalonSRX] = [self.intake_main_motor]
+        self.all_motors.extend(self.indexer_motors)
+        self.all_motors.append(self.injector_motor)
+
+        for motor in self.all_motors:
             motor.setInverted(True)
             motor.setNeutralMode(ctre.NeutralMode.Brake)
             motor.configForwardLimitSwitchSource(
@@ -29,7 +36,7 @@ class Indexer:
         self.intake_left_motor.setInverted(True)
         self.intake_right_motor.setInverted(False)
 
-        self.indexer_motors[-1].setInverted(False)
+        self.injector_motor.setInverted(False)
 
         self.indexer_speed = 0.6
         self.injector_speed = 0.7
@@ -54,9 +61,9 @@ class Indexer:
 
     def execute(self) -> None:
         if self.intaking:
-            injector = self.indexer_motors[-1]
-            feeder = self.indexer_motors[-2]
-            intake_main_motor = self.indexer_motors[0]
+            injector = self.injector_motor
+            feeder = self.indexer_motors[-1]
+            intake_main_motor = self.intake_main_motor
 
             if injector.isFwdLimitSwitchClosed():
                 self.transfer_to_injector = False
@@ -66,17 +73,16 @@ class Indexer:
 
             # Turn on all motors and let the limit switches stop it
             intake_main_motor.set(self.intake_motor_speed)
-            for motor in self.indexer_motors[1:-2]:
+            for motor in self.indexer_motors:
                 motor.set(self.indexer_speed)
             if self.is_piston_retracted():
-                feeder.set(self.indexer_speed)
                 injector.set(self.injector_speed)
             else:
                 feeder.stopMotor()
                 injector.stopMotor()
 
             # Override any limit switches where the next cell is vacant
-            for first, second in zip(self.indexer_motors, self.indexer_motors[1:]):
+            for first, second in zip(self.all_motors, self.all_motors[1:]):
                 at_limit = second.isFwdLimitSwitchClosed()
                 if second == feeder and self.transfer_to_injector:
                     at_limit = True  # Pretend the ball is still in the feeder
@@ -111,7 +117,7 @@ class Indexer:
         else:
             # Move balls through if we have them, but don't take in more
             ball_in_previous = False
-            for motor in self.indexer_motors:
+            for motor in self.all_motors:
                 if not motor.isFwdLimitSwitchClosed():
                     # We don't have a ball in this cell
                     # Test this first so the previous ball flag works
@@ -144,7 +150,7 @@ class Indexer:
 
     @feedback
     def balls_loaded(self) -> int:
-        balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.indexer_motors)
+        balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors)
         return balls
 
     def is_piston_retracted(self) -> bool:
@@ -153,6 +159,5 @@ class Indexer:
     @feedback
     def is_ready(self) -> bool:
         return (
-            self.indexer_motors[-1].isFwdLimitSwitchClosed()
-            and self.is_piston_retracted()
+            self.injector_motor.isFwdLimitSwitchClosed() and self.is_piston_retracted()
         )

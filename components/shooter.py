@@ -1,5 +1,4 @@
 import wpilib
-from typing import Sequence
 from wpilib import controller
 import ctre
 from numpy import interp
@@ -9,7 +8,7 @@ from magicbot import feedback, tunable
 class Shooter:
     outer_motor: ctre.WPI_TalonFX
     centre_motor: ctre.WPI_TalonFX
-    indexer_motors: Sequence[ctre.WPI_TalonSRX]
+    injector_motor: ctre.TalonSRX
     loading_piston: wpilib.DoubleSolenoid
     piston_switch: wpilib.DigitalInput
 
@@ -148,7 +147,7 @@ class Shooter:
         self.inject = True
 
     def is_ball_cleared(self) -> bool:
-        return not self.indexer_motors[-1].isFwdLimitSwitchClosed()
+        return not self.injector_motor.isFwdLimitSwitchClosed()
 
     def stop_motors(self) -> None:
         self.centre_target = 0
