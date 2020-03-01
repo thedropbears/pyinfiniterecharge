@@ -7,7 +7,7 @@ class Hang:
     winch_motor: ctre.WPI_TalonFX
     kracken_hook_latch: wpilib.DoubleSolenoid
 
-    WINCH_SPEED = 1.0
+    WINCH_SPEED = 0.5
 
     winch_desired_output = will_reset_to(0.0)
 
