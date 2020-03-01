@@ -106,7 +106,7 @@ class Turret:
     )  # counts per 100ms
 
     PI_OVER_2_IN_COUNTS = int(math.pi / 2 * COUNTS_PER_TURRET_RADIAN)
-    SCAN_INCREMENT = int(math.radians(10.0) * COUNTS_PER_TURRET_RADIAN)
+    SCAN_INCREMENT = int(math.radians(20.0) * COUNTS_PER_TURRET_RADIAN)
 
     #### API
 

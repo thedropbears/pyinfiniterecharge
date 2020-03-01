@@ -162,6 +162,9 @@ class MyRobot(magicbot.MagicRobot):
         self.turret.index_found = False
         self.turret.on_enable()
         self.track_target = False
+        self.chassis.reset_odometry(
+            geometry.Pose2d(1, -1, geometry.Rotation2d(math.pi))
+        )
 
     track_target = magicbot.tunable(False)
 
@@ -169,23 +172,19 @@ class MyRobot(magicbot.MagicRobot):
 
         self.vision.execute()
 
-        self.shooter.execute()
-
         if self.track_target:
             self.target_estimator.execute()
-            # self.shooter_controller.engage()
-            # self.shooter_controller.execute()
+            self.shooter_controller.engage()
+            self.shooter_controller.execute()
             self.turret.execute()
+
+        self.shooter.execute()
 
         if self.driver_joystick.getTrigger():
             self.indexer.enable_intaking()
 
         if self.driver_joystick.getRawButtonPressed(3):
             self.track_target = not self.track_target
-            self.chassis.reset_odometry(
-                geometry.Pose2d(1, -1, geometry.Rotation2d(math.pi))
-            )
-            self.turret.scan(math.pi)
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):

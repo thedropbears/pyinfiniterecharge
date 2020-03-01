@@ -1,4 +1,7 @@
 import math
+import time
+
+from typing import Optional
 
 from magicbot import feedback, StateMachine, state, will_reset_to
 import wpilib.geometry
@@ -14,6 +17,8 @@ from components.led_screen import LEDScreen
 
 class ShooterController(StateMachine):
     """Statemachine for high level control of the shooter and injector"""
+
+    VERBOSE_LOGGING = True
 
     chassis: Chassis
     indexer: Indexer
@@ -40,10 +45,13 @@ class ShooterController(StateMachine):
     )
     # in field co ordinates
 
+    MIN_SCAN_PERIOD = 3.0
+
     def __init__(self) -> None:
         super().__init__()
         self.spin_command = False
         self.distance = None
+        self.time_of_last_scan: Optional[float] = None
 
     def execute(self) -> None:
         super().execute()
@@ -86,13 +94,19 @@ class ShooterController(StateMachine):
 
             # Scan starting straight downrange. TODO: remove this if the above
             # seems worthwhile
-            # self.turret.scan(-self.chassis.get_heading())
-            self.turret.scan(math.pi)
+            time_now = time.monotonic()
+            if (
+                self.time_of_last_scan is None
+                or (time_now - self.time_of_last_scan) > self.MIN_SCAN_PERIOD
+            ):
+                self.turret.scan(-self.chassis.get_heading())
+                self.time_of_last_scan = time_now
+            # self.turret.scan(math.pi)
 
     @state
     def tracking(self) -> None:
         """
-        Aiming towards a vision target and spining up flywheels
+        Aiming towards a vision target and spinning up flywheels
         """
         # collect data only once per loop
         if not self.target_estimator.is_ready():
@@ -101,7 +115,7 @@ class ShooterController(StateMachine):
         else:
             target_data = self.target_estimator.get_data()
             if abs(target_data.angle) > self.find_allowable_angle(target_data.distance):
-                # print(f"Telling turret to slew by {delta_angle}")
+                print(f"Telling turret to slew by {target_data.angle}")
                 self.turret.slew(target_data.angle)
             if self.turret.is_ready():
                 self.shooter.set_range(target_data.distance)

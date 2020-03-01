@@ -24,18 +24,23 @@ class TargetEstimator:
     vision: Vision
 
     def __init__(self) -> None:
-        self.reset()
+        self._init()
 
-    def on_enable(self) -> None:
-        self.reset()
-
-    def reset(self) -> None:
+    def _init(self):
         self.angle_to_target: float = 0.0
         self.vision_range: float = 0.0
         self.previous_azimuth: float = 0.0
         self.previous_heading: Optional[float] = None
         self.previous_vision_data: VisionData = VisionData(0.0, 0.0, 0.0)
         self._pointing_downrange: bool = False
+
+    def on_enable(self) -> None:
+        self.reset()
+
+    def reset(self) -> None:
+        self._init()
+        self.previous_heading = self.chassis.get_heading()
+        self.previous_azimuth = self.turret.get_azimuth()
 
     @feedback
     def is_ready(self) -> bool:
@@ -69,12 +74,15 @@ class TargetEstimator:
             self.previous_heading = self.chassis.get_heading()
 
         # First, correct our estimate
+        print(f"prior angle to target {self.angle_to_target}")
         current_azimuth = self.turret.get_azimuth()
         delta = current_azimuth - self.previous_azimuth
         self.angle_to_target -= delta
+        print(f"angle to target minus azimuth delta {self.angle_to_target}")
         current_heading = self.chassis.get_heading()
         delta = constrain_angle(current_heading - self.previous_heading)
         self.angle_to_target -= delta
+        print(f"angle to target minus heading delta {self.angle_to_target}")
         self.previous_azimuth = current_azimuth
         self.previous_heading = current_heading
 
