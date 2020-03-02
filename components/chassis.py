@@ -127,6 +127,11 @@ class Chassis:
         return self.odometry.getPose()
 
     @magicbot.feedback
+    def get_heading(self) -> float:
+        """Get the current heading of the robot."""
+        return self.get_pose().rotation().radians()
+
+    @magicbot.feedback
     def get_left_velocity(self) -> float:
         return self.left_encoder.getVelocity()
 

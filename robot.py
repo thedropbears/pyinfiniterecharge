@@ -11,13 +11,15 @@ import ctre
 import magicbot
 import rev.color
 import wpilib
+from wpilib import geometry
 
 from components.chassis import Chassis
 from components.hang import Hang
 from components.indexer import Indexer
+from components.range_finder import RangeFinder
 from components.shooter import Shooter
 from components.spinner import Spinner
-from components.range_finder import RangeFinder
+from components.target_estimator import TargetEstimator
 from components.turret import Turret
 from components.vision import Vision
 from components.led_screen import LEDScreen
@@ -35,6 +37,7 @@ class MyRobot(magicbot.MagicRobot):
     vision: Vision
 
     # List controllers (which require components) here.
+    target_estimator: TargetEstimator
     shooter_controller: ShooterController
     spinner_controller: SpinnerController
 
@@ -158,33 +161,44 @@ class MyRobot(magicbot.MagicRobot):
     def testInit(self):
         self.turret.index_found = False
         self.turret.on_enable()
+        self.track_target = False
+        self.chassis.reset_odometry(
+            geometry.Pose2d(1, -1, geometry.Rotation2d(math.pi))
+        )
+
+    track_target = magicbot.tunable(False)
 
     def testPeriodic(self):
 
         self.vision.execute()
 
+        if self.track_target:
+            self.target_estimator.execute()
+            self.shooter_controller.engage()
+            self.shooter_controller.execute()
+            self.turret.execute()
+
         self.shooter.execute()
 
-        if self.driver_joystick.getRawButtonPressed(10):
-            self.shooter.fire()
+        if self.driver_joystick.getTrigger():
             self.indexer.enable_intaking()
 
-        # Slew the turret
-        slew_increment = math.radians(5)  # radians
-        if self.driver_joystick.getRawButtonPressed(6):
-            self.turret.slew(-slew_increment)
-            self.turret.execute()
-        elif self.driver_joystick.getRawButtonPressed(5):
-            self.turret.slew(slew_increment)
-            self.turret.execute()
+        if self.driver_joystick.getRawButtonPressed(3):
+            self.track_target = not self.track_target
 
         # Pay out the winch after a match
         if self.driver_joystick.getRawButton(4):
             self.hang.pay_out()
             self.hang.execute()
 
-        if self.driver_joystick.getTrigger():
-            self.indexer.enable_intaking()
+        # Slew the turret
+        slew_increment = math.radians(5)  # radians
+        if self.driver_joystick.getRawButtonPressed(5):
+            self.turret.slew(slew_increment)
+            self.turret.execute()
+        elif self.driver_joystick.getRawButtonPressed(6):
+            self.turret.slew(-slew_increment)
+            self.turret.execute()
 
         if self.driver_joystick.getRawButtonPressed(7):
             self.indexer.shimmy_speed += 0.1
@@ -200,6 +214,10 @@ class MyRobot(magicbot.MagicRobot):
                 self.driver_joystick.getThrottle() + 1
             ) / 2
             self.indexer.execute()
+
+        if self.driver_joystick.getRawButtonPressed(10):
+            self.shooter.fire()
+            self.indexer.enable_intaking()
 
 
 if __name__ == "__main__":
