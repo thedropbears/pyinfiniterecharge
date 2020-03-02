@@ -55,6 +55,7 @@ class TargetEstimator:
     def is_ready(self) -> bool:
         return (
             self.is_pointing_downrange is not None
+            and self.angle_to_target is not None
             and self.is_pointing_downrange()
             and self.has_vision()
         )
@@ -68,11 +69,11 @@ class TargetEstimator:
             return False
         return self._pointing_downrange
 
-    def get_data(self) -> Optional[VisionData]:
+    def get_data(self) -> VisionData:
         # Clients should check is_ready before calling, so this is just
         # defensive in case they don't
         if not self.is_ready():
-            return None
+            return VisionData(0.0, 0.0, 0.0)
         if abs(self.angle_to_target) < math.radians(5.0):
             vd = VisionData(
                 self.range_finder.get_distance() - self.CAMERA_TO_LIDAR,
@@ -96,13 +97,13 @@ class TargetEstimator:
         current_azimuth = self.turret.get_azimuth()
         current_heading = self.chassis.get_heading()
         if self.angle_to_target is not None:
-            print(f"prior angle to target {self.angle_to_target}")
-            delta = current_azimuth - self.previous_azimuth
+            # print(f"prior angle to target {self.angle_to_target}")
+            delta = constrain_angle(current_azimuth - self.previous_azimuth)
             self.angle_to_target -= delta
-            print(f"angle to target minus azimuth delta {self.angle_to_target}")
+            # print(f"angle to target minus azimuth delta {self.angle_to_target}")
             delta = constrain_angle(current_heading - self.previous_heading)
             self.angle_to_target -= delta
-            print(f"angle to target minus heading delta {self.angle_to_target}")
+            # print(f"angle to target minus heading delta {self.angle_to_target}")
         self.previous_azimuth = current_azimuth
         self.previous_heading = current_heading
 
