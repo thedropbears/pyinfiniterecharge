@@ -54,7 +54,7 @@ class TargetEstimator:
     @feedback
     def is_ready(self) -> bool:
         return (
-            self.is_pointing_downrange is not None
+            self._pointing_downrange is not None
             and self.angle_to_target is not None
             and self.is_pointing_downrange()
             and self.has_vision()
