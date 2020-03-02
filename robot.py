@@ -135,7 +135,7 @@ class MyRobot(magicbot.MagicRobot):
                 self.indexer.enable_intaking()
                 self.indexer.lower_intake()
 
-        if gamepad.getAButtonPressed():
+        if gamepad.getAButton():
             # Dump all balls out the intake to try to clear jam, etc
             self.indexer.clearing = True
         else:
