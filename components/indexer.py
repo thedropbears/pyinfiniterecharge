@@ -37,6 +37,7 @@ class Indexer:
         self.intake_right_motor.setInverted(False)
 
         self.injector_motor.setInverted(False)
+        self.indexer_motors[1].setInverted(False)
 
         self.indexer_speed = 0.6
         self.injector_speed = 0.7
