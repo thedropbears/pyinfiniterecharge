@@ -5,7 +5,7 @@ from magicbot import will_reset_to
 
 class Hang:
     winch_motor: ctre.WPI_TalonFX
-    kracken_hook_latch: wpilib.DoubleSolenoid
+    kracken_hook_latch: wpilib.Solenoid
 
     WINCH_SPEED = 0.5
 
@@ -25,7 +25,7 @@ class Hang:
 
         # solenoid
         if self.fire_hook:
-            self.kracken_hook_latch.set(wpilib.DoubleSolenoid.Value.kForward)
+            self.kracken_hook_latch.set(True)
 
         # drive winch
         self.winch_motor.set(self.winch_desired_output)
