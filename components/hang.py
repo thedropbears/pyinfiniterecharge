@@ -14,6 +14,9 @@ class Hang:
     def __init__(self) -> None:
         self.fire_hook = False
 
+    def setup(self) -> None:
+        self.winch_motor.setInverted(True)
+
     def on_disable(self) -> None:
         # stop motors
         self.winch_motor.stopMotor()
