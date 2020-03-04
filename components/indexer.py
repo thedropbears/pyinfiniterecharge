@@ -37,6 +37,7 @@ class Indexer:
         self.intake_left_motor.setInverted(True)
         self.intake_right_motor.setInverted(False)
 
+        self.intake_main_motor.setInverted(False)
         self.injector_motor.setInverted(False)
         self.indexer_motors[1].setInverted(False)
 
