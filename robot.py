@@ -62,7 +62,7 @@ class MyRobot(magicbot.MagicRobot):
         self.imu = NavX()
 
         self.hang_winch_motor = ctre.WPI_TalonFX(30)
-        self.hang_kracken_hook_latch = wpilib.DoubleSolenoid(4, 5)
+        self.hang_kracken_hook_latch = wpilib.Solenoid(0)
 
         self.intake_main_motor = ctre.WPI_TalonSRX(18)
         self.indexer_motors = [
@@ -77,7 +77,7 @@ class MyRobot(magicbot.MagicRobot):
         self.intake_right_motor = rev.CANSparkMax(9, rev.MotorType.kBrushless)
 
         self.led_screen_led = wpilib.AddressableLED(0)
-        self.loading_piston = wpilib.DoubleSolenoid(6, 7)
+        self.loading_piston = wpilib.DoubleSolenoid(2, 3)
         self.shooter_centre_motor = ctre.WPI_TalonFX(2)
         self.shooter_outer_motor = ctre.WPI_TalonFX(3)
 
@@ -85,7 +85,7 @@ class MyRobot(magicbot.MagicRobot):
 
         self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
         self.spinner_motor = wpilib.Spark(2)
-        self.spinner_solenoid = wpilib.DoubleSolenoid(2, 3)
+        self.spinner_solenoid = wpilib.DoubleSolenoid(6, 7)
 
         self.turret_centre_index = wpilib.DigitalInput(0)
         self.turret_right_index = wpilib.DigitalInput(1)
