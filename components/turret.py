@@ -117,6 +117,9 @@ class Turret:
         self._setup_position()
         self.current_state = self.SLEWING
 
+    def __init__(self):
+        self.disabled = False
+
     def on_enable(self) -> None:
         self.must_finish = False
         if self.index_found:
@@ -140,6 +143,9 @@ class Turret:
                 self._enable_index_interrupts()
 
     def execute(self) -> None:
+        if self.disabled:
+            self.motor.set(ctre.ControlMode.PercentOutput, 0.0)
+            return
         if not self.index_found and self.index_hit != Index.NO_INDEX:
             self._handle_index(self.index_hit)
         if self.current_state == self.SCANNING:
@@ -277,7 +283,6 @@ class Turret:
                     self.current_scan_delta = -self.PI_OVER_2_IN_COUNTS
             self.current_scan_delta = -self.current_scan_delta
             current_target += self.current_scan_delta
-
         self._slew_to_counts(current_target)
 
     #### Position and Indexing

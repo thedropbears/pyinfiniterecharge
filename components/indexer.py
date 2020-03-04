@@ -18,6 +18,7 @@ class Indexer:
 
     def __init__(self):
         self.shimmying = False
+        self.clearing = False
 
     def setup(self):
         # All the motors that comprise indexer cells, in order from intake
@@ -36,6 +37,7 @@ class Indexer:
         self.intake_left_motor.setInverted(True)
         self.intake_right_motor.setInverted(False)
 
+        self.intake_main_motor.setInverted(False)
         self.injector_motor.setInverted(False)
         self.indexer_motors[1].setInverted(False)
 
@@ -59,8 +61,17 @@ class Indexer:
     def on_enable(self) -> None:
         self.shimmy_count = 0
         self.intaking = True
+        self.clearing = False
 
     def execute(self) -> None:
+        if self.clearing:
+            # Run everything backwards to try to clear a jam
+            for motor in self.indexer_motors:
+                motor.set(-self.indexer_speed)
+            self.intake_left_motor.set(0)
+            self.intake_right_motor.set(0)
+            return
+
         if self.intaking:
             injector = self.injector_motor
             feeder = self.indexer_motors[-1]

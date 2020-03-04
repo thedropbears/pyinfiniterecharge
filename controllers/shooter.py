@@ -54,12 +54,26 @@ class ShooterController(StateMachine):
         self.distance = None
         self.time_of_last_scan: Optional[float] = None
         self.time_target_lost: Optional[float] = None
+        self.disabled_flash: int = 0
 
     def execute(self) -> None:
         super().execute()
         self.update_LED()
 
     def update_LED(self) -> None:
+        # Flash if turret and shooter are disabled
+        if self.shooter.disabled:
+            if self.disabled_flash < 25:
+                self.led_screen.set_bottom_row(255, 0, 0)
+                self.led_screen.set_middle_row(255, 0, 0)
+                self.led_screen.set_top_row(255, 0, 0)
+            else:
+                self.led_screen.set_bottom_row(0, 0, 0)
+                self.led_screen.set_middle_row(0, 0, 0)
+                self.led_screen.set_top_row(0, 0, 0)
+            self.disabled_flash = (self.disabled_flash + 1) % 50
+            return
+
         if self.shooter.is_ready():
             self.led_screen.set_bottom_row(0, 255, 0)
         else:

@@ -13,6 +13,8 @@ import rev.color
 import wpilib
 from wpilib import geometry
 
+from wpilib.interfaces import GenericHID
+
 from components.chassis import Chassis
 from components.hang import Hang
 from components.indexer import Indexer
@@ -27,7 +29,7 @@ from controllers.shooter import ShooterController
 from controllers.spinner import SpinnerController
 from utilities import git
 from utilities.nav_x import NavX
-from utilities.scalers import rescale_js, scale_value
+from utilities.scalers import scale_value
 
 GIT_COMMIT = git.describe()
 
@@ -94,6 +96,7 @@ class MyRobot(magicbot.MagicRobot):
 
         # operator interface
         self.driver_joystick = wpilib.Joystick(0)
+        self.codriver_gamepad = wpilib.XboxController(1)
 
         self.MEMORY_CONSTANT = int(0.1 / self.control_loop_wait_time)
         # how long before data times out
@@ -113,49 +116,73 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopPeriodic(self):
         """Executed every cycle"""
-        self.handle_intake_inputs(self.driver_joystick)
-        self.handle_chassis_inputs(self.driver_joystick)
-        self.handle_spinner_inputs(self.driver_joystick)
-        self.handle_shooter_inputs(self.driver_joystick)
-        self.handle_hang_inputs(self.driver_joystick)
+        self.handle_intake_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_chassis_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_spinner_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_shooter_inputs(self.driver_joystick, self.codriver_gamepad)
+        self.handle_hang_inputs(self.driver_joystick, self.codriver_gamepad)
 
         self.shooter_controller.engage()
 
-    def handle_intake_inputs(self, joystick: wpilib.Joystick) -> None:
-        if joystick.getRawButtonPressed(6):
+    def handle_intake_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
+        if joystick.getRawButtonPressed(2):
             if self.indexer.intaking:
                 self.indexer.disable_intaking()
+                self.indexer.raise_intake()
             else:
                 self.indexer.enable_intaking()
+                self.indexer.lower_intake()
 
-    def handle_spinner_inputs(self, joystick: wpilib.Joystick) -> None:
+        if gamepad.getAButton():
+            # Dump all balls out the intake to try to clear jam, etc
+            self.indexer.clearing = True
+        else:
+            # Normal operation
+            self.indexer.clearing = False
+
+    def handle_spinner_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
         if joystick.getRawButtonPressed(7):
             self.spinner_controller.run(test=True, task="position")
-            print(f"Spinner Running")
         if joystick.getRawButtonPressed(9):
             self.spinner.piston_up()
-            print("Spinner Piston Up")
         if joystick.getRawButtonPressed(10):
             self.spinner.piston_down()
-            print("Spinner Piston Down")
-        if joystick.getRawButtonPressed(8):
-            print(f"Detected Colour: {self.spinner_controller.get_current_colour()}")
-            print(f"Distance: {self.spinner_controller.get_wheel_dist()}")
 
-    def handle_chassis_inputs(self, joystick: wpilib.Joystick) -> None:
-        throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
-        vx = 3 * throttle * rescale_js(-joystick.getY(), 0.1)
-        vz = 3 * throttle * rescale_js(-joystick.getTwist(), 0.1)
+    def handle_chassis_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
+        scaled_throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
+        vx = scale_value(joystick.getY(), 1, -1, -3, 3, 2) * scaled_throttle
+        vz = scale_value(joystick.getTwist(), 1, -1, -3, 3, 2) * scaled_throttle
         self.chassis.drive(vx, vz)
+        if joystick.getRawButtonPressed(3):
+            # TODO reset heading
+            pass
 
-    def handle_shooter_inputs(self, joystick: wpilib.Joystick) -> None:
+    def handle_shooter_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
         if joystick.getTrigger():
             self.shooter_controller.fire_input()
+        if gamepad.getBackButton() and gamepad.getRawButtonPressed(5):
+            # Disable turret in case of catastrophic malfunction
+            # Make this toggle to allow re-enabling turret in case it was accidentally disabled
+            self.shooter.disabled = not self.shooter.disabled
+            self.turret.disabled = self.shooter.disabled
 
-    def handle_hang_inputs(self, joystick: wpilib.Joystick) -> None:
-        if joystick.getRawButton(3) and joystick.getRawButton(4):
+    def handle_hang_inputs(
+        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
+    ) -> None:
+        if gamepad.getStartButton() and gamepad.getBumper(GenericHID.Hand.kRightHand):
             self.hang.raise_hook()
-        if self.hang.fire_hook and joystick.getRawButton(4):
+        if self.hang.fire_hook and (
+            gamepad.getTriggerAxis(GenericHID.Hand.kLeftHand) > 0.9
+            or gamepad.getTriggerAxis(GenericHID.Hand.kRightHand) > 0.9
+        ):
             self.hang.winch()
 
     def testInit(self):
