@@ -1,6 +1,6 @@
 from typing import List
 
-from magicbot import feedback
+from magicbot import feedback, tunable
 import ctre
 import wpilib
 
@@ -14,7 +14,12 @@ class Indexer:
     intake_arm_piston: wpilib.Solenoid
     intake_left_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
     intake_right_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
-    SHIMMY_TICKS = int(50 * 0.25)
+
+    indexer_speed = tunable(0.6)
+    injector_speed = tunable(0.7)
+    intake_motor_speed = tunable(1.0)
+    shimmy_speed = tunable(1.0)
+    shimmy_ticks = tunable(50 // 4)
 
     def __init__(self):
         self.shimmying = False
@@ -41,9 +46,6 @@ class Indexer:
         self.injector_motor.setInverted(False)
         self.indexer_motors[1].setInverted(False)
 
-        self.indexer_speed = 0.6
-        self.injector_speed = 0.7
-
         # We have a delay because the distance between the second last
         # stage of the indexer and the injector is longer than others
         # and the injector motors are slower
@@ -53,8 +55,6 @@ class Indexer:
         self.left_shimmy = True
 
         self.shimmy_count = 0
-        self.intake_motor_speed = 1.0
-        self.shimmy_speed = 1.0
         self.shimmying = False
         self.intaking = False
 
@@ -110,14 +110,14 @@ class Indexer:
                         self.intake_left_motor.set(self.shimmy_speed)
                         self.intake_right_motor.set(0)
                         self.shimmy_count += 1
-                        if self.shimmy_count > self.SHIMMY_TICKS:
+                        if self.shimmy_count > self.shimmy_ticks:
                             self.left_shimmy = False
                             self.shimmy_count = 0
                     else:
                         self.intake_left_motor.set(0)
                         self.intake_right_motor.set(self.shimmy_speed)
                         self.shimmy_count += 1
-                        if self.shimmy_count > self.SHIMMY_TICKS:
+                        if self.shimmy_count > self.shimmy_ticks:
                             self.left_shimmy = True
                             self.shimmy_count = 0
                 else:
