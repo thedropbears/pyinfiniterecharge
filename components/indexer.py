@@ -60,7 +60,8 @@ class Indexer:
 
     def on_enable(self) -> None:
         self.shimmy_count = 0
-        self.intaking = True
+        self.intaking = False
+        self.intake_lowered = False
         self.clearing = False
 
     def execute(self) -> None:
