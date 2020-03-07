@@ -13,8 +13,8 @@ class Shooter:
     piston_switch: wpilib.DigitalInput
 
     ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10)  # TODO add more data points
-    centre_lookup = (20, 30, 40, 42, 52, 54, 60, 67, 72)
-    outer_lookup = (70, 50, 40, 35, 25, 21, 21, 17, 17)
+    centre_lookup = (28, 30, 42, 48, 55, 64, 68, 70, 82)
+    outer_lookup = (65, 53, 40, 36, 28, 22, 20, 20, 19)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
