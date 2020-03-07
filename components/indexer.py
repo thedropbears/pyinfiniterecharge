@@ -160,10 +160,6 @@ class Indexer:
         self.intake_lowered = True
 
     @feedback
-    def is_intake_lowered(self) -> bool:
-        return self.intake_lowered
-
-    @feedback
     def balls_loaded(self) -> int:
         balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors)
         return balls
