@@ -69,6 +69,8 @@ class Chassis:
             pid.setFF(0)
             pid.setOutputRange(-1, 1)
 
+        self._reset_encoders()
+
         self.kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
         self.odometry = DifferentialDriveOdometry(self._get_heading())
 
@@ -139,11 +141,14 @@ class Chassis:
     def get_right_velocity(self) -> float:
         return self.right_encoder.getVelocity()
 
+    def _reset_encoders(self) -> None:
+        self.left_encoder.setPosition(0)
+        self.right_encoder.setPosition(0)
+
     def reset_odometry(self, pose: Pose2d) -> None:
         """Resets the odometry to start with the given pose.
 
         This is intended to be called at the start of autonomous.
         """
-        self.left_encoder.setPosition(0)
-        self.right_encoder.setPosition(0)
+        self._reset_encoders()
         self.odometry.resetPosition(pose, self._get_heading())
