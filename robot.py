@@ -93,6 +93,8 @@ class MyRobot(magicbot.MagicRobot):
         self.MEMORY_CONSTANT = int(0.1 / self.control_loop_wait_time)
         # how long before data times out
 
+        self.has_zeroed = False
+
     def autonomousInit(self) -> None:
         """Initialise things for all autonomous modes."""
         self.chassis.enable_closed_loop()
@@ -104,6 +106,9 @@ class MyRobot(magicbot.MagicRobot):
 
     def teleopInit(self) -> None:
         """Initialise things for driver control."""
+        if not self.has_zeroed:
+            self.chassis.reset_odometry(-3, 0, math.pi)
+            self.has_zeroed = True
         self.chassis.disable_closed_loop()
         self.indexer.shimmying = True
         self.indexer.auto_retract = True
