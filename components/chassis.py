@@ -72,6 +72,10 @@ class Chassis:
         self.kinematics = DifferentialDriveKinematics(TRACK_WIDTH)
         self.odometry = DifferentialDriveOdometry(self._get_heading())
 
+        # default_position on the field
+        self.chassis.reset_odometry(-3, 0, math.pi)
+
+
     def execute(self) -> None:
         # XXX: https://github.com/robotpy/robotpy-wpilib/issues/635
         chassis_speeds = ChassisSpeeds()
