@@ -34,6 +34,8 @@ class Indexer:
         self.all_motors.extend(self.indexer_motors)
         self.all_motors.append(self.injector_motor)
 
+        self.indexer_and_injector = self.indexer_motors + [self.injector_motor]
+
         for motor in self.all_motors:
             motor.setInverted(True)
             motor.setNeutralMode(ctre.NeutralMode.Brake)
@@ -72,37 +74,37 @@ class Indexer:
             self.intake_right_motor.set(0)
             return
 
-        if self.intaking:
-            injector = self.injector_motor
-            feeder = self.indexer_motors[-1]
-            intake_main_motor = self.intake_main_motor
+        injector = self.injector_motor
+        feeder = self.indexer_motors[-1]
+        intake_main_motor = self.intake_main_motor
 
-            if injector.isFwdLimitSwitchClosed():
-                self.transfer_to_injector = False
-            elif feeder.isFwdLimitSwitchClosed():
-                # Transferring
-                self.transfer_to_injector = True
+        if injector.isFwdLimitSwitchClosed():
+            self.transfer_to_injector = False
+        elif feeder.isFwdLimitSwitchClosed():
+            # Transferring
+            self.transfer_to_injector = True
 
-            # Turn on all motors and let the limit switches stop it
-            intake_main_motor.set(self.intake_motor_speed)
-            for motor in self.indexer_motors:
-                motor.set(self.indexer_speed)
-            if self.is_piston_retracted():
-                injector.set(self.injector_speed)
+        # Turn on all motors and let the limit switches stop it
+        intake_main_motor.set(self.intake_motor_speed)
+        for motor in self.indexer_motors:
+            motor.set(self.indexer_speed)
+        if self.is_piston_retracted():
+            injector.set(self.injector_speed)
+        else:
+            feeder.stopMotor()
+            injector.stopMotor()
+
+        # Override any limit switches where the next cell is vacant
+        for first, second in zip(self.all_motors, self.all_motors[1:]):
+            at_limit = second.isFwdLimitSwitchClosed()
+            if second == feeder and self.transfer_to_injector:
+                at_limit = True  # Pretend the ball is still in the feeder
+            if not at_limit:
+                first.overrideLimitSwitchesEnable(False)
             else:
-                feeder.stopMotor()
-                injector.stopMotor()
+                first.overrideLimitSwitchesEnable(True)
 
-            # Override any limit switches where the next cell is vacant
-            for first, second in zip(self.all_motors, self.all_motors[1:]):
-                at_limit = second.isFwdLimitSwitchClosed()
-                if second == feeder and self.transfer_to_injector:
-                    at_limit = True  # Pretend the ball is still in the feeder
-                if not at_limit:
-                    first.overrideLimitSwitchesEnable(False)
-                else:
-                    first.overrideLimitSwitchesEnable(True)
-
+        if self.intaking:
             if not intake_main_motor.isFwdLimitSwitchClosed():
                 if self.shimmying:
                     if self.left_shimmy:
@@ -129,17 +131,13 @@ class Indexer:
         else:
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
+            self.intake_main_motor.set(0)
 
-            # Move balls through if we have them, but don't take in more
-            ball_in_previous = False
-            for motor in self.all_motors:
+            for motor in self.indexer_and_injector:
                 if not motor.isFwdLimitSwitchClosed():
-                    # We don't have a ball in this cell
-                    # Test this first so the previous ball flag works
-                    if not ball_in_previous:
-                        motor.stopMotor()
+                    motor.set(0)
                 else:
-                    ball_in_previous = True
+                    break
 
         if self.intake_lowered:
             self.intake_arm_piston.set(True)
