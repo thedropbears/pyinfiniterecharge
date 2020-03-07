@@ -155,7 +155,7 @@ class MyRobot(magicbot.MagicRobot):
     def handle_chassis_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
     ) -> None:
-        throttle = scale_value(joystick.getThrottle(), 1, -1, 0, 1)
+        throttle = scale_value(joystick.getThrottle(), 1, -1, 0.1, 1)
         vx = 3 * throttle * rescale_js(-joystick.getY(), 0.1)
         vz = 3 * throttle * rescale_js(-joystick.getTwist(), 0.1)
         self.chassis.drive(vx, vz)
