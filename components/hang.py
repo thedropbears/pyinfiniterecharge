@@ -1,13 +1,13 @@
 import ctre
 import wpilib
-from magicbot import will_reset_to
+from magicbot import tunable, will_reset_to
 
 
 class Hang:
     winch_motor: ctre.WPI_TalonFX
     kracken_hook_latch: wpilib.Solenoid
 
-    WINCH_SPEED = 0.5
+    winch_speed = tunable(0.5)
 
     winch_desired_output = will_reset_to(0.0)
 
@@ -36,8 +36,8 @@ class Hang:
 
     def winch(self) -> None:
         # drive motor
-        self.winch_desired_output = self.WINCH_SPEED
+        self.winch_desired_output = self.winch_speed
 
     def pay_out(self) -> None:
         # drive motor backwards to release cable in pits
-        self.winch_desired_output = -self.WINCH_SPEED
+        self.winch_desired_output = -self.winch_speed
