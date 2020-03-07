@@ -21,8 +21,11 @@ class Indexer:
     shimmy_speed = tunable(1.0)
     shimmy_ticks = tunable(50 // 4)
 
+    intake_lowered = tunable(False)
+    intaking = tunable(False)
+    shimmying = tunable(False)
+
     def __init__(self):
-        self.shimmying = False
         self.clearing = False
 
     def setup(self):
@@ -50,13 +53,9 @@ class Indexer:
         # stage of the indexer and the injector is longer than others
         # and the injector motors are slower
         self.transfer_to_injector = False
-        self.intake_lowered = False
-        self.intaking = False
         self.left_shimmy = True
 
         self.shimmy_count = 0
-        self.shimmying = False
-        self.intaking = False
 
     def on_enable(self) -> None:
         self.shimmy_count = 0
