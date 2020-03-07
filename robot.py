@@ -107,7 +107,7 @@ class MyRobot(magicbot.MagicRobot):
     def teleopInit(self) -> None:
         """Initialise things for driver control."""
         if not self.has_zeroed:
-            self.chassis.reset_odometry(-3, 0, math.pi)
+            self.chassis.reset_odometry(geometry.Pose2d(-3, 0, geometry.Rotation2d(math.pi)))
             self.has_zeroed = True
         self.chassis.disable_closed_loop()
         self.indexer.shimmying = True

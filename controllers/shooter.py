@@ -141,7 +141,6 @@ class ShooterController(StateMachine):
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
             target_data = self.target_estimator.get_data()
-            # if abs(target_data.angle) > self.find_allowable_angle(target_data.distance):
             if abs(target_data.angle) > self.find_allowable_angle(target_data.distance):
                 # print(f"Telling turret to slew by {target_data.angle}")
                 self.turret.slew(target_data.angle)
