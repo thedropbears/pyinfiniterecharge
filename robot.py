@@ -252,7 +252,7 @@ class MyRobot(magicbot.MagicRobot):
             ) / 2
             self.indexer.execute()
 
-        if self.driver_joystick.getTriggerPressed(10):
+        if self.driver_joystick.getTriggerPressed():
             self.shooter.fire()
 
 
