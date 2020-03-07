@@ -58,9 +58,9 @@ class MyRobot(magicbot.MagicRobot):
         self.logger.info("pyinfiniterecharge %s", GIT_COMMIT)
 
         self.chassis_left_front = rev.CANSparkMax(5, rev.MotorType.kBrushless)
-        self.chassis_left_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
+        self.chassis_left_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
-        self.chassis_right_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
+        self.chassis_right_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
         self.imu = NavX()
 
         self.hang_winch_motor = ctre.WPI_TalonFX(30)
