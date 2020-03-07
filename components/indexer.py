@@ -19,7 +19,7 @@ class Indexer:
     injector_speed = tunable(0.7)
     intake_motor_speed = tunable(1.0)
     shimmy_speed = tunable(1.0)
-    shimmy_ticks = tunable(50 // 4)
+    shimmy_ticks = tunable(int(50 * 0.25))
 
     intake_lowered = tunable(False)
     intaking = tunable(False)
