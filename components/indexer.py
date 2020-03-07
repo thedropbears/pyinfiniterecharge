@@ -140,7 +140,6 @@ class Indexer:
                         motor.stopMotor()
                 else:
                     ball_in_previous = True
-                motor.stopMotor()
 
         if self.intake_lowered:
             self.intake_arm_piston.set(True)
