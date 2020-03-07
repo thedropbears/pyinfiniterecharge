@@ -13,8 +13,8 @@ class Shooter:
     piston_switch: wpilib.DigitalInput
 
     ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10)  # TODO add more data points
-    centre_lookup = (20, 30, 40, 42, 52, 54, 60, 67, 72)
-    outer_lookup = (70, 50, 40, 35, 25, 21, 21, 17, 17)
+    centre_lookup = (28, 30, 42, 48, 55, 64, 68, 70, 82)
+    outer_lookup = (65, 53, 40, 36, 28, 22, 20, 20, 19)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
@@ -36,16 +36,20 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 0.00394 * self.RPS_TO_CTRE_UNITS / 10)
+        self.outer_motor.config_kP(0, 3.52 / 10)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
-        self.outer_ff_calculator = controller.SimpleMotorFeedforward(kS=0.187, kV=0.11)
-        self.centre_motor.config_kP(0, 0.0034 * self.RPS_TO_CTRE_UNITS / 10)
+        self.outer_ff_calculator = controller.SimpleMotorFeedforward(
+            kS=0.0448, kV=0.112
+        )
+        self.centre_motor.config_kP(0, 5.05 / 10)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
-        self.centre_ff_calculator = controller.SimpleMotorFeedforward(kS=0.158, kV=0.11)
+        self.centre_ff_calculator = controller.SimpleMotorFeedforward(
+            kS=0.0113, kV=0.113
+        )
 
     def execute(self) -> None:
         if self.disabled:
