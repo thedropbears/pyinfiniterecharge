@@ -36,16 +36,16 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 0.00394 * self.RPS_TO_CTRE_UNITS / 10)
+        self.outer_motor.config_kP(0, 3.52 / 10)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
-        self.outer_ff_calculator = controller.SimpleMotorFeedforward(kS=0.187, kV=0.11)
-        self.centre_motor.config_kP(0, 0.0034 * self.RPS_TO_CTRE_UNITS / 10)
+        self.outer_ff_calculator = controller.SimpleMotorFeedforward(kS=0.0448, kV=0.112)
+        self.centre_motor.config_kP(0, 5.05 / 10)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
-        self.centre_ff_calculator = controller.SimpleMotorFeedforward(kS=0.158, kV=0.11)
+        self.centre_ff_calculator = controller.SimpleMotorFeedforward(kS=0.0113, kV=0.113)
 
     def execute(self) -> None:
         if self.disabled:
