@@ -161,8 +161,10 @@ class Indexer:
 
     @feedback
     def balls_loaded(self) -> int:
-        balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors)
-        return balls
+        return (
+            sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors)
+            + self.transfer_to_injector
+        )
 
     def is_piston_retracted(self) -> bool:
         return not self.piston_switch.get()
