@@ -189,6 +189,7 @@ class MyRobot(magicbot.MagicRobot):
         self.turret.index_found = False
         self.turret.on_enable()
         self.track_target = False
+        self.run_indexer = False
         self.chassis.reset_odometry(
             geometry.Pose2d(1, -1, geometry.Rotation2d(math.pi))
         )
@@ -207,8 +208,17 @@ class MyRobot(magicbot.MagicRobot):
 
         self.shooter.execute()
 
-        if self.driver_joystick.getTrigger():
-            self.indexer.enable_intaking()
+        if self.run_indexer:
+            self.indexer.execute()
+
+        if self.driver_joystick.getRawButtonPressed(2):
+            self.run_indexer = True
+            if self.indexer.intaking:
+                self.indexer.disable_intaking()
+                self.indexer.raise_intake()
+            else:
+                self.indexer.enable_intaking()
+                self.indexer.lower_intake()
 
         if self.driver_joystick.getRawButtonPressed(3):
             self.track_target = not self.track_target
@@ -242,9 +252,8 @@ class MyRobot(magicbot.MagicRobot):
             ) / 2
             self.indexer.execute()
 
-        if self.driver_joystick.getRawButtonPressed(10):
+        if self.driver_joystick.getTriggerPressed(10):
             self.shooter.fire()
-            self.indexer.enable_intaking()
 
 
 if __name__ == "__main__":
