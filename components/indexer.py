@@ -128,6 +128,9 @@ class Indexer:
                 self.intake_right_motor.set(0)
                 self.intake_left_motor.set(0)
         else:
+            self.intake_left_motor.set(0)
+            self.intake_right_motor.set(0)
+
             # Move balls through if we have them, but don't take in more
             ball_in_previous = False
             for motor in self.all_motors:
