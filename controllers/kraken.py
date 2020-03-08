@@ -4,6 +4,7 @@ from magicbot import feedback, StateMachine, state, timed_state
 
 from components.hang import Hang
 from components.indexer import Indexer
+from components.shooter import Shooter
 from components.turret import Turret
 
 
@@ -12,6 +13,7 @@ class KrakenController(StateMachine):
 
     hang: Hang
     indexer: Indexer
+    shooter: Shooter
     turret: Turret
 
     def __init__(self) -> None:
@@ -21,6 +23,11 @@ class KrakenController(StateMachine):
         super().execute()
 
     @state(first=True, must_finish=True)
+    def disable_shooter(self) -> None:
+        self.shooter.disabled = True
+        self.next_state("clear_turret")
+
+    @state(must_finish=True)
     def clear_turret(self) -> None:
         self.turret.park_and_disable()
         if self.turret.is_parked():
