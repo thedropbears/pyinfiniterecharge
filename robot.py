@@ -9,7 +9,7 @@ import math
 
 import ctre
 import magicbot
-import rev.color
+import rev
 import wpilib
 from wpilib import geometry
 
@@ -20,13 +20,11 @@ from components.hang import Hang
 from components.indexer import Indexer
 from components.range_finder import RangeFinder
 from components.shooter import Shooter
-from components.spinner import Spinner
 from components.target_estimator import TargetEstimator
 from components.turret import Turret
 from components.vision import Vision
 from components.led_screen import LEDScreen
 from controllers.shooter import ShooterController
-from controllers.spinner import SpinnerController
 from utilities import git
 from utilities.nav_x import NavX
 from utilities.scalers import rescale_js, scale_value
@@ -41,7 +39,6 @@ class MyRobot(magicbot.MagicRobot):
     # List controllers (which require components) here.
     target_estimator: TargetEstimator
     shooter_controller: ShooterController
-    spinner_controller: SpinnerController
 
     # List components (which represent physical subsystems) here.
     chassis: Chassis
@@ -49,7 +46,6 @@ class MyRobot(magicbot.MagicRobot):
     range_finder: RangeFinder
     indexer: Indexer
     shooter: Shooter
-    spinner: Spinner
     turret: Turret
     led_screen: LEDScreen
 
@@ -85,10 +81,6 @@ class MyRobot(magicbot.MagicRobot):
 
         self.range_counter = wpilib.Counter(6)
 
-        self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
-        self.spinner_motor = wpilib.Spark(2)
-        self.spinner_solenoid = wpilib.DoubleSolenoid(6, 7)
-
         self.turret_centre_index = wpilib.DigitalInput(0)
         self.turret_right_index = wpilib.DigitalInput(1)
         self.turret_left_index = wpilib.DigitalInput(2)
@@ -120,7 +112,6 @@ class MyRobot(magicbot.MagicRobot):
         """Executed every cycle"""
         self.handle_intake_inputs(self.driver_joystick, self.codriver_gamepad)
         self.handle_chassis_inputs(self.driver_joystick, self.codriver_gamepad)
-        self.handle_spinner_inputs(self.driver_joystick, self.codriver_gamepad)
         self.handle_shooter_inputs(self.driver_joystick, self.codriver_gamepad)
         self.handle_hang_inputs(self.driver_joystick, self.codriver_gamepad)
 
@@ -143,16 +134,6 @@ class MyRobot(magicbot.MagicRobot):
         else:
             # Normal operation
             self.indexer.clearing = False
-
-    def handle_spinner_inputs(
-        self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
-    ) -> None:
-        if joystick.getRawButtonPressed(7):
-            self.spinner_controller.run(test=True, task="position")
-        if joystick.getRawButtonPressed(9):
-            self.spinner.piston_up()
-        if joystick.getRawButtonPressed(10):
-            self.spinner.piston_down()
 
     def handle_chassis_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
