@@ -45,7 +45,6 @@ class ShooterController(StateMachine):
     )
     # in field co ordinates
 
-    MIN_SCAN_PERIOD = 3.0
     TARGET_LOST_TO_SCAN = 0.5
 
     def __init__(self) -> None:
@@ -102,23 +101,15 @@ class ShooterController(StateMachine):
             self.time_target_lost = None
             self.next_state("tracking")
         else:
-            # Scan starting straight downrange. TODO: remove this if the above
-            # seems worthwhile
+            # Scan starting straight downrange.
             time_now = time.monotonic()
             # Start a scan only if it's been a minimum time since we lost the target
             if (
                 self.time_target_lost is None
                 or (time_now - self.time_target_lost) > self.TARGET_LOST_TO_SCAN
             ):
-                # Start a scan only if it's been a minimum time since we started
-                # a scan. This allows the given scan to grow enough to find the
-                # target so that we don't just start the scan over every cycle.
-                if (
-                    self.time_of_last_scan is None
-                    or (time_now - self.time_of_last_scan) > self.MIN_SCAN_PERIOD
-                ):
-                    self.turret.scan(-self.chassis.get_heading())
-                    self.time_of_last_scan = time_now
+                self.turret.scan(-self.chassis.get_heading())
+                self.time_of_last_scan = time_now
 
     @state
     def tracking(self) -> None:

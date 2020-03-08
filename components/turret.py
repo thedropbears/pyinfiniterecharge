@@ -192,19 +192,23 @@ class Turret:
 
     def scan(self, azimuth=math.pi) -> None:
         """
-        Slew the turret back and forth looking for a target
+        Slew the turret back and forth up to 90 degrees on either side, centred
+        at the given azimuth.
+
+        If the turret is already scanning, this adjusts the centre of the scan
+        rather than starting over.
         """
-        # The target must be downfield from us, so scan up to
-        # 90 degrees either side of the given heading
 
         if self.must_finish:
             return
-        # First reset scan size
-        self.current_scan_delta = self.SCAN_INCREMENT
+        # If we aren't already scanning, reset scan size
+        if self.current_state != self.SCANNING:
+            self.current_scan_delta = self.SCAN_INCREMENT
         turret_azimuth = _robot_to_turret(azimuth)
-        # set the first pass
+        # If we are starting a new scan, the following is the first pass.
+        # If we are adjusting an existing scan, this is the next adjusted pass.
         self._slew_to_counts(
-            turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.SCAN_INCREMENT
+            turret_azimuth * self.COUNTS_PER_TURRET_RADIAN + self.current_scan_delta
         )
         self.current_state = self.SCANNING
 
