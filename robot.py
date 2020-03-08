@@ -9,7 +9,6 @@ import math
 
 import ctre
 import magicbot
-import rev.color
 import wpilib
 from wpilib import geometry
 
@@ -80,8 +79,6 @@ class MyRobot(magicbot.MagicRobot):
         self.shooter_outer_motor = ctre.WPI_TalonFX(3)
 
         self.range_counter = wpilib.Counter(6)
-
-        self.colour_sensor = rev.color.ColorSensorV3(wpilib.I2C.Port.kOnboard)
 
         self.turret_centre_index = wpilib.DigitalInput(0)
         self.turret_right_index = wpilib.DigitalInput(1)
