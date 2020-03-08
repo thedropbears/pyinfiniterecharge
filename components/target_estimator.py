@@ -30,15 +30,15 @@ class TargetEstimator:
     vision: Vision
 
     def __init__(self) -> None:
+        self.previous_azimuth = 0.0
+        self.previous_heading = 0.0
+        self._pointing_downrange = False
         self._init()
 
     def _init(self):
         self.angle_to_target: Optional[float] = None
         self.vision_range: Optional[float] = None
-        self.previous_azimuth: Optional[float] = None
-        self.previous_heading: Optional[float] = None
         self.previous_vision_data: Optional[VisionData] = None
-        self._pointing_downrange: Optional[bool] = None
 
     def on_enable(self) -> None:
         self.reset()
@@ -64,8 +64,6 @@ class TargetEstimator:
 
     @feedback
     def is_pointing_downrange(self) -> bool:
-        if self._pointing_downrange is None:
-            return False
         return self._pointing_downrange
 
     def get_data(self) -> VisionData:
@@ -73,6 +71,7 @@ class TargetEstimator:
         # defensive in case they don't
         if not self.is_ready():
             return VisionData(0.0, 0.0, 0.0)
+        assert self.angle_to_target is not None  # mypy is silly
         if abs(self.angle_to_target) < math.radians(5.0):
             vd = VisionData(
                 self.range_finder.get_distance() - self.CAMERA_TO_LIDAR,
@@ -80,7 +79,8 @@ class TargetEstimator:
                 time.monotonic(),
             )
         else:
-            vd = VisionData(self.vision_range, self.angle_to_target, time.monotonic(),)
+            assert self.vision_range is not None
+            vd = VisionData(self.vision_range, self.angle_to_target, time.monotonic())
         return vd
 
     def execute(self) -> None:
