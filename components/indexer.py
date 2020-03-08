@@ -84,12 +84,33 @@ class Indexer:
             # Transferring
             self.transfer_to_injector = True
 
+        # find the location of the first ball
+        # only motors above it will run
+        if self.intaking:
+            first_ball = -1
+        else:
+            first_ball = len(self.all_motors)
+            if self.transfer_to_injector:
+                first_ball = len(self.all_motors) - 2
+                # there is a ball in the feeder
+            for i, motor in enumerate(self.all_motors):
+                if motor.isFwdLimitSwitchClosed():
+                    first_ball = i
+                    break
+
         # Turn on all motors and let the limit switches stop it
-        intake_main_motor.set(self.intake_motor_speed)
-        for motor in self.indexer_motors:
-            motor.set(self.indexer_speed)
+        for i, motor in enumerate(
+            self.indexer_motors, len(self.all_motors) - len(self.indexer_motors) - 1
+        ):
+            if first_ball <= i:
+                motor.set(self.indexer_speed)
+            else:
+                motor.stopMotor()
         if self.is_piston_retracted():
-            injector.set(self.injector_speed)
+            if first_ball != len(self.all_motors):
+                injector.set(self.injector_speed)
+            else:
+                injector.stopMotor()
         else:
             feeder.stopMotor()
             injector.stopMotor()
@@ -105,6 +126,7 @@ class Indexer:
                 first.overrideLimitSwitchesEnable(True)
 
         if self.intaking:
+            intake_main_motor.set(self.intake_motor_speed)
             if not intake_main_motor.isFwdLimitSwitchClosed():
                 if self.shimmying:
                     if self.left_shimmy:
@@ -133,12 +155,6 @@ class Indexer:
             self.intake_right_motor.set(0)
             self.intake_main_motor.set(0)
 
-            for motor in self.indexer_and_injector:
-                if not motor.isFwdLimitSwitchClosed():
-                    motor.set(0)
-                else:
-                    break
-
         if self.intake_lowered:
             self.intake_arm_piston.set(True)
         else:
@@ -158,7 +174,10 @@ class Indexer:
 
     @feedback
     def balls_loaded(self) -> int:
-        balls = sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors) + self.transfer_to_injector
+        balls = (
+            sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors)
+            + self.transfer_to_injector
+        )
         return balls
 
     def is_piston_retracted(self) -> bool:
