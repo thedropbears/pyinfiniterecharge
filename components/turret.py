@@ -58,6 +58,10 @@ class Turret:
     SLEWING = 0
     SCANNING = 1
 
+    # Directions for turret turnaround
+    POSITIVE = 0
+    NEGATIVE = 1
+
     # Constants for Talon on the turret
     COUNTS_PER_MOTOR_REV = 4096
     GEAR_REDUCTION = 160 / 18
@@ -158,7 +162,7 @@ class Turret:
 
         self.azimuth_history.appendleft(self.motor.getSelectedSensorPosition())
 
-        if self.must_finish and self._motor_is_finished():
+        if self.must_finish and self._turnaround_sufficient():
             self.must_finish = False
 
     # Slew to the given absolute angle in radians in the robot coordinate system.
@@ -179,9 +183,11 @@ class Turret:
         if target < -self.MAX_TURRET_COUNT:
             target += self.COUNTS_PER_TURRET_REV
             self.must_finish = True
+            self.turnaround_direction = self.POSITIVE
         elif target > self.MAX_TURRET_COUNT:
             target += -self.COUNTS_PER_TURRET_REV
             self.must_finish = True
+            self.turnaround_direction = self.NEGATIVE
         self._slew_to_counts(target)
 
     def scan(self, azimuth=math.pi) -> None:
@@ -266,6 +272,19 @@ class Turret:
             and abs(self.motor.getSelectedSensorVelocity())
             < self.ACCEPTABLE_ERROR_SPEED
         )
+
+    def _turnaround_sufficient(self) -> bool:
+        if self.turnaround_direction == self.POSITIVE:
+            if self.motor.getSelectedSensorPosition() > (
+                self.current_target_counts - self.PI_OVER_2_IN_COUNTS
+            ):
+                return True
+        else:
+            if self.motor.getSelectedSensorPosition() < (
+                self.current_target_counts + self.PI_OVER_2_IN_COUNTS
+            ):
+                return True
+        return False
 
     def _do_scanning(self) -> None:
         # Check if we've finished a scan pass
