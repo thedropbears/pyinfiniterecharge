@@ -59,6 +59,12 @@ class Indexer:
 
         self.shimmy_count = 0
 
+        # if true the intake will retract when we have 5 balls
+        self.auto_retract = False
+        # time we need to have a ball in 0th slot before we retract
+        self.full_timeout = int(0.5 * 50)
+        self.full_time = 0
+
     def on_enable(self) -> None:
         self.shimmy_count = 0
         self.intaking = False
@@ -77,6 +83,16 @@ class Indexer:
         injector = self.injector_motor
         feeder = self.indexer_motors[-1]
         intake_main_motor = self.intake_main_motor
+
+        if self.auto_retract:
+            if intake_main_motor.isFwdLimitSwitchClosed():
+                self.full_time += 1
+            else:
+                self.full_time = 0
+
+            if self.full_time >= self.full_timeout:
+                self.disable_intaking()
+                self.raise_intake()
 
         if injector.isFwdLimitSwitchClosed():
             self.transfer_to_injector = False
@@ -99,6 +115,10 @@ class Indexer:
                     break
 
         # Turn on all motors and let the limit switches stop it
+        if first_ball <= 0:
+            intake_main_motor.set(self.intake_motor_speed)
+        else:
+            intake_main_motor.set(0)
         for i, motor in enumerate(
             self.indexer_motors, len(self.all_motors) - len(self.indexer_motors) - 1
         ):
@@ -126,7 +146,6 @@ class Indexer:
                 first.overrideLimitSwitchesEnable(True)
 
         if self.intaking:
-            intake_main_motor.set(self.intake_motor_speed)
             if not intake_main_motor.isFwdLimitSwitchClosed():
                 if self.shimmying:
                     if self.left_shimmy:
@@ -153,7 +172,6 @@ class Indexer:
         else:
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
-            self.intake_main_motor.set(0)
 
         if self.intake_lowered:
             self.intake_arm_piston.set(True)
