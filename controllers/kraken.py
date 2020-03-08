@@ -22,8 +22,8 @@ class KrakenController(StateMachine):
 
     @state(first=True, must_finish=True)
     def clear_turret(self) -> None:
-        self.turret.disabled = True
-        if self.turret.is_ready():
+        self.turret.park_and_disable()
+        if self.turret.is_parked():
             self.next_state("lower_intake")
 
     @timed_state(must_finish=True, duration=1, next_state="release_the_kraken")
