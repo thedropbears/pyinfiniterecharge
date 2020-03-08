@@ -98,6 +98,7 @@ class MyRobot(magicbot.MagicRobot):
     def autonomousInit(self) -> None:
         """Initialise things for all autonomous modes."""
         self.chassis.enable_closed_loop()
+        self.chassis.enable_brake_mode()
         self.indexer.shimmying = False
         self.indexer.auto_retract = False
 
@@ -110,6 +111,7 @@ class MyRobot(magicbot.MagicRobot):
             self.chassis.reset_odometry(geometry.Pose2d(-3, 0, geometry.Rotation2d(math.pi)))
             self.has_zeroed = True
         self.chassis.disable_closed_loop()
+        self.chassis.disable_brake_mode()
         self.indexer.shimmying = True
         self.indexer.auto_retract = True
 

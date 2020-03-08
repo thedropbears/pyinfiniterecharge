@@ -29,15 +29,7 @@ class ShooterController(StateMachine):
 
     fire_command = will_reset_to(False)
 
-    TARGET_RADIUS = (3 * 12 + 3.25) / 2 * 0.0254  # Circumscribing radius of target
-    BALL_RADIUS = 7 / 2 * 0.0254
-    # convert from freedom units
-    CENTRE_ACCURACY = (
-        0.1  # maximum distance the centre of the ball will be from our target point
-    )
-    TOTAL_RADIUS = BALL_RADIUS + CENTRE_ACCURACY
-    OFFSET = TOTAL_RADIUS / math.sin(math.pi / 3)
-    TRUE_TARGET_RADIUS = TARGET_RADIUS - OFFSET
+    MAX_MISALIGNMENT = 0.2  # m from centre of target
 
     MIN_SCAN_PERIOD = 3.0
     TARGET_LOST_TO_SCAN = 0.5
@@ -51,6 +43,7 @@ class ShooterController(StateMachine):
         self.time_of_last_scan: Optional[float] = None
         self.time_target_lost: Optional[float] = None
         self.disabled_flash: int = 0
+        self.fired_count: int = 0
 
     def execute(self) -> None:
         super().execute()
@@ -81,7 +74,7 @@ class ShooterController(StateMachine):
             self.led_screen.set_middle_row(255, 0, 0)
 
         if self.target_estimator.is_ready():
-            if self.turret.is_ready():
+            if self.aimed_at_target():
                 self.led_screen.set_top_row(0, 255, 0)
             else:
                 self.led_screen.set_top_row(255, 128, 0)
@@ -95,7 +88,7 @@ class ShooterController(StateMachine):
         """
         if initial_call:
             target_angle = self.chassis.find_power_port_angle()
-            self.turret.slew(target_angle)
+            self.turret.slew(0)
         if self.turret.is_ready():
             self.next_state("searching")
 
@@ -141,7 +134,7 @@ class ShooterController(StateMachine):
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:
             target_data = self.target_estimator.get_data()
-            if abs(target_data.angle) > self.find_allowable_angle(target_data.distance):
+            if abs(target_data.angle) > self.find_allowable_angle():
                 # print(f"Telling turret to slew by {target_data.angle}")
                 self.turret.slew(target_data.angle)
             if self.turret.is_ready():
@@ -156,6 +149,7 @@ class ShooterController(StateMachine):
         """
         if initial_call:
             self.shooter.fire()
+            self.fired_count += 1
         elif not self.shooter.is_firing():
             self.next_state("tracking")
 
@@ -169,17 +163,24 @@ class ShooterController(StateMachine):
     def ready_to_fire(self) -> bool:
         return (
             self.shooter.is_ready()
-            and self.turret.is_ready()
+            and self.aimed_at_target()
             and self.indexer.is_ready()
+            and self.target_estimator.is_ready()
+            and self.turret.is_ready()
         )
 
-    def find_allowable_angle(self, dist: float) -> float:
+    @feedback
+    def aimed_at_target(self) -> bool:
+        target_data = self.target_estimator.get_data()
+        return abs(target_data.angle) < self.find_allowable_angle()
+
+    def find_allowable_angle(self) -> float:
         """
         Find the maximum angle by which the turret can be misaligned to still score a hit
         Currently does not consider angle from target
-        dist: planar distance from the target
+        dist: the maximum value of our lookup table
         """
-        dist = min(dist, 14.0)
-        angle = math.atan(self.TRUE_TARGET_RADIUS / dist)
+        dist = self.shooter.ranges[-1]
+        angle = math.atan(self.MAX_MISALIGNMENT / dist)
         # print(f"angle tolerance +- {angle} true target radius{self.TRUE_TARGET_RADIUS}")
         return angle

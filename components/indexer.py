@@ -15,7 +15,7 @@ class Indexer:
     intake_left_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
     intake_right_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
 
-    indexer_speed = tunable(0.6)
+    indexer_speed = tunable(0.4)
     injector_speed = tunable(0.7)
     intake_motor_speed = tunable(1.0)
     shimmy_speed = tunable(1.0)

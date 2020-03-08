@@ -19,7 +19,7 @@ GEAR_RATIO = 10.75
 TRACK_WIDTH = 0.579  # measured by characterisation
 WHEEL_CIRCUMFERENCE = 0.0254 * 6 * math.pi
 
-POWER_PORT_POSITION = Translation2d(0, -2.404)
+POWER_PORT_POSITION = Translation2d(0, 0)
 # in field co ordinates
 
 
@@ -123,6 +123,14 @@ class Chassis:
     def enable_closed_loop(self) -> None:
         """Run the drivetrain in velocity closed loop mode."""
         self.open_loop = False
+
+    def enable_brake_mode(self) -> None:
+        self.right_front.setIdleMode(rev.IdleMode.kBrake)
+        self.right_front.setIdleMode(rev.IdleMode.kBrake)
+
+    def disable_brake_mode(self) -> None:
+        self.right_front.setIdleMode(rev.IdleMode.kCoast)
+        self.right_front.setIdleMode(rev.IdleMode.kCoast)
 
     def _get_heading(self) -> Rotation2d:
         """Get the current heading of the robot from the IMU, anticlockwise positive."""

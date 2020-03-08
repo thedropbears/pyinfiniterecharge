@@ -21,7 +21,7 @@ def _test_for_downrange(heading: float, azimuth: float) -> bool:
 
 class TargetEstimator:
 
-    ALPHA = 0.1  # Exponential smoothing fraction
+    ALPHA = 0.2  # Exponential smoothing fraction
     CAMERA_TO_LIDAR = 0.15
 
     chassis: Chassis
