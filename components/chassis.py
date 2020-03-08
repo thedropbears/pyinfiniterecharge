@@ -75,7 +75,6 @@ class Chassis:
         # default_position on the field
         self.chassis.reset_odometry(-3, 0, math.pi)
 
-
     def execute(self) -> None:
         # XXX: https://github.com/robotpy/robotpy-wpilib/issues/635
         chassis_speeds = ChassisSpeeds()
