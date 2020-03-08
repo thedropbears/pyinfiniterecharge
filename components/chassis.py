@@ -73,7 +73,7 @@ class Chassis:
         self.odometry = DifferentialDriveOdometry(self._get_heading())
 
         # default_position on the field
-        self.chassis.reset_odometry(-3, 0, math.pi)
+        self.reset_odometry(Pose2d(-3, 0, Rotation2d(math.pi)))
 
     def execute(self) -> None:
         # XXX: https://github.com/robotpy/robotpy-wpilib/issues/635
