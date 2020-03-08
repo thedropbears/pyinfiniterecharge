@@ -105,6 +105,7 @@ class MyRobot(magicbot.MagicRobot):
         """Initialise things for all autonomous modes."""
         self.chassis.enable_closed_loop()
         self.indexer.shimmying = False
+        self.indexer.auto_retract = False
 
     def disabledPeriodic(self) -> None:
         self.vision.execute()
@@ -113,6 +114,7 @@ class MyRobot(magicbot.MagicRobot):
         """Initialise things for driver control."""
         self.chassis.disable_closed_loop()
         self.indexer.shimmying = True
+        self.indexer.auto_retract = True
 
     def teleopPeriodic(self):
         """Executed every cycle"""
