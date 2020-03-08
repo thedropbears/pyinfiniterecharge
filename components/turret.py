@@ -215,6 +215,9 @@ class Turret:
     def is_ready(self) -> bool:
         return self.current_state != self.SCANNING and self._motor_is_finished()
 
+    def is_parked(self) -> bool:
+        return self.disabled and self._motor_is_finished()
+
     def azimuth_at_time(self, t: float) -> float:
         """Get the stored azimuth (in radians) of the turret at a specified
         time. Returns the oldest data if the requested time is not in history
@@ -238,6 +241,10 @@ class Turret:
     def get_azimuth(self) -> float:
         """Get the current azimuth in radians"""
         return self._sensor_to_robot(self.motor.getSelectedSensorPosition())
+
+    def park_and_disable(self) -> None:
+        self.disabled = True
+        self._slew_to_counts(self.INDEX_POSITIONS[Index.LEFT])
 
     #### Internal methods from here on
 
