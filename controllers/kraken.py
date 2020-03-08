@@ -20,7 +20,7 @@ class KrakenController(StateMachine):
     def execute(self) -> None:
         super().execute()
 
-    @state(first=True)
+    @state(first=True, must_finish=True)
     def clear_turret(self) -> None:
         self.turret.disabled = True
         if self.turret.is_ready():
@@ -30,7 +30,7 @@ class KrakenController(StateMachine):
     def lower_intake(self) -> None:
         self.indexer.lower_intake()
 
-    @state
+    @state(must_finish=True)
     def release_the_kraken(self) -> None:
         self.hang.raise_hook()
         self.done()
