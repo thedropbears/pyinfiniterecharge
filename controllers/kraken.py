@@ -1,6 +1,4 @@
-import math
-
-from magicbot import feedback, StateMachine, state, timed_state
+from magicbot import StateMachine, state, timed_state
 
 from components.hang import Hang
 from components.indexer import Indexer
