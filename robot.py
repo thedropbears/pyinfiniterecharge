@@ -9,6 +9,7 @@ import math
 
 import ctre
 import magicbot
+import rev
 import wpilib
 from wpilib import geometry
 
