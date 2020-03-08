@@ -167,7 +167,7 @@ class MyRobot(magicbot.MagicRobot):
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
     ) -> None:
         if gamepad.getStartButton() and gamepad.getBumper(GenericHID.Hand.kRightHand):
-            self.hang_controller.engage()
+            self.kraken_controller.engage()
         if self.hang.fire_hook and (
             gamepad.getTriggerAxis(GenericHID.Hand.kLeftHand) > 0.9
             or gamepad.getTriggerAxis(GenericHID.Hand.kRightHand) > 0.9
