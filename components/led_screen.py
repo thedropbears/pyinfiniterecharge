@@ -22,7 +22,7 @@ class LEDScreen:
         self.image_num_rows = logo_num_rows
         self.current_image_row = 0
         # Move the image after this number of ticks
-        self.animation_period = 3
+        self.animation_period = 20
         self.current_animation_cycle = 0
 
     def setup(self) -> None:
@@ -74,7 +74,7 @@ class LEDScreen:
         third_image_row = (
             second_image_row + self.IMAGE_ROWS_BETWEEN_LED_ROWS
         ) % self.image_num_rows
-        for i in len(self.image[image_row]):
+        for i in range(0, len(self.image[image_row])):
             self.led_raster[0][i].setRGB(
                 self.image[image_row][i][0],
                 self.image[image_row][i][1],
