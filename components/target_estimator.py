@@ -74,14 +74,10 @@ class TargetEstimator:
         if not self.is_ready():
             return VisionData(0.0, 0.0, 0.0)
         if abs(self.angle_to_target) < math.radians(5.0):
-            vd = VisionData(
-                self.range_finder.get_distance() - self.CAMERA_TO_LIDAR,
-                self.angle_to_target,
-                time.monotonic(),
-            )
+            distance = self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
         else:
-            vd = VisionData(self.vision_range, self.angle_to_target, time.monotonic(),)
-        return vd
+            distance = self.vision_range
+        return VisionData(distance, self.angle_to_target, time.monotonic())
 
     def execute(self) -> None:
         # Each timestep we need to adjust our estimate for turret movement.

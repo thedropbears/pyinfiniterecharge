@@ -80,7 +80,7 @@ class Vision:
         """Returns the latest vision data.
 
         Returns None if there is no vision data.
-         """
+        """
         return self.vision_data
 
     def execute(self) -> None:
