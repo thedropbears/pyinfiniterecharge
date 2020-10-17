@@ -76,6 +76,7 @@ class Indexer:
             # Run everything backwards to try to clear a jam
             for motor in self.indexer_motors:
                 motor.set(-self.indexer_speed)
+            self.intake_main_motor.set(-self.intake_motor_speed)
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
             return
