@@ -91,10 +91,10 @@ class Chassis:
             self.right_front.setVoltage(right_ff)
         else:
             self.left_pid.setReference(
-                speeds.left, rev.ControlType.kVelocity, arbFeedforward=left_ff,
+                speeds.left, rev.ControlType.kVelocity, arbFeedforward=left_ff
             )
             self.right_pid.setReference(
-                speeds.right, rev.ControlType.kVelocity, arbFeedforward=right_ff,
+                speeds.right, rev.ControlType.kVelocity, arbFeedforward=right_ff
             )
 
         self.odometry.update(
