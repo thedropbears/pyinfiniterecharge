@@ -238,6 +238,14 @@ class MyRobot(magicbot.MagicRobot):
         if self.driver_joystick.getTriggerPressed():
             self.shooter.fire()
 
+        if self.driver_joystick.getRawButtonPressed(10):
+            if not self.led_screen.animating:
+                self.led_screen.animate()
+            else:
+                self.led_screen.setup()
+                self.led_screen.animating = False
+        self.led_screen.execute()
+
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)
