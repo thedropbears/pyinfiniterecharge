@@ -84,7 +84,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
             self.shooter_controller.fired_count = 0
         self.shooter_controller.engage()
         self.shooter_controller.fire_input()
-        if self.shooter_controller.fired_count >= self.expected_balls[self.trajectory_num - 1] or state_tm >= 5:
+        if self.has_fired_balls():
             if self.trajectory_num >= len(self.paths):
                 self.done()
             else:
@@ -100,7 +100,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
             self.shooter.set_range(self.end_ranges[self.trajectory_num])
         if (
             state_tm > self.path.totalTime()
-            or self.has_collected_balls()
+            # or self.has_collected_balls()
         ):
             # this needs to be overidden in the subclasses
             print(f"Calculated path time: {self.path.totalTime()}")
@@ -124,6 +124,13 @@ class ShootMoveShootBase(AutonomousStateMachine):
             return True
         else:
             return False
+
+    def has_fired_balls(self) -> bool:
+        balls_to_fire = self.expected_balls[self.trajectory_num - 1]
+        if self.trajectory_num == 0:
+            balls_to_fire = 3
+        print(f"Expecting to fire {balls_to_fire} balls")
+        return self.shooter_controller.fired_count >= balls_to_fire
 
 
 class test(ShootMoveShootBase):
@@ -166,6 +173,7 @@ class _3Right23(ShootMoveShootBase):
 
     def setup(self):
         # TODO add correct headings
+        # empty waypoints are used for trajectories with only two points
         self.start_poses = [
             to_pose(-3.459, -1.7, math.pi),
             to_pose(-6.165, 0.582, 0),
@@ -197,10 +205,11 @@ class _3Right32(ShootMoveShootBase):
     MODE_NAME = "3RIGHT32"
 
     def setup(self):
+        # empty waypoints are used for trajectories with only two points
         self.start_poses = [to_pose(-3.459, -1.7, math.pi), to_pose(-8.163, -1.7, math.pi), to_pose(-4.168, -1.7, math.pi)]
         self.end_poses = [to_pose(-8.163, -1.7, math.pi), to_pose(-4.168, -1.7, math.pi), to_pose(-6.062-1, 0.248, -1.178)]
         self.waypoints = [
-            [geometry.Translation2d(-7.077, -1.7), geometry.Translation2d(-7.992, -1.7),],
+            [geometry.Translation2d(-7.077, -1.7), geometry.Translation2d(-7.992, -1.7)],
             [],
             [],
         ]
