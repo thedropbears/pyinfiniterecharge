@@ -39,13 +39,7 @@ class Chassis:
         self.left_front.setInverted(False)
         self.right_front.setInverted(True)
 
-        for motor in (
-            self.left_front,
-            self.left_rear,
-            self.right_front,
-            self.right_rear,
-        ):
-            motor.setIdleMode(rev.IdleMode.kCoast)
+        self.disable_brake_mode()
 
         self.left_rear.follow(self.left_front)
         self.right_rear.follow(self.right_front)
@@ -125,12 +119,22 @@ class Chassis:
         self.open_loop = False
 
     def enable_brake_mode(self) -> None:
-        self.right_front.setIdleMode(rev.IdleMode.kBrake)
-        self.right_front.setIdleMode(rev.IdleMode.kBrake)
+        for motor in (
+            self.left_front,
+            self.left_rear,
+            self.right_front,
+            self.right_rear,
+        ):
+            motor.setIdleMode(rev.IdleMode.kBrake)
 
     def disable_brake_mode(self) -> None:
-        self.right_front.setIdleMode(rev.IdleMode.kCoast)
-        self.right_front.setIdleMode(rev.IdleMode.kCoast)
+        for motor in (
+            self.left_front,
+            self.left_rear,
+            self.right_front,
+            self.right_rear,
+        ):
+            motor.setIdleMode(rev.IdleMode.kCoast)
 
     def _get_heading(self) -> Rotation2d:
         """Get the current heading of the robot from the IMU, anticlockwise positive."""
