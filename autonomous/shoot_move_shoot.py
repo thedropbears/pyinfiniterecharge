@@ -52,7 +52,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
         )
         self.end_ranges = []
         self.paths = []
-        for i in range(self.trajectory_max):
+        for i in range(len(self.start_poses)):
             self.trajectory_config.setReversed(self.reversed[i])
             path = self.gen.generateTrajectory(
                 self.start_poses[i],

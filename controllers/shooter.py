@@ -177,10 +177,9 @@ class ShooterController(StateMachine):
     def find_allowable_angle(self) -> float:
         """
         Find the maximum angle by which the turret can be misaligned to still score a hit
-        Currently does not consider angle from target
-        dist: the maximum value of our lookup table
+        Currently does not consider angle from target, assumes we are at max distance
         """
+        # dist: the maximum value of our lookup table
         dist = self.shooter.ranges[-1]
         angle = math.atan(self.MAX_MISALIGNMENT / dist)
-        # print(f"angle tolerance +- {angle} true target radius{self.TRUE_TARGET_RADIUS}")
         return angle
