@@ -1,7 +1,6 @@
-import math
 from typing import List
 
-from wpilib.geometry import Pose2d
+from wpilib.geometry import Pose2d, Translation2d
 from magicbot import AutonomousStateMachine, state
 
 from components.chassis import Chassis
@@ -14,7 +13,7 @@ class AutoNavBase(AutonomousStateMachine):
 
     def __init__(self) -> None:
         super().__init__()
-        self.path_num
+        self.path_num = 0
         self.paths: List(Path)
 
     def setup(self) -> None:
@@ -53,11 +52,14 @@ class test(AutoNavBase):
     def setup(self):
         self.paths = [
             Path(
-                Pose2d(0, 0, 0),
-                Pose2d(1, 1, math.pi / 2),
-                Pose2d(0, 1, math.pi),
-                Pose2d(-1, 0, -math.pi / 2),
-                Pose2d(0, 0, 0),
+                [
+                    Pose2d(0, 0, 0),
+                    Translation2d(1, 1),
+                    Translation2d(0, 1),
+                    Translation2d(-1, 0),
+                    Pose2d(0, 0, 0),
+                ],
+                reversed=False,
             )
         ]
         super().setup()

@@ -4,19 +4,20 @@ from wpilib import controller
 from wpilib import trajectory
 from wpilib import Timer
 from wpilib.trajectory import constraint
-from wpilib.geometry import Pose2d
+from wpilib.geometry import Pose2d, Translation2d
 
 from components.chassis import Chassis
 
 
 class Path:
     start: Pose2d
-    waypoints: List(Pose2d)
+    waypoints: List[Translation2d]
     end: Pose2d
     reversed: bool
 
-    def __init__(self, poses, reversed) -> None:
-        self.start, *self.waypoints, self.end = poses
+    def __init__(self, points, reversed) -> None:
+        self.start, *self.waypoints, self.end = points
+        self.reversed = reversed
 
 
 class PathFollow:
@@ -52,6 +53,18 @@ class PathFollow:
             path.start,
             path.waypoints,
             path.end,
+            self.trajectory_config,
+        )
+        self.start_time = Timer.getFPGATimestamp()
+
+    def new_quintic_path(self, waypoints: List[Pose2d], reversed: bool):
+        """
+        Give the path follower a new path, it will abandon the current one and
+        follow it instead. This method specifies the heading at each waypoint.
+        """
+        self.trajectory_config.setReversed(reversed)
+        self.trajectory = self.gen.generateTrajectory(
+            waypoints,
             self.trajectory_config,
         )
         self.start_time = Timer.getFPGATimestamp()
