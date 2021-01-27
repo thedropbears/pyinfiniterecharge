@@ -1,11 +1,25 @@
 # pyinfiniterecharge
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/ambv/black)
 
-The Drop Bears' robot code for FIRST Infinite Recharge (FRC 2020).
+The Drop Bears' robot code for _FIRST_ Infinite Recharge (FRC 2020-2021).
 
 ## Install dependencies
 
-    pip3 install -r requirements.txt
+On a computer:
+
+    pip3 install -r requirements-sim.txt
+
+For the roboRIO:
+
+```sh
+# Online:
+robotpy-installer download-python
+robotpy-installer download -r requirements.txt
+
+# On the robot network:
+robotpy-installer install-python
+robotpy-installer install -r requirements.txt
+```
 
 ## Code style
 This codebase adheres to the code style enforced by the black autoformatter:

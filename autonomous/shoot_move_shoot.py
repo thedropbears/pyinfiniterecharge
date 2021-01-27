@@ -1,9 +1,9 @@
 import math
 
 from wpilib import controller
-from wpilib import geometry
-from wpilib import trajectory
-from wpilib.trajectory import constraint
+from wpimath import geometry
+from wpimath import trajectory
+from wpimath.trajectory import constraint
 from magicbot import AutonomousStateMachine, state
 
 from components.chassis import Chassis

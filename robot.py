@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2017-2018 FIRST. All Rights Reserved.
-# Open Source Software - may be modified and shared by FRC teams. The code
-# must be accompanied by the FIRST BSD license file in the root directory of
-# the project.
-
 import math
 
 import ctre
 import magicbot
 import rev
 import wpilib
-from wpilib import geometry
 
 from wpilib.interfaces import GenericHID
+from wpimath import geometry
 
 from components.chassis import Chassis
 from components.hang import Hang
