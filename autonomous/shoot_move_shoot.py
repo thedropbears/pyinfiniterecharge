@@ -130,7 +130,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
         balls_to_fire = self.expected_balls[self.trajectory_num - 1]
         if self.trajectory_num == 0:
             balls_to_fire = 3
-        print(f"Expecting to fire {balls_to_fire} balls")
+        # print(f"Expecting to fire {balls_to_fire} balls")
         return self.shooter_controller.fired_count >= balls_to_fire
 
 
