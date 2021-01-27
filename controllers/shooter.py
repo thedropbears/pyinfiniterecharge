@@ -87,7 +87,7 @@ class ShooterController(StateMachine):
         Wait for the turret to complete it's inital slew before doing anything
         """
         if initial_call:
-            target_angle = self.chassis.find_power_port_angle()
+            # target_angle = self.chassis.find_power_port_angle()
             self.turret.slew(0)
         if self.turret.is_ready():
             self.next_state("searching")
