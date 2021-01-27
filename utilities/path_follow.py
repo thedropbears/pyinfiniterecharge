@@ -25,10 +25,9 @@ class PathFollow:
     an output is wanted
     """
 
-    def __init__(self, chassis: Chassis, tolerance: Pose2d) -> None:
+    def __init__(self, chassis: Chassis) -> None:
         self.chassis = chassis
         self.controller = controller.RamseteController()
-        self.controller.setTolerance(tolerance)
         self.trajectory_config = trajectory.TrajectoryConfig(
             maxVelocity=1, maxAcceleration=1
         )
