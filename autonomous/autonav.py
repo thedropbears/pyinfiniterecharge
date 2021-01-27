@@ -1,4 +1,3 @@
-import math
 from typing import List
 
 from wpilib.geometry import Pose2d, Translation2d
