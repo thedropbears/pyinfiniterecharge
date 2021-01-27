@@ -6,7 +6,7 @@ import rev
 from utilities.nav_x import NavX
 
 from wpilib.controller import SimpleMotorFeedforwardMeters
-from wpilib.geometry import Pose2d, Rotation2d
+from wpilib.geometry import Pose2d, Rotation2d, Translation2d
 from wpilib.kinematics import (
     ChassisSpeeds,
     DifferentialDriveKinematics,
@@ -18,6 +18,9 @@ GEAR_RATIO = 10.75
 # measurements in metres
 TRACK_WIDTH = 0.579  # measured by characterisation
 WHEEL_CIRCUMFERENCE = 0.0254 * 6 * math.pi
+
+POWER_PORT_POSITION = Translation2d(0, 0)
+# in field co ordinates
 
 
 class Chassis:
@@ -36,13 +39,7 @@ class Chassis:
         self.left_front.setInverted(False)
         self.right_front.setInverted(True)
 
-        for motor in (
-            self.left_front,
-            self.left_rear,
-            self.right_front,
-            self.right_rear,
-        ):
-            motor.setIdleMode(rev.IdleMode.kCoast)
+        self.disable_brake_mode()
 
         self.left_rear.follow(self.left_front)
         self.right_rear.follow(self.right_front)
@@ -121,6 +118,24 @@ class Chassis:
         """Run the drivetrain in velocity closed loop mode."""
         self.open_loop = False
 
+    def enable_brake_mode(self) -> None:
+        for motor in (
+            self.left_front,
+            self.left_rear,
+            self.right_front,
+            self.right_rear,
+        ):
+            motor.setIdleMode(rev.IdleMode.kBrake)
+
+    def disable_brake_mode(self) -> None:
+        for motor in (
+            self.left_front,
+            self.left_rear,
+            self.right_front,
+            self.right_rear,
+        ):
+            motor.setIdleMode(rev.IdleMode.kCoast)
+
     def _get_heading(self) -> Rotation2d:
         """Get the current heading of the robot from the IMU, anticlockwise positive."""
         return Rotation2d(self.imu.getYaw())
@@ -150,3 +165,13 @@ class Chassis:
         self.left_encoder.setPosition(0)
         self.right_encoder.setPosition(0)
         self.odometry.resetPosition(pose, self._get_heading())
+
+    def find_field_angle(self, field_point: Translation2d) -> float:
+        """Return the theoretical angle (in radians) to the target based on odometry"""
+        pose = self.get_pose()
+        rel = field_point - pose.translation()
+        rel_heading = Rotation2d(rel.y, rel.x) + pose.rotation()
+        return rel_heading.radians()
+
+    def find_power_port_angle(self) -> float:
+        return self.find_field_angle(POWER_PORT_POSITION)

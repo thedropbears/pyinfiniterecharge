@@ -94,11 +94,11 @@ class Turret:
     # Double until oscillation occurs
     # Set kD to 10*kP
     pidF = 0.2
-    pidP = 0.4
+    pidP = 1.0
     pidI = 0.005
     pidIZone = 300
     pidD = 4.0
-    SLEW_CRUISE_VELOCITY = 3500
+    SLEW_CRUISE_VELOCITY = 4000
     SCAN_CRUISE_VELOCITY = 1500
     CRUISE_ACCELERATION = int(SLEW_CRUISE_VELOCITY / 0.15)
 
