@@ -135,23 +135,6 @@ class ShootMoveShootBase(AutonomousStateMachine):
         return self.shooter_controller.fired_count >= balls_to_fire
 
 
-class test(ShootMoveShootBase):
-    MODE_NAME = "Test"
-    DEFAULT = True
-
-    def setup(self):
-        self.start_poses = [to_pose(0, 0, math.pi)]
-        self.end_poses = [to_pose(-2, 0, math.pi)]
-        self.waypoints = [[geometry.Translation2d(-1, math.pi)]]
-        self.trajectory_config = trajectory.TrajectoryConfig(
-            maxVelocity=1, maxAcceleration=1
-        )
-        self.expected_balls = [0]
-        self.reversed = [False]
-        self.trajectory_max = 1
-        super().setup()
-
-
 class _3Right3(ShootMoveShootBase):
     MODE_NAME = "3RIGHT3"
 
