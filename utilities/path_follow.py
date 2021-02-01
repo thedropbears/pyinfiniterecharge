@@ -67,7 +67,6 @@ class PathFollow:
             constraint.CentripetalAccelerationConstraint(1.5) # m/s^2
         )
         self.trajectory: trajectory.Trajectory
-        self.timer: Timer = Timer()
         self.start_time: float
 
     def new_path(self, path: Path) -> None:

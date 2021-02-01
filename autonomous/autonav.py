@@ -1,4 +1,3 @@
-
 from typing import List
 
 from wpilib.geometry import Pose2d, Translation2d
@@ -170,5 +169,35 @@ class Slalom(AutoNavBase):
                 os.path.join(PATHWEAVER_PATH, "Slalom.wpilib.json"),
                 reversed=False,
             )
+        ]
+        super().setup()
+
+
+class Slalom(AutoNavBase):
+    MODE_NAME = "Slalom"
+
+    def setup(self):
+        self.paths = [
+            Path(
+                [
+                    Pose2d(1.056, 0.618, 0),
+                    Translation2d(2.188, 0.908),
+                    Translation2d(2.696, 2.269),
+                    Translation2d(4.596, 2.737),
+                    Translation2d(5.757, 2.522),
+                    Translation2d(6.509, 2.120),
+                    Translation2d(7.111, 1.088),
+                    Translation2d(8.151, 0.681),
+                    Translation2d(8.464, 1.543),
+                    Translation2d(7.955, 2.522),
+                    Translation2d(7.194, 2.323),
+                    Translation2d(6.531, 0.952),
+                    Translation2d(4.473, 0.572),
+                    Translation2d(2.382, 0.912),
+                    Translation2d(2.277, 2.335),
+                    Pose2d(0.946, 2.346, math.pi),
+                ],
+                reversed=False,
+            ),
         ]
         super().setup()
