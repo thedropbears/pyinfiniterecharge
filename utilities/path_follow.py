@@ -4,6 +4,7 @@ from wpilib import controller
 from wpilib import trajectory
 from wpilib import Timer
 from wpilib.trajectory import constraint
+from wpilib.trajectory import TrajectoryUtil
 from wpilib.geometry import Pose2d, Translation2d
 
 from components.chassis import Chassis
@@ -19,6 +20,20 @@ class Path:
         self.start, *self.waypoints, self.end = points
         self.reversed = reversed
 
+    def getTrajectory(self, config: trajectory.TrajectoryGenerator ):
+        return trajectory.TrajectoryGenerator(self.start, self.waypoints, self.end, config)
+
+def LoadPath:
+    filename: str
+    reversed: bool
+
+    def __init__(self, filename, reversed):
+        self.filename = filename
+        self.reversed = reversed
+    
+    def getTrajectory(self, *_: trajectory.TrajectoryGenerator):
+        # dosent care about the config you give it, set config through pathweaver
+        return TrajectoryUtil.fromPathweaverJson(self.filename)
 
 class PathFollow:
     """
@@ -49,12 +64,7 @@ class PathFollow:
         follow it instead
         """
         self.trajectory_config.setReversed(path.reversed)
-        self.trajectory = self.gen.generateTrajectory(
-            path.start,
-            path.waypoints,
-            path.end,
-            self.trajectory_config,
-        )
+        self.trajectory = path.getTrajectory(self.trajectory_config)
         self.start_time = Timer.getFPGATimestamp()
 
     def new_quintic_path(self, waypoints: List[Pose2d], reversed: bool):
