@@ -20,23 +20,24 @@ class Path:
         self.start, *self.waypoints, self.end = points
         self.reversed = reversed
 
-    def getTrajectory(self, config: trajectory.TrajectoryGenerator):
-        return trajectory.TrajectoryGenerator(
-            self.start, self.waypoints, self.end, config
-        )
+    def getTrajectory(self, config: trajectory.TrajectoryConfig):
+        return trajectory.TrajectoryGenerator().generateTrajectory( self.start, self.waypoints, self.end, config)
 
 
 class LoadPath:
+    start: Pose2d
     filename: str
     reversed: bool
 
     def __init__(self, filename, reversed):
         self.filename = filename
         self.reversed = reversed
+        self.trajectory = TrajectoryUtil.fromPathweaverJson(self.filename)
+        self.start = self.trajectory.initialPose() # is used to reset odometry
 
-    def getTrajectory(self, *_: trajectory.TrajectoryGenerator):
+    def getTrajectory(self, *_: trajectory.TrajectoryConfig):
         # dosent care about the config you give it, set config through pathweaver
-        return TrajectoryUtil.fromPathweaverJson(self.filename)
+        return self.trajectory
 
 
 class PathFollow:
