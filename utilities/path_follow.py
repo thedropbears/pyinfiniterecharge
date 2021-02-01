@@ -20,20 +20,24 @@ class Path:
         self.start, *self.waypoints, self.end = points
         self.reversed = reversed
 
-    def getTrajectory(self, config: trajectory.TrajectoryGenerator ):
-        return trajectory.TrajectoryGenerator(self.start, self.waypoints, self.end, config)
+    def getTrajectory(self, config: trajectory.TrajectoryGenerator):
+        return trajectory.TrajectoryGenerator(
+            self.start, self.waypoints, self.end, config
+        )
 
-def LoadPath:
+
+class LoadPath:
     filename: str
     reversed: bool
 
     def __init__(self, filename, reversed):
         self.filename = filename
         self.reversed = reversed
-    
+
     def getTrajectory(self, *_: trajectory.TrajectoryGenerator):
         # dosent care about the config you give it, set config through pathweaver
         return TrajectoryUtil.fromPathweaverJson(self.filename)
+
 
 class PathFollow:
     """

@@ -7,6 +7,7 @@ from components.chassis import Chassis
 from utilities.path_follow import Path, LoadPath, PathFollow
 import math
 
+
 class AutoNavBase(AutonomousStateMachine):
 
     chassis: Chassis
@@ -67,37 +68,37 @@ class test(AutoNavBase):
 
 class BarrelRacing(AutoNavBase):
     MODE_NAME = "Barrel Racing"
+
     def setup(self):
         self.paths = [
             Path(
                 [
-                Pose2d(1.044, 2.139, 0),
-                Translation2d(4.031, 2.25),
-                Translation2d(4.718, 1.483),
-                Translation2d(3.585, 0.689),
-                Translation2d(2.925, 1.991),
-                Translation2d(4.985, 2.330),
-                Translation2d(4.985, 2.330),
-                Translation2d(6.903, 2.562),
-                Translation2d(6.456, 3.7),
-                Translation2d(5.368, 3.346),
-                Translation2d(6.126, 1.269),
-                Translation2d(7.250, 0.921),
-                Translation2d(8.0, 1.0),
-                Translation2d(7.8, 2.0),
-                Translation2d(6.5, 2.2),
-                Pose2d(1.044, 2.2, math.pi)
+                    Pose2d(1.044, 2.139, 0),
+                    Translation2d(4.031, 2.25),
+                    Translation2d(4.718, 1.483),
+                    Translation2d(3.585, 0.689),
+                    Translation2d(2.925, 1.991),
+                    Translation2d(4.985, 2.330),
+                    Translation2d(4.985, 2.330),
+                    Translation2d(6.903, 2.562),
+                    Translation2d(6.456, 3.7),
+                    Translation2d(5.368, 3.346),
+                    Translation2d(6.126, 1.269),
+                    Translation2d(7.250, 0.921),
+                    Translation2d(8.0, 1.0),
+                    Translation2d(7.8, 2.0),
+                    Translation2d(6.5, 2.2),
+                    Pose2d(1.044, 2.2, math.pi),
                 ],
-                reversed = False
+                reversed=False,
             )
         ]
         super().setup()
 
+
 def LoadTest(AutoNavBase):
     MODE_NAME = "Pathweaver Test"
+
     def setup(self):
-        self.paths = [
-            LoadPath("output/test_path.wpilib.json"),
-            reversed = False
-        ]
+        self.paths = [LoadPath("output/test_path.wpilib.json", reversed=False)]
         super().setup()
