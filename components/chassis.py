@@ -3,15 +3,15 @@ import math
 import magicbot
 import rev
 
-from utilities.nav_x import NavX
-
-from wpilib.controller import SimpleMotorFeedforwardMeters
-from wpilib.geometry import Pose2d, Rotation2d, Translation2d
-from wpilib.kinematics import (
+from wpimath.controller import SimpleMotorFeedforwardMeters
+from wpimath.geometry import Pose2d, Rotation2d, Translation2d
+from wpimath.kinematics import (
     ChassisSpeeds,
     DifferentialDriveKinematics,
     DifferentialDriveOdometry,
 )
+
+from utilities.nav_x import NavX
 
 GEAR_RATIO = 10.75
 

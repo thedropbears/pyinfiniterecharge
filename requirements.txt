@@ -1,8 +1,7 @@
-numpy ~= 1.18
-pyfrc ~= 2020.0.6
-wpilib ~= 2020.3.2
-robotpy-ctre ~= 2020.3.0
-robotpy-navx ~= 2020.1.0
-robotpy-rev ~= 2020.1.0.4
-robotpy-rev-color ~= 2020.1.0
-robotpy-wpilib-utilities ~= 2020.1.4
+numpy ~= 1.19
+wpilib ~= 2021.2.1
+robotpy-ctre ~= 2021.1.2
+robotpy-navx ~= 2021.0.0
+robotpy-rev ~= 2021.0.2
+robotpy-wpilib-utilities ~= 2021.0.1
+robotpy-wpimath ~= 2021.2.1.2
