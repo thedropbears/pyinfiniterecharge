@@ -100,5 +100,7 @@ class LoadTest(AutoNavBase):
     MODE_NAME = "Pathweaver Test"
 
     def setup(self):
-        self.paths = [LoadPath("pathweaver_paths/test_path.wpilib.json", reversed=False)]
+        self.paths = [
+            LoadPath("pathweaver_paths/test_path.wpilib.json", reversed=False)
+        ]
         super().setup()
