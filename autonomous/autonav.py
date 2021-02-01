@@ -201,3 +201,109 @@ class Slalom(AutoNavBase):
             ),
         ]
         super().setup()
+
+
+class Bounce(AutoNavBase):
+    MODE_NAME = "Bounce"
+
+    def setup(self):
+        self.paths = [
+            Path(
+                [
+                    Pose2d(1.019, 2.139, 0),
+                    Translation2d(1.830, 2.359),
+                    Pose2d(2.250, 3.406, math.pi/2),
+                ],
+                reversed=False,
+            ),
+            Path(
+                [
+                    Pose2d(2.250, 3.406, math.pi/2),
+                    Translation2d(2.686, 2.169),
+                    Translation2d(3.164, 1.137),
+                    Translation2d(3.795, 0.786),
+                    Translation2d(4.443, 1.186),
+                    Pose2d(4.557, 3.429, -math.pi/2),
+                ],
+                reversed=True,
+            ),
+            Path(
+                [
+                    Pose2d(4.557, 3.429, -math.pi/2),
+                    Translation2d(4.668, 1.020),
+                    Translation2d(5.873, 0.766),
+                    Translation2d(6.776, 1.068),
+                    Pose2d(6.856, 3.414, math.pi/2),
+                ],
+                reversed=False,
+            ),
+            Path(
+                [
+                    Pose2d(6.856, 3.414, math.pi/2),
+                    Translation2d(7.157, 2.328),
+                    Pose2d(8.352, 2.168, math.pi),
+                ],
+                reversed=True,
+            ),
+        ]
+        super().setup()
+
+
+PATHWEAVER_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "pathweaver_paths", "output"
+)
+
+
+class BarrelRacing(AutoNavBase):
+    MODE_NAME = "Barrel Racing"
+
+    def setup(self):
+        self.paths = [
+            LoadPath(
+                os.path.join(PATHWEAVER_PATH, "Barrel_Racing.wpilib.json"),
+                reversed=False,
+            )
+        ]
+        super().setup()
+
+class Slalom(AutoNavBase):
+    MODE_NAME = "Slalom"
+
+    def setup(self):
+        self.paths = [
+            LoadPath(
+                os.path.join(PATHWEAVER_PATH, "Slalom.wpilib.json"),
+                reversed=False,
+            )
+        ]
+        super().setup()
+
+
+class Slalom(AutoNavBase):
+    MODE_NAME = "Slalom"
+
+    def setup(self):
+        self.paths = [
+            Path(
+                [
+                    Pose2d(1.056, 0.618, 0),
+                    Translation2d(2.188, 0.908),
+                    Translation2d(2.696, 2.269),
+                    Translation2d(4.596, 2.737),
+                    Translation2d(5.757, 2.522),
+                    Translation2d(6.509, 2.120),
+                    Translation2d(7.111, 1.088),
+                    Translation2d(8.151, 0.681),
+                    Translation2d(8.464, 1.543),
+                    Translation2d(7.955, 2.522),
+                    Translation2d(7.194, 2.323),
+                    Translation2d(6.531, 0.952),
+                    Translation2d(4.473, 0.572),
+                    Translation2d(2.382, 0.912),
+                    Translation2d(2.277, 2.335),
+                    Pose2d(0.946, 2.346, math.pi),
+                ],
+                reversed=False,
+            ),
+        ]
+        super().setup()
