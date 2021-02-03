@@ -94,3 +94,52 @@ class Slalom(AutoNavBase):
             ),
         ]
         super().setup()
+
+
+class Bounce(AutoNavBase):
+    MODE_NAME = "Bounce"
+
+    def setup(self):
+        self.paths = [
+            Path(
+                [
+                    Pose2d(1.019, 2.139, 0),
+                    Translation2d(1.830, 2.359),
+                    Translation2d(2.237, 3.103),
+                    Pose2d(2.268, 3.836, math.pi/2),
+                ],
+                reversed=False,
+            ),
+            Path(
+                [
+                    Pose2d(2.268, 3.836, math.pi/2),
+                    Translation2d(2.237, 3.103),
+                    Translation2d(2.686, 2.169),
+                    Translation2d(3.164, 1.137),
+                    Translation2d(3.795, 0.786),
+                    Translation2d(4.443, 1.186),
+                    Pose2d(4.577, 3.812, math.pi/2),
+                ],
+                reversed=True,
+            ),
+            Path(
+                [
+                    Pose2d(4.577, 3.812, math.pi/2),
+                    Translation2d(4.668, 1.020),
+                    Translation2d(5.873, 0.766),
+                    Translation2d(6.776, 1.068),
+                    Pose2d(6.854, 3.795, math.pi/2),
+                ],
+                reversed=False,
+            ),
+            Path(
+                [
+                    Pose2d(6.854, 3.795, math.pi/2),
+                    Translation2d(7.157, 2.328),
+                    Translation2d(5.873, 0.766),
+                    Pose2d(8.352, 2.168, 0),
+                ],
+                reversed=False,
+            ),
+        ]
+        super().setup()
