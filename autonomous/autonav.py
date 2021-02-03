@@ -97,12 +97,19 @@ class BarrelRacing(AutoNavBase):
         super().setup()
 
 
-PATHWEAVER_PATH = os.path.join( os.path.dirname(os.path.abspath(__file__)) , "pathweaver_paths", "output")
+PATHWEAVER_PATH = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "pathweaver_paths", "output"
+)
+
+
 class LoadTest(AutoNavBase):
     MODE_NAME = "Pathweaver Test"
 
     def setup(self):
         self.paths = [
-            LoadPath(os.path.join(PATHWEAVER_PATH, "Barrel_Racing.wpilib.json"), reversed=False)
+            LoadPath(
+                os.path.join(PATHWEAVER_PATH, "Barrel_Racing.wpilib.json"),
+                reversed=False,
+            )
         ]
         super().setup()
