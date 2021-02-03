@@ -53,7 +53,8 @@ class Shooter:
 
     def execute(self) -> None:
         if self.disabled:
-            self.stop_motors()
+            self.centre_motor.set(0)
+            self.outer_target.set(0)
             return
 
         voltage = wpilib.RobotController.getInputVoltage()
@@ -158,6 +159,6 @@ class Shooter:
     def is_ball_cleared(self) -> bool:
         return not self.injector_motor.isFwdLimitSwitchClosed()
 
-    def stop_motors(self) -> None:
-        self.centre_target = 0
-        self.outer_target = 0
+    def toggle(self) -> None:
+        """Toggle the shooter on and off"""
+        self.disabled = not self.disabled
