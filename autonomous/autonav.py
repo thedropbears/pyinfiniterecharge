@@ -6,6 +6,7 @@ from magicbot import AutonomousStateMachine, state
 from components.chassis import Chassis
 from utilities.path_follow import Path, LoadPath, PathFollow
 import math
+import os
 
 
 class AutoNavBase(AutonomousStateMachine):
@@ -96,11 +97,12 @@ class BarrelRacing(AutoNavBase):
         super().setup()
 
 
+PATHWEAVER_PATH = os.path.join( os.path.dirname(os.path.abspath(__file__)) , "pathweaver_paths", "output")
 class LoadTest(AutoNavBase):
     MODE_NAME = "Pathweaver Test"
 
     def setup(self):
         self.paths = [
-            LoadPath("pathweaver_paths/test_path.wpilib.json", reversed=False)
+            LoadPath(os.path.join(PATHWEAVER_PATH, "Barrel_Racing.wpilib.json"), reversed=False)
         ]
         super().setup()
