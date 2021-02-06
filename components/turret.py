@@ -148,7 +148,7 @@ class Turret:
 
     def execute(self) -> None:
         if self.disabled:
-            self.motor.set(ctre.ControlMode.PercentOutput, 0.0)
+            self.motor.stopMotor()
             return
         if not self.index_found and self.index_hit != Index.NO_INDEX:
             self._handle_index(self.index_hit)
@@ -229,6 +229,10 @@ class Turret:
                 else self.get_azimuth()
             )
         return self._sensor_to_robot(self.azimuth_history[control_loops_ago])
+
+    def toggle(self):
+        """Toggle the turret on and off"""
+        self.disabled = not self.disabled
 
     def get_azimuth(self) -> float:
         """Get the current azimuth in radians"""
