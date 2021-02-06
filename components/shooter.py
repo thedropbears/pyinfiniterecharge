@@ -53,8 +53,8 @@ class Shooter:
 
     def execute(self) -> None:
         if self.disabled:
-            self.centre_motor.set(0)
-            self.outer_target.set(0)
+            self.centre_motor.stopMotor()
+            self.outer_motor.stopMotor()
             return
 
         voltage = wpilib.RobotController.getInputVoltage()
