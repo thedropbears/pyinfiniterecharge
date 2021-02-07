@@ -56,43 +56,51 @@ class test(AutoNavBase):
             Path(
                 [
                     Pose2d(0, 0, 0),
-                    Translation2d(1, 1),
-                    Translation2d(0, 1),
-                    Translation2d(-1, 0),
-                    Pose2d(0, 0, 0),
+                    Translation2d(3, 0),
+                    Pose2d(4, 1, math.pi/2),
                 ],
                 reversed=False,
-            )
-        ]
-        super().setup()
-
-
-class BarrelRacing(AutoNavBase):
-    MODE_NAME = "Barrel Racing"
-
-    def setup(self):
-        self.paths = [
+            ),
             Path(
                 [
-                    Pose2d(1.044, 2.139, 0),
-                    Translation2d(4.031, 2.25),
-                    Translation2d(4.718, 1.483),
-                    Translation2d(3.585, 0.689),
-                    Translation2d(2.925, 1.991),
-                    Translation2d(4.985, 2.330),
-                    Translation2d(4.985, 2.330),
-                    Translation2d(6.903, 2.562),
-                    Translation2d(6.456, 3.7),
-                    Translation2d(5.368, 3.346),
-                    Translation2d(6.126, 1.269),
-                    Translation2d(7.250, 0.921),
-                    Translation2d(8.0, 1.0),
-                    Translation2d(7.8, 2.0),
-                    Translation2d(6.5, 2.2),
-                    Pose2d(1.044, 2.2, math.pi),
+                    Pose2d(4, 1, math.pi/2),
+                    Translation2d(3, 0),
+                    Pose2d(0, 0, 0),
+                ],
+                reversed=True
+            ),
+            Path(
+                [
+                    Pose2d(0, 0, 0),
+                    Translation2d(3, 0),
+                    Pose2d(4, 1, math.pi/2),
                 ],
                 reversed=False,
-            )
+            ),
+            Path(
+                [
+                    Pose2d(4, 1, math.pi/2),
+                    Translation2d(3, 0),
+                    Pose2d(0, 0, 0),
+                ],
+                reversed=True
+            ),
+            Path(
+                [
+                    Pose2d(0, 0, 0),
+                    Translation2d(3, 0),
+                    Pose2d(4, 1, math.pi/2),
+                ],
+                reversed=False,
+            ),
+            Path(
+                [
+                    Pose2d(4, 1, math.pi/2),
+                    Translation2d(3, 0),
+                    Pose2d(0, 0, 0),
+                ],
+                reversed=True
+            ),
         ]
         super().setup()
 
@@ -102,13 +110,25 @@ PATHWEAVER_PATH = os.path.join(
 )
 
 
-class LoadTest(AutoNavBase):
-    MODE_NAME = "Pathweaver Test"
+class BarrelRacing(AutoNavBase):
+    MODE_NAME = "Barrel Racing"
 
     def setup(self):
         self.paths = [
             LoadPath(
                 os.path.join(PATHWEAVER_PATH, "Barrel_Racing.wpilib.json"),
+                reversed=False,
+            )
+        ]
+        super().setup()
+
+class Slalom(AutoNavBase):
+    MODE_NAME = "Slalom"
+
+    def setup(self):
+        self.paths = [
+            LoadPath(
+                os.path.join(PATHWEAVER_PATH, "Slalom.wpilib.json"),
                 reversed=False,
             )
         ]

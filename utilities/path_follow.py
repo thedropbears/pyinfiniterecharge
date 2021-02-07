@@ -36,6 +36,8 @@ class LoadPath:
         self.reversed = reversed
         self.trajectory = TrajectoryUtil.fromPathweaverJson(self.filename)
         self.start = self.trajectory.initialPose()  # is used to reset odometry
+        print(f"loaded file {filename}")
+        print(f"states num: {len(self.trajectory.states())}")
 
     def getTrajectory(self, *_: trajectory.TrajectoryConfig):
         # dosent care about the config you give it, set config through pathweaver
@@ -52,7 +54,7 @@ class PathFollow:
         self.chassis = chassis
         self.controller = controller.RamseteController()
         self.trajectory_config = trajectory.TrajectoryConfig(
-            maxVelocity=1, maxAcceleration=1
+            maxVelocity=2, maxAcceleration=2
         )
         self.gen = trajectory.TrajectoryGenerator()
         self.trajectory_config.setKinematics(self.chassis.kinematics)
@@ -60,6 +62,9 @@ class PathFollow:
             constraint.DifferentialDriveVoltageConstraint(
                 self.chassis.ff_calculator, self.chassis.kinematics, maxVoltage=10
             )
+        )
+        self.trajectory_config.addConstraint(
+            constraint.CentripetalAccelerationConstraint(1.5) # m/s^2
         )
         self.trajectory: trajectory.Trajectory
         self.timer: Timer = Timer()
@@ -73,6 +78,7 @@ class PathFollow:
         self.trajectory_config.setReversed(path.reversed)
         self.trajectory = path.getTrajectory(self.trajectory_config)
         self.start_time = Timer.getFPGATimestamp()
+        print("total path time: ", self.trajectory.totalTime())
 
     def new_quintic_path(self, waypoints: List[Pose2d], reversed: bool):
         """
