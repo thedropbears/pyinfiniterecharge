@@ -74,6 +74,10 @@ class ShootMoveShootBase(AutonomousStateMachine):
         # self.has_zeroed = True
         super().on_enable()
 
+    def done(self) -> None:
+        super().done()
+        self.chassis.disable_brake_mode()
+
     @state(first=True)
     def shoot(self, initial_call, state_tm) -> None:
         """
