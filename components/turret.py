@@ -234,6 +234,7 @@ class Turret:
         """Toggle the turret on and off"""
         self.disabled = not self.disabled
 
+    @magicbot.feedback
     def get_azimuth(self) -> float:
         """Get the current azimuth in radians"""
         return self._sensor_to_robot(self.motor.getSelectedSensorPosition())

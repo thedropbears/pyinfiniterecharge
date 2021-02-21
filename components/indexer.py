@@ -61,9 +61,6 @@ class Indexer:
 
         # if true the intake will retract when we have 5 balls
         self.auto_retract = False
-        # time we need to have a ball in 0th slot before we retract
-        self.full_timeout = int(0.5 * 50)
-        self.full_time = 0
 
     def on_enable(self) -> None:
         self.shimmy_count = 0
@@ -86,12 +83,7 @@ class Indexer:
         intake_main_motor = self.intake_main_motor
 
         if self.auto_retract:
-            if intake_main_motor.isFwdLimitSwitchClosed():
-                self.full_time += 1
-            else:
-                self.full_time = 0
-
-            if self.full_time >= self.full_timeout:
+            if self.balls_loaded() >= 5:
                 self.disable_intaking()
                 self.raise_intake()
 
