@@ -1,7 +1,8 @@
 import math
+from typing import Tuple
 
 from hypothesis import assume, given
-from hypothesis.strategies import floats
+from hypothesis.strategies import floats, tuples
 
 from utilities.scalers import apply_deadzone, map_exponential, scale_value
 
@@ -31,21 +32,17 @@ reals = floats(allow_nan=False, allow_infinity=False)
 
 @given(
     value=reals,
-    input_lower=reals,
-    input_upper=reals,
-    output_lower=floats(-24, 24),
-    output_upper=floats(-24, 24),
+    input_range=tuples(reals, reals).filter(lambda x: x[0] != x[1]),
+    output_range=tuples(floats(-24, 24), floats(-24, 24)).map(sorted).filter(lambda x: x[0] < x[1]),
     exponent=floats(0, 16, exclude_min=True),
 )
 def test_scale_value(
     value: float,
-    input_lower: float,
-    input_upper: float,
-    output_lower: float,
-    output_upper: float,
+    input_range: Tuple[float, float],
+    output_range: Tuple[float, float],
     exponent: float,
 ):
-    assume(input_lower != input_upper)
+    input_lower, input_upper = input_range
+    output_lower, output_upper = output_range
     assume(min(input_lower, input_upper) <= value <= max(input_lower, input_upper))
-    assume(output_lower < output_upper)
     scale_value(value, input_lower, input_upper, output_lower, output_upper, exponent)
