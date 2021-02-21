@@ -43,4 +43,5 @@ def test_scale_value(
     input_lower, input_upper = input_range
     output_lower, output_upper = output_range
     assume(min(input_lower, input_upper) <= value <= max(input_lower, input_upper))
-    scale_value(value, input_lower, input_upper, output_lower, output_upper)
+    result = scale_value(value, input_lower, input_upper, output_lower, output_upper)
+    assert output_lower <= result <= output_upper
