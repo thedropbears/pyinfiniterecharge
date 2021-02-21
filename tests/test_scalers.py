@@ -33,16 +33,14 @@ reals = floats(allow_nan=False, allow_infinity=False)
 @given(
     value=reals,
     input_range=tuples(reals, reals).filter(lambda x: x[0] != x[1]),
-    output_range=tuples(floats(-24, 24), floats(-24, 24)).map(sorted).filter(lambda x: x[0] < x[1]),
-    exponent=floats(0, 16, exclude_min=True),
+    output_range=tuples(reals, reals).map(sorted).filter(lambda x: x[0] < x[1]),
 )
 def test_scale_value(
     value: float,
     input_range: Tuple[float, float],
     output_range: Tuple[float, float],
-    exponent: float,
 ):
     input_lower, input_upper = input_range
     output_lower, output_upper = output_range
     assume(min(input_lower, input_upper) <= value <= max(input_lower, input_upper))
-    scale_value(value, input_lower, input_upper, output_lower, output_upper, exponent)
+    scale_value(value, input_lower, input_upper, output_lower, output_upper)
