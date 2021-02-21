@@ -61,9 +61,6 @@ class Indexer:
 
         # if true the intake will retract when we have 5 balls
         self.auto_retract = False
-        # time we need to have a ball in 0th slot before we retract
-        self.full_timeout = int(0.8 * 50)
-        self.full_time = 0
 
     def on_enable(self) -> None:
         self.shimmy_count = 0
