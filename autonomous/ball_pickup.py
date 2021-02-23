@@ -4,6 +4,7 @@ from wpilib import controller
 from wpimath import geometry
 from wpimath import trajectory
 from wpimath.trajectory import constraint
+from wpilib.geometry import Pose2d, Translation2d
 from magicbot import AutonomousStateMachine, state
 
 from components.chassis import Chassis
@@ -23,7 +24,8 @@ def to_pose(x: float, y: float, heading: float) -> geometry.Pose2d:
     return geometry.Pose2d(x, y, rotation)
 
 
-class BallPickupBase(AutonomousStateMachine):
+class BallPickup(AutonomousStateMachine):
+    MODE_NAME = "Ball Pickup"
 
     shooter_controller: ShooterController
     shooter: Shooter
@@ -35,11 +37,40 @@ class BallPickupBase(AutonomousStateMachine):
     TARGET_POSITION = geometry.Translation2d(0, 0)
 
     path_names = ["None", "A1", "A2", "B1", "B2"]
-    all_paths = {"A1" : Path([], reversed=False),
-    "A2" : Path([], reversed=False),
-    "B1" : Path([], reversed=False),
-    "B2" : Path([], reversed=False),
-    }
+    # 1 is for red and 2 is for blue
+    all_paths = {}
+    all_paths["A1"] = Path( # red A
+        [Pose2d(2.286, 0.282, 0),
+        Translation2d(2.286, 2.286),
+        Translation2d(1.524, 3.810),
+        Translation2d(3.810, 4.572),
+        Pose2d(3.810, 9.144, 0),
+        ],
+        reversed=False)
+    all_paths["A2"] = Path( # blue A
+        [Pose2d(2.286, 0.282, 0),
+        Translation2d(0.762, 4.572),
+        Translation2d(3.048, 5.334),
+        Translation2d(2.286, 6.858),
+        Pose2d(2.286, 9.144, 0),
+        ],
+        reversed=False)
+    all_paths["B1"] = Path( # red B
+        [Pose2d(2.286, 0.282, 0),
+        Translation2d(3.048, 2.286),
+        Translation2d(1.524, 3.810),
+        Translation2d(3.048, 5.334),
+        Pose2d(3.048, 9.144, 0),
+        ],
+        reversed=False)
+    all_paths["B2"] = Path( # blue B
+        [Pose2d(2.286, 0.282, 0),
+        Translation2d(1.524, 4.572),
+        Translation2d(3.048, 6.096),
+        Translation2d(1.524, 7.620),
+        Pose2d(1.524, 9.144, 0),
+        ],
+        reversed=False)
 
     expected_balls = 3
 
@@ -48,35 +79,39 @@ class BallPickupBase(AutonomousStateMachine):
 
         self.path_name = None
 
-        self.shooter.toggle() # turns fly wheels off
-
     def setup(self):
         self.path_follow: PathFollow = PathFollow(self.chassis)
+        self.indexer.set_max_balls(3)
+        self.shooter.toggle() # turns fly wheels off
 
     @state(first=True)
-    def findPath(self):
-    	# wait for vision to know which path its on
-    	self.vision_data = self.vision.get_data()
-    	if self.vision_data[0] % 1 == 0: # check if its the balls vision which will only return whole numbers
-    		if self.vision_data[0] != 0: # if it knowns which path its on
-    			self.path_name = self.path_names[self.vision_data[0]]
-    			self.next_state("move")
-    	else:
-    		print("wrong vision data")
+    def findPath(self, initial_call, state_tm):
+        # wait for vision to know which path its on
+        self.vision_data = self.vision.get_data()
+        # self.vision_data.distance is actually the path num not the distance
+        print("vison data", self.vision_data)
+        if self.vision_data != None:
+            if self.vision_data.distance % 1 == 0: # check if its the balls vision which will only return whole numbers
+                if self.vision_data.distance != 0: # if it knowns which path its on
+                    self.path_name = self.path_names[int(self.vision_data.distance)]
+                    self.next_state("move")
+                else:
+                    print("dosent know which path yet")
+            else:
+                print("wrong vision data")
+        else:
+            print("no vision data")
 
     @state
-    def move(self):
-    	if initial_call:
+    def move(self, initial_call, state_tm):
+        if initial_call:
             path = self.all_paths[self.path_name]
             self.path_follow.new_path(path)
         self.path_follow.run()
         if self.path_follow.path_done():
             self.done()
 
-        if self.has_collected_balls():
-        	
-
-	def has_collected_balls(self) -> bool:
+    def has_collected_balls(self) -> bool:
         """
         Has the robot collected all the balls for the current trajectory?
         """
