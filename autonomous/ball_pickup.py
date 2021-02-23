@@ -39,38 +39,46 @@ class BallPickup(AutonomousStateMachine):
     path_names = ["None", "A1", "A2", "B1", "B2"]
     # 1 is for red and 2 is for blue
     all_paths = {}
-    all_paths["A1"] = Path( # red A
-        [Pose2d(2.286, 0.282, 0),
-        Translation2d(2.286, 2.286),
-        Translation2d(1.524, 3.810),
-        Translation2d(3.810, 4.572),
-        Pose2d(3.810, 9.144, 0),
+    all_paths["A1"] = Path(  # red A
+        [
+            Pose2d(2.286, 0.282, 0),
+            Translation2d(2.286, 2.286),
+            Translation2d(1.524, 3.810),
+            Translation2d(3.810, 4.572),
+            Pose2d(3.810, 9.144, 0),
         ],
-        reversed=False)
-    all_paths["A2"] = Path( # blue A
-        [Pose2d(2.286, 0.282, 0),
-        Translation2d(0.762, 4.572),
-        Translation2d(3.048, 5.334),
-        Translation2d(2.286, 6.858),
-        Pose2d(2.286, 9.144, 0),
+        reversed=False,
+    )
+    all_paths["A2"] = Path(  # blue A
+        [
+            Pose2d(2.286, 0.282, 0),
+            Translation2d(0.762, 4.572),
+            Translation2d(3.048, 5.334),
+            Translation2d(2.286, 6.858),
+            Pose2d(2.286, 9.144, 0),
         ],
-        reversed=False)
-    all_paths["B1"] = Path( # red B
-        [Pose2d(2.286, 0.282, 0),
-        Translation2d(3.048, 2.286),
-        Translation2d(1.524, 3.810),
-        Translation2d(3.048, 5.334),
-        Pose2d(3.048, 9.144, 0),
+        reversed=False,
+    )
+    all_paths["B1"] = Path(  # red B
+        [
+            Pose2d(2.286, 0.282, 0),
+            Translation2d(3.048, 2.286),
+            Translation2d(1.524, 3.810),
+            Translation2d(3.048, 5.334),
+            Pose2d(3.048, 9.144, 0),
         ],
-        reversed=False)
-    all_paths["B2"] = Path( # blue B
-        [Pose2d(2.286, 0.282, 0),
-        Translation2d(1.524, 4.572),
-        Translation2d(3.048, 6.096),
-        Translation2d(1.524, 7.620),
-        Pose2d(1.524, 9.144, 0),
+        reversed=False,
+    )
+    all_paths["B2"] = Path(  # blue B
+        [
+            Pose2d(2.286, 0.282, 0),
+            Translation2d(1.524, 4.572),
+            Translation2d(3.048, 6.096),
+            Translation2d(1.524, 7.620),
+            Pose2d(1.524, 9.144, 0),
         ],
-        reversed=False)
+        reversed=False,
+    )
 
     expected_balls = 3
 
@@ -82,7 +90,7 @@ class BallPickup(AutonomousStateMachine):
     def setup(self):
         self.path_follow: PathFollow = PathFollow(self.chassis)
         self.indexer.set_max_balls(3)
-        self.shooter.toggle() # turns fly wheels off
+        self.shooter.toggle()  # turns fly wheels off
 
     @state(first=True)
     def findPath(self, initial_call, state_tm):
@@ -91,8 +99,10 @@ class BallPickup(AutonomousStateMachine):
         # self.vision_data.distance is actually the path num not the distance
         print("vison data", self.vision_data)
         if self.vision_data != None:
-            if self.vision_data.distance % 1 == 0: # check if its the balls vision which will only return whole numbers
-                if self.vision_data.distance != 0: # if it knowns which path its on
+            if (
+                self.vision_data.distance % 1 == 0
+            ):  # check if its the balls vision which will only return whole numbers
+                if self.vision_data.distance != 0:  # if it knowns which path its on
                     self.path_name = self.path_names[int(self.vision_data.distance)]
                     self.next_state("move")
                 else:

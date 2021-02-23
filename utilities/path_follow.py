@@ -64,7 +64,7 @@ class PathFollow:
             )
         )
         self.trajectory_config.addConstraint(
-            constraint.CentripetalAccelerationConstraint(1.5) # m/s^2
+            constraint.CentripetalAccelerationConstraint(1.5)  # m/s^2
         )
         self.trajectory: trajectory.Trajectory
         self.start_time: float

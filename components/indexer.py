@@ -202,5 +202,5 @@ class Indexer:
             self.injector_motor.isFwdLimitSwitchClosed() and self.is_piston_retracted()
         )
 
-    def set_max_balls(self, n:int) -> None:
+    def set_max_balls(self, n: int) -> None:
         self.max_balls = n
