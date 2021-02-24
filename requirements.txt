@@ -4,4 +4,4 @@ robotpy-navx ~= 2021.1.0
 robotpy-rev ~= 2021.0.2
 robotpy-wpilib-utilities ~= 2021.0.1
 robotpy-wpimath ~= 2021.2.2.1
-wpilib ~= 2021.2.2
+wpilib ~= 2021.2.2.1
