@@ -1,5 +1,5 @@
 import wpilib
-from wpilib import controller
+from wpimath.controller import SimpleMotorFeedforward
 import ctre
 from numpy import interp
 from magicbot import feedback, tunable
@@ -36,20 +36,16 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 3.52 / 10)
+        self.outer_motor.config_kP(0, 1.1e-5)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
-        self.outer_ff_calculator = controller.SimpleMotorFeedforward(
-            kS=0.0448, kV=0.112
-        )
-        self.centre_motor.config_kP(0, 5.05 / 10)
+        self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.495, kV=0.107)
+        self.centre_motor.config_kP(0, 0.000395)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
-        self.centre_ff_calculator = controller.SimpleMotorFeedforward(
-            kS=0.0113, kV=0.113
-        )
+        self.centre_ff_calculator = SimpleMotorFeedforward(kS=0.51, kV=0.107)
 
     def execute(self) -> None:
         if self.disabled:
