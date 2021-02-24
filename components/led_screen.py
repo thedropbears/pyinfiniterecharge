@@ -6,9 +6,9 @@ class LEDScreen:
 
     def __init__(self):
         self.led_length = 72
-        self.led_bottom = wpilib.AddressableLED.LEDData(255, 0, 0)
-        self.led_middle = wpilib.AddressableLED.LEDData(0, 255, 0)
-        self.led_top = wpilib.AddressableLED.LEDData(0, 0, 255)
+        self.led_bottom = wpilib.AddressableLED.LEDData(255, 102, 102)
+        self.led_middle = wpilib.AddressableLED.LEDData(102, 255, 102)
+        self.led_top = wpilib.AddressableLED.LEDData(102, 102, 255)
 
     def setup(self) -> None:
         self.led.setLength(self.led_length)
