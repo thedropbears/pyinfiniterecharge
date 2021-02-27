@@ -36,11 +36,11 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 0.107)
+        self.outer_motor.config_kP(0, 0.104)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
-        self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.495, kV=0.107)
+        self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.505, kV=0.107)
         self.centre_motor.config_kP(0, 0.109)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
