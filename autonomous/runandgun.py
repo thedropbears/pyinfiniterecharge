@@ -60,12 +60,17 @@ class RunAndGun(AutonomousStateMachine):
         """
         if initial_call:
             path = self.paths[self.path_num]
-            self.path_follow.new_path(path)
+            self.path_follow.set_path(path)
         self.path_follow.run()
         self.shooter_controller.engage()
         self.shooter_controller.fire_input()
-        if self.path_follow.path_done() and self.indexer.balls_loaded() <= 0:
-            self.next_state("done_move")
+        if self.indexer.balls_loaded() <= 0:
+            if self.path_follow.path_done():
+                self.next_state("done_move")
+            else:
+                # This should return 0 for the final path
+                speed = self.get_transition_speed(path)
+                self.path_follow.set_transition_speed(speed)
 
     @state
     def done_move(self):
@@ -88,3 +93,48 @@ class RunAndGun(AutonomousStateMachine):
                     self.next_state("run_and_gun")
             else:
                 self.next_state("move")
+
+    def generate_unified_trajectory(self):
+        """
+        Generate a trajectory as if all of the paths were a single one. Intended to be used
+        for calculating transition speeds
+        """
+        start = None
+        end = None
+        waypoints = []
+        for i, path in enumerate(self.paths):
+            if i <= len(self.paths - 1):
+                end = path.end
+            if i == 0:
+                start = path.start
+                continue
+            else:
+                waypoints.append(start)
+                waypoints += path.waypoints
+
+        return self.path_follow.gen.generateTrajectory(
+            start,
+            waypoints,
+            end,
+            self.path_follow.trajectory_config
+        )
+
+    def cumulative_time_to_path(self, target_path: Path) -> float:
+        t = 0.0
+        for path in self.paths:
+            t += self.path_follow.get_total_path_time(path)
+            if path is target_path:
+                break
+        else:
+            print("The path you wanted a time until is not in this routine.")
+        return t
+
+    def get_transition_speed(self, first_path: Path) -> float:
+        """
+        Get the speed at which the robot would have moved between the supplied path and the
+        next one if the entire routine was a single trajectory
+        """
+        unified_trajectory = self.generate_unified_trajectory()
+        sample_time = self.cumulative_time_to_path(first_path)
+        state = unified_trajectory.sample(sample_time)
+        return state.velocity

@@ -32,7 +32,7 @@ class AutoNavBase(AutonomousStateMachine):
         """
         if initial_call:
             path = self.paths[self.path_num]
-            self.path_follow.new_path(path)
+            self.path_follow.set_path(path)
         self.path_follow.run()
         if self.path_follow.path_done():
             self.next_state("done_move")
