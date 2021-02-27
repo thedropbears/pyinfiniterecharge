@@ -138,31 +138,26 @@ class Indexer:
                 second_has_ball = True  # Pretend the ball is still in the feeder
             first.overrideLimitSwitchesEnable(second_has_ball)
 
-        if self.intaking:
-            if not intake_main_motor.isFwdLimitSwitchClosed():
-                if self.shimmying:
-                    if self.left_shimmy:
-                        self.intake_left_motor.set(self.shimmy_speed)
-                        self.intake_right_motor.set(0)
-                        self.shimmy_count += 1
-                        if self.shimmy_count > self.shimmy_ticks:
-                            self.left_shimmy = False
-                            self.shimmy_count = 0
-                    else:
-                        self.intake_left_motor.set(0)
-                        self.intake_right_motor.set(self.shimmy_speed)
-                        self.shimmy_count += 1
-                        if self.shimmy_count > self.shimmy_ticks:
-                            self.left_shimmy = True
-                            self.shimmy_count = 0
-                else:
+        if self.intaking and not intake_main_motor.isFwdLimitSwitchClosed():
+            if self.shimmying:
+                if self.left_shimmy:
                     self.intake_left_motor.set(self.shimmy_speed)
+                    self.intake_right_motor.set(0)
+                    self.shimmy_count += 1
+                    if self.shimmy_count > self.shimmy_ticks:
+                        self.left_shimmy = False
+                        self.shimmy_count = 0
+                else:
+                    self.intake_left_motor.set(0)
                     self.intake_right_motor.set(self.shimmy_speed)
-
+                    self.shimmy_count += 1
+                    if self.shimmy_count > self.shimmy_ticks:
+                        self.left_shimmy = True
+                        self.shimmy_count = 0
             else:
-                self.intake_right_motor.set(0)
-                self.intake_left_motor.set(0)
-        else:
+                self.intake_left_motor.set(self.shimmy_speed)
+                self.intake_right_motor.set(self.shimmy_speed)
+        else:  # nothing to intake
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
 
