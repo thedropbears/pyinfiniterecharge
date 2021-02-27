@@ -161,10 +161,7 @@ class Indexer:
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
 
-        if self.intake_lowered:
-            self.intake_arm_piston.set(True)
-        else:
-            self.intake_arm_piston.set(False)
+        self.intake_arm_piston.set(self.intake_lowered)
 
     def enable_intaking(self) -> None:
         self.intaking = True
