@@ -29,6 +29,7 @@ GIT_COMMIT = git.describe()
 
 class MyRobot(magicbot.MagicRobot):
     # List sensors which should collect data before controllers here.
+    range_finder: RangeFinder
     vision: Vision
 
     # List controllers (which require components) here.
@@ -38,7 +39,6 @@ class MyRobot(magicbot.MagicRobot):
     # List components (which represent physical subsystems) here.
     chassis: Chassis
     hang: Hang
-    range_finder: RangeFinder
     indexer: Indexer
     shooter: Shooter
     turret: Turret
