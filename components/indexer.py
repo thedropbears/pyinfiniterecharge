@@ -12,8 +12,9 @@ class Indexer:
     piston_switch: wpilib.DigitalInput
 
     intake_arm_piston: wpilib.Solenoid
-    intake_left_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
-    intake_right_motor: wpilib.interfaces.SpeedController  # Looking from behind the robot
+    # left and right, looking from behind the robot
+    intake_left_motor: wpilib.interfaces.SpeedController
+    intake_right_motor: wpilib.interfaces.SpeedController
 
     indexer_speed = tunable(0.6)
     injector_speed = tunable(0.7)
@@ -37,7 +38,6 @@ class Indexer:
         self.indexer_and_injector = self.indexer_motors + [self.injector_motor]
 
         for motor in self.all_motors:
-            motor.setInverted(True)
             motor.setNeutralMode(ctre.NeutralMode.Brake)
             motor.configForwardLimitSwitchSource(
                 ctre.LimitSwitchSource.FeedbackConnector,
@@ -48,8 +48,10 @@ class Indexer:
         self.intake_right_motor.setInverted(True)
 
         self.intake_main_motor.setInverted(False)
-        self.injector_motor.setInverted(False)
+        self.indexer_motors[0].setInverted(True)
         self.indexer_motors[1].setInverted(False)
+        self.indexer_motors[2].setInverted(True)
+        self.injector_motor.setInverted(False)
 
         # We have a delay because the distance between the second last
         # stage of the indexer and the injector is longer than others
@@ -81,6 +83,7 @@ class Indexer:
         injector = self.injector_motor
         feeder = self.indexer_motors[-1]
         intake_main_motor = self.intake_main_motor
+        num_cells = len(self.all_motors)
 
         if self.auto_retract:
             if self.balls_loaded() >= 5:
@@ -93,15 +96,17 @@ class Indexer:
             # Transferring
             self.transfer_to_injector = True
 
-        # find the location of the first ball
-        # only motors above it will run
+        # Find the location of the closest ball to the intake,
+        # counting from the intake (0).  Only run the motors from
+        # that ball toward the injector when we're not intaking.
         if self.intaking:
             first_ball = -1
         else:
-            first_ball = len(self.all_motors)
+            # If we don't find a ball, our last ball has been fired.
+            first_ball = num_cells
             if self.transfer_to_injector:
-                first_ball = len(self.all_motors) - 2
                 # there is a ball in the feeder
+                first_ball = num_cells - 2
             for i, motor in enumerate(self.all_motors):
                 if motor.isFwdLimitSwitchClosed():
                     first_ball = i
@@ -112,15 +117,13 @@ class Indexer:
             intake_main_motor.set(self.intake_motor_speed)
         else:
             intake_main_motor.set(0)
-        for i, motor in enumerate(
-            self.indexer_motors, len(self.all_motors) - len(self.indexer_motors) - 1
-        ):
+        for i, motor in enumerate(self.indexer_motors, 1):
             if first_ball <= i:
                 motor.set(self.indexer_speed)
             else:
                 motor.stopMotor()
         if self.is_piston_retracted():
-            if first_ball != len(self.all_motors):
+            if first_ball != num_cells:
                 injector.set(self.injector_speed)
             else:
                 injector.stopMotor()
@@ -130,13 +133,10 @@ class Indexer:
 
         # Override any limit switches where the next cell is vacant
         for first, second in zip(self.all_motors, self.all_motors[1:]):
-            at_limit = second.isFwdLimitSwitchClosed()
-            if second == feeder and self.transfer_to_injector:
-                at_limit = True  # Pretend the ball is still in the feeder
-            if not at_limit:
-                first.overrideLimitSwitchesEnable(False)
-            else:
-                first.overrideLimitSwitchesEnable(True)
+            second_has_ball = second.isFwdLimitSwitchClosed()
+            if second is feeder and self.transfer_to_injector:
+                second_has_ball = True  # Pretend the ball is still in the feeder
+            first.overrideLimitSwitchesEnable(second_has_ball)
 
         if self.intaking:
             if not intake_main_motor.isFwdLimitSwitchClosed():
