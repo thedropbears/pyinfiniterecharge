@@ -90,7 +90,7 @@ class Indexer:
                 self.disable_intaking()
                 self.raise_intake()
 
-        if injector.isFwdLimitSwitchClosed():
+        if self.injector_has_ball():
             self.transfer_to_injector = False
         elif feeder.isFwdLimitSwitchClosed():
             # Transferring
@@ -186,8 +186,10 @@ class Indexer:
     def is_piston_retracted(self) -> bool:
         return not self.piston_switch.get()
 
+    def injector_has_ball(self) -> bool:
+        return self.injector_motor.isFwdLimitSwitchClosed()
+
     @feedback
     def is_ready(self) -> bool:
-        return (
-            self.injector_motor.isFwdLimitSwitchClosed() and self.is_piston_retracted()
-        )
+        """Is the indexer ready for the shooter to fire?"""
+        return self.injector_has_ball() and self.is_piston_retracted()
