@@ -4,13 +4,16 @@ import ctre
 from numpy import interp
 from magicbot import feedback, tunable
 
+from components.indexer import Indexer
+
 
 class Shooter:
     outer_motor: ctre.WPI_TalonFX
-    centre_motor: ctre.WPI_TalonFX
-    injector_motor: ctre.TalonSRX
+    centre_motor: ctre.WPI_TalonFX  # centre of arc
     loading_piston: wpilib.DoubleSolenoid
     piston_switch: wpilib.DigitalInput
+
+    indexer: Indexer
 
     ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10)  # TODO add more data points
     centre_lookup = (28, 30, 42, 48, 55, 64, 68, 70, 82)
@@ -157,7 +160,7 @@ class Shooter:
         self.inject = True
 
     def is_ball_cleared(self) -> bool:
-        return not self.injector_motor.isFwdLimitSwitchClosed()
+        return not self.indexer.injector_has_ball()
 
     def toggle(self) -> None:
         """Toggle the shooter on and off"""
