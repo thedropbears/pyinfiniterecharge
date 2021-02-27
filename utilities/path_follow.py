@@ -14,10 +14,16 @@ class Path:
     waypoints: List[Translation2d]
     end: Pose2d
     reversed: bool
+    shoot: bool
+    intake: bool
+    stop_to_fire: bool
 
-    def __init__(self, points, reversed) -> None:
+    def __init__(self, points, reversed, shoot=False, intake=False, stop_to_fire=True) -> None:
         self.start, *self.waypoints, self.end = points
         self.reversed = reversed
+        self.shoot = shoot
+        self.intake = intake
+        self.stop_to_fire = stop_to_fire
 
 
 class PathFollow:
