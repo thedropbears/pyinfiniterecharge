@@ -91,18 +91,6 @@ class PathFollow:
         )
         self.start_time = Timer.getFPGATimestamp()
 
-    def new_quintic_path(self, waypoints: List[Pose2d], reversed: bool):
-        """
-        Give the path follower a new path, it will abandon the current one and
-        follow it instead. This method specifies the heading at each waypoint.
-        """
-        self.trajectory_config.setReversed(reversed)
-        self.trajectory = self.gen.generateTrajectory(
-            waypoints,
-            self.trajectory_config,
-        )
-        self.start_time = Timer.getFPGATimestamp()
-
     def run(self) -> None:
         """
         Send the chassis control inputs for this loop

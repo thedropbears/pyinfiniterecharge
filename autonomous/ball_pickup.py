@@ -1,5 +1,3 @@
-import math
-
 from wpilib import controller
 from wpimath import geometry
 from wpimath import trajectory
