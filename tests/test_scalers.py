@@ -27,13 +27,15 @@ def test_exponential(value, base):
         assert math.copysign(1, result) == math.copysign(1, value)
 
 
-reals = floats(allow_nan=False, allow_infinity=False)
+real_halves = floats(allow_nan=False, allow_infinity=False, width=16)
 
 
 @given(
-    value=reals,
-    input_range=tuples(reals, reals).filter(lambda x: x[0] != x[1]),
-    output_range=tuples(reals, reals).map(sorted).filter(lambda x: x[0] < x[1]),
+    value=real_halves,
+    input_range=tuples(real_halves, real_halves).filter(lambda x: x[0] != x[1]),
+    output_range=tuples(real_halves, real_halves)
+    .map(sorted)
+    .filter(lambda x: x[0] < x[1]),
 )
 def test_scale_value(
     value: float,
