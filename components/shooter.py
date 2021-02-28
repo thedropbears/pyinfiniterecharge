@@ -1,5 +1,5 @@
 import wpilib
-from wpilib import controller
+from wpimath.controller import SimpleMotorFeedforward
 import ctre
 from numpy import interp
 from magicbot import feedback, tunable
@@ -36,20 +36,16 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 3.52 / 10)
+        self.outer_motor.config_kP(0, 0.104)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
-        self.outer_ff_calculator = controller.SimpleMotorFeedforward(
-            kS=0.0448, kV=0.112
-        )
-        self.centre_motor.config_kP(0, 5.05 / 10)
+        self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.505, kV=0.107)
+        self.centre_motor.config_kP(0, 0.109)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
-        self.centre_ff_calculator = controller.SimpleMotorFeedforward(
-            kS=0.0113, kV=0.113
-        )
+        self.centre_ff_calculator = SimpleMotorFeedforward(kS=0.51, kV=0.107)
 
     def execute(self) -> None:
         if self.disabled:
@@ -58,24 +54,24 @@ class Shooter:
             return
 
         voltage = wpilib.RobotController.getInputVoltage()
-        centre_feed_forward = (
-            self.centre_ff_calculator.calculate(self.centre_target) / voltage
-        )
-        outer_feed_forward = (
-            self.outer_ff_calculator.calculate(self.outer_target) / voltage
-        )
+        centre_feed_forward = self.centre_ff_calculator.calculate(self.centre_target)
+        outer_feed_forward = self.outer_ff_calculator.calculate(self.outer_target)
+
         self.centre_motor.set(
             ctre.ControlMode.Velocity,
             self.centre_target * self.RPS_TO_CTRE_UNITS,
             ctre.DemandType.ArbitraryFeedForward,
-            centre_feed_forward,
+            centre_feed_forward / voltage,
         )
         self.outer_motor.set(
             ctre.ControlMode.Velocity,
             self.outer_target * self.RPS_TO_CTRE_UNITS,
             ctre.DemandType.ArbitraryFeedForward,
-            outer_feed_forward,
+            outer_feed_forward / voltage,
         )
+        # self.centre_motor.setVoltage(centre_feed_forward)
+        # self.outer_motor.setVoltage(outer_feed_forward)
+
         if self.inject:
             self.loading_piston.set(wpilib.DoubleSolenoid.Value.kForward)
         else:
