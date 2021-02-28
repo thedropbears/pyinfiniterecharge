@@ -80,9 +80,10 @@ class Turret:
     HALL_EFFECT_CLOSED = False
     HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
 
-    # Limit to prevent turret from rotating too far. Note that this allows for
-    # a total coverage > 360 degrees.
-    MAX_TURRET_COUNT = int(math.radians(190) * COUNTS_PER_TURRET_RADIAN)
+    # Signed limits to prevent turret from rotating too far. Note that this allows
+    # for a total coverage > 360 degrees.
+    MAX_TURRET_COUNT = int(0.3 * COUNTS_PER_TURRET_RADIAN)  # measured values
+    MIN_TURRET_COUNT = int((-3.0 - math.pi) * COUNTS_PER_TURRET_RADIAN)
 
     # PID values
     # Open loop tests give a turret speed of ~930counts/100ms at 25% throttle
@@ -152,7 +153,10 @@ class Turret:
             return
         if not self.index_found and self.index_hit != Index.NO_INDEX:
             self._handle_index(self.index_hit)
-        if self.current_state == self.SCANNING:
+        if not self.index_found:
+            self.slew(math.pi)
+            self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
+        elif self.current_state == self.SCANNING:
             self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
             self._do_scanning()
         else:
@@ -180,7 +184,7 @@ class Turret:
         self.current_state = self.SLEWING
         current_pos = self.motor.getSelectedSensorPosition()
         target = current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN)
-        if target < -self.MAX_TURRET_COUNT:
+        if target < self.MIN_TURRET_COUNT:
             target += self.COUNTS_PER_TURRET_REV
             self.must_finish = True
             self.turnaround_direction = self.POSITIVE
@@ -268,8 +272,8 @@ class Turret:
     def _slew_to_counts(self, counts: int) -> None:
         # Callers should ensure that the target is in range, but this is
         # defense in depth to not damage the robot.
-        if counts < -self.MAX_TURRET_COUNT:
-            counts = -self.MAX_TURRET_COUNT
+        if counts < self.MIN_TURRET_COUNT:
+            counts = self.MIN_TURRET_COUNT
         if counts > self.MAX_TURRET_COUNT:
             counts = self.MAX_TURRET_COUNT
         self.current_target_counts = counts
