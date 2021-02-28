@@ -1,7 +1,4 @@
-from wpilib import controller
 from wpimath import geometry
-from wpimath import trajectory
-from wpimath.trajectory import constraint
 from wpilib.geometry import Pose2d, Translation2d
 from magicbot import AutonomousStateMachine, state
 
@@ -11,7 +8,7 @@ from components.shooter import Shooter
 from controllers.shooter import ShooterController
 from components.vision import Vision
 
-from utilities.path_follow import Path, LoadPath, PathFollow
+from utilities.path_follow import Path, PathFollow
 
 
 def to_pose(x: float, y: float, heading: float) -> geometry.Pose2d:
