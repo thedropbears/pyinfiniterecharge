@@ -182,6 +182,7 @@ class MyRobot(magicbot.MagicRobot):
         )
 
     track_target = magicbot.tunable(False)
+    run_turret = magicbot.tunable(False)
 
     def testPeriodic(self):
 
@@ -219,9 +220,12 @@ class MyRobot(magicbot.MagicRobot):
         slew_increment = math.radians(5)  # radians
         if self.driver_joystick.getRawButtonPressed(5):
             self.turret.slew(slew_increment)
-            self.turret.execute()
+            self.run_turret = True
         elif self.driver_joystick.getRawButtonPressed(6):
             self.turret.slew(-slew_increment)
+            self.run_turret = True
+
+        if self.run_turret:
             self.turret.execute()
 
         if self.driver_joystick.getRawButtonPressed(7):
