@@ -10,6 +10,7 @@ from magicbot import feedback
 @dataclass
 class VisionData:
     #: The distance to the target in metres.
+    #: Also used as the path type with balls vision
     distance: float
 
     #: The angle to the target in radians.

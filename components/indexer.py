@@ -25,6 +25,8 @@ class Indexer:
     intaking = tunable(False)
     shimmying = tunable(False)
 
+    max_balls = tunable(5)
+
     def __init__(self):
         self.clearing = False
 
@@ -83,7 +85,7 @@ class Indexer:
         intake_main_motor = self.intake_main_motor
 
         if self.auto_retract:
-            if self.balls_loaded() >= 5:
+            if self.balls_loaded() >= self.max_balls:
                 self.disable_intaking()
                 self.raise_intake()
 
@@ -199,3 +201,6 @@ class Indexer:
         return (
             self.injector_motor.isFwdLimitSwitchClosed() and self.is_piston_retracted()
         )
+
+    def set_max_balls(self, n: int) -> None:
+        self.max_balls = n
