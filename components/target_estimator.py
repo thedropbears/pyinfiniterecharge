@@ -16,7 +16,7 @@ from magicbot import feedback
 def _test_for_downrange(heading: float, azimuth: float) -> bool:
     # Calculate the turret azimuth in field coordinates
     turret_in_field = constrain_angle(heading + azimuth)
-    return abs(turret_in_field) < math.pi / 2.0
+    return abs(turret_in_field) > math.pi / 2.0
 
 
 class TargetEstimator:
