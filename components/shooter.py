@@ -112,6 +112,10 @@ class Shooter:
             <= self.outer_target * self.velocity_tolerance
         )
 
+    def stop(self):
+        self.centre_target = 0
+        self.outer_target = 0
+
     @feedback
     def get_centre_velocity(self):
         """Returns velocity in rps"""
