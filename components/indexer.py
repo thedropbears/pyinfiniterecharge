@@ -183,7 +183,8 @@ class Indexer:
     def balls_loaded(self) -> int:
         balls = (
             sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors)
-            + self.transfer_to_injector + self.transfer_to_feeder
+            + self.transfer_to_injector
+            + self.transfer_to_feeder
         )
         return balls
 
