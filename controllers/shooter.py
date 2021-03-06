@@ -49,6 +49,10 @@ class ShooterController(StateMachine):
         super().execute()
         self.update_LED()
 
+    def on_disable(self):
+        self.stop()
+        return super().on_disable()
+
     def update_LED(self) -> None:
         # Flash if turret and shooter are disabled
         if self.shooter.disabled:
