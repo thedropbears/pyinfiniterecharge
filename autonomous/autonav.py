@@ -105,34 +105,34 @@ class Bounce(AutoNavBase):
                 [
                     Pose2d(1.019, 2.139, 0),
                     Translation2d(1.830, 2.359),
-                    Pose2d(2.250, 3.406, math.pi/2),
+                    Pose2d(2.250, 3.406, math.pi / 2),
                 ],
                 reversed=False,
             ),
             Path(
                 [
-                    Pose2d(2.250, 3.406, math.pi/2),
+                    Pose2d(2.250, 3.406, math.pi / 2),
                     Translation2d(2.686, 2.169),
                     Translation2d(3.164, 1.137),
                     Translation2d(3.795, 0.786),
                     Translation2d(4.443, 1.186),
-                    Pose2d(4.557, 3.429, -math.pi/2),
+                    Pose2d(4.557, 3.429, -math.pi / 2),
                 ],
                 reversed=True,
             ),
             Path(
                 [
-                    Pose2d(4.557, 3.429, -math.pi/2),
+                    Pose2d(4.557, 3.429, -math.pi / 2),
                     Translation2d(4.668, 1.020),
                     Translation2d(5.873, 0.766),
                     Translation2d(6.776, 1.068),
-                    Pose2d(6.856, 3.414, math.pi/2),
+                    Pose2d(6.856, 3.414, math.pi / 2),
                 ],
                 reversed=False,
             ),
             Path(
                 [
-                    Pose2d(6.856, 3.414, math.pi/2),
+                    Pose2d(6.856, 3.414, math.pi / 2),
                     Translation2d(7.157, 2.328),
                     Pose2d(8.352, 2.168, math.pi),
                 ],
