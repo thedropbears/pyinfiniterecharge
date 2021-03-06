@@ -117,6 +117,7 @@ class Indexer:
             intake_main_motor.set(self.intake_motor_speed)
         else:
             intake_main_motor.set(0)
+        # Recall that the intake's cell is 0 - we're counting the cells here.
         for i, motor in enumerate(self.indexer_motors, 1):
             if first_ball <= i:
                 motor.set(self.indexer_speed)
