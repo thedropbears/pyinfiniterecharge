@@ -35,8 +35,6 @@ class Indexer:
         self.all_motors.extend(self.indexer_motors)
         self.all_motors.append(self.injector_motor)
 
-        self.indexer_and_injector = self.indexer_motors + [self.injector_motor]
-
         for motor in self.all_motors:
             motor.setNeutralMode(ctre.NeutralMode.Brake)
             motor.configForwardLimitSwitchSource(
