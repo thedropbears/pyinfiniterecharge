@@ -41,6 +41,7 @@ class AutoNavBase(AutonomousStateMachine):
     def done_move(self):
         self.path_num += 1
         if self.path_num >= len(self.paths):
+            self.chassis.drive(0, 0)
             self.done()
         else:
             self.next_state("move")
@@ -105,91 +106,38 @@ class Bounce(AutoNavBase):
                 [
                     Pose2d(1.019, 2.139, 0),
                     Translation2d(1.830, 2.359),
-                    Pose2d(2.250, 3.406, math.pi/2),
+                    Pose2d(2.250, 3.406, math.pi / 2),
                 ],
                 reversed=False,
             ),
             Path(
                 [
-                    Pose2d(2.250, 3.406, math.pi/2),
+                    Pose2d(2.250, 3.406, math.pi / 2),
                     Translation2d(2.686, 2.169),
                     Translation2d(3.164, 1.137),
                     Translation2d(3.795, 0.786),
                     Translation2d(4.443, 1.186),
-                    Pose2d(4.557, 3.429, -math.pi/2),
+                    Pose2d(4.557, 3.429, -math.pi / 2),
                 ],
                 reversed=True,
             ),
             Path(
                 [
-                    Pose2d(4.557, 3.429, -math.pi/2),
+                    Pose2d(4.557, 3.429, -math.pi / 2),
                     Translation2d(4.668, 1.020),
                     Translation2d(5.873, 0.766),
                     Translation2d(6.776, 1.068),
-                    Pose2d(6.856, 3.414, math.pi/2),
+                    Pose2d(6.856, 3.414, math.pi / 2),
                 ],
                 reversed=False,
             ),
             Path(
                 [
-                    Pose2d(6.856, 3.414, math.pi/2),
+                    Pose2d(6.856, 3.414, math.pi / 2),
                     Translation2d(7.157, 2.328),
                     Pose2d(8.352, 2.168, math.pi),
                 ],
                 reversed=True,
-            ),
-        ]
-        super().setup()
-
-
-class Showoff(AutoNavBase):
-    MODE_NAME = "Showoff"
-
-    def setup(self):
-        self.paths = [
-            Path(
-                [
-                    Pose2d(8.382, 3.528, -math.pi/2),
-                    Translation2d(8.212, 2.491),
-                    Translation2d(7.278, 2.375),
-                    Translation2d(6.858, 3.048),
-                    Translation2d(6.439, 3.750),
-                    Translation2d(5.604, 3.706),
-                    Translation2d(5.334, 3.048),
-                    Pose2d(5.018, 2.310, math.pi),
-                ],
-                reversed=False,
-            ),
-            Path(
-                [
-                    Pose2d(5.018, 2.310, math.pi),
-                    Translation2d(3.875, 2.359),
-                    Translation2d(3.745, 3.583),
-                    Translation2d(5.035, 3.636),
-                    Translation2d(5.334, 3.048),
-                    Translation2d(5.116, 2.237),
-                    Pose2d(2.826, 2.296, math.pi),
-                ],
-                reversed=False,
-            ),
-            Path(
-                [
-                    Pose2d(2.826, 2.296, math.pi),
-                    Translation2d(2.286, 1.524),
-                    Translation2d(2.754, 0.761),
-                    Translation2d(3.537, 0.846),
-                    Translation2d(3.800, 1.524),
-                    Translation2d(4.373, 2.267),
-                    Translation2d(5.118, 2.091),
-                    Translation2d(5.334, 1.524),
-                    Translation2d(5.756, 0.888),
-                    Translation2d(6.637, 0.935),
-                    Translation2d(6.858, 1.524),
-                    Translation2d(7.429, 2.273),
-                    Translation2d(8.217, 2.025),
-                    Pose2d(8.382, 1.524, -math.pi/2),
-                ],
-                reversed=False,
             ),
         ]
         super().setup()
