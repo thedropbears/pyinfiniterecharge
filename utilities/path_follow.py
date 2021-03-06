@@ -17,8 +17,11 @@ class Path:
     shoot: bool
     intake: bool
     stop_to_fire: bool
+    transition_velocity: float
 
-    def __init__(self, points, reversed, shoot=False, intake=False, stop_to_fire=True) -> None:
+    def __init__(
+        self, points, reversed, shoot=False, intake=False, stop_to_fire=True
+    ) -> None:
         self.start, *self.waypoints, self.end = points
         self.reversed = reversed
         self.shoot = shoot
@@ -35,8 +38,9 @@ class PathFollow:
     def __init__(self, chassis: Chassis) -> None:
         self.chassis = chassis
         self.controller = controller.RamseteController()
+        self.max_acceleration = 1
         self.trajectory_config = trajectory.TrajectoryConfig(
-            maxVelocity=1, maxAcceleration=1
+            maxVelocity=1, maxAcceleration=self.max_acceleration
         )
         self.gen = trajectory.TrajectoryGenerator()
         self.trajectory_config.setKinematics(self.chassis.kinematics)
@@ -45,8 +49,10 @@ class PathFollow:
                 self.chassis.ff_calculator, self.chassis.kinematics, maxVoltage=10
             )
         )
+        self.current_path_time = 0
+        self.next_start_speed = 0
         self.cached_path: Path
-        self.trajectory: trajectory.Trajectory
+        self.trajectory: trajectory.Trajectory = None
         self.start_time: float
 
     def set_path(self, path: Path) -> None:
@@ -57,7 +63,9 @@ class PathFollow:
         self.trajectory_config.setReversed(path.reversed)
         self.cached_path = path
         self.trajectory = self.new_path(path)
-        self.trajectory_config.setStartVelocity(0)
+        self.trajectory_config.setEndVelocity(0)
+        self.trajectory_config.setStartVelocity(self.next_start_speed)
+        self.next_start_speed = 0
         self.start_time = Timer.getFPGATimestamp()
 
     # def set_quintic_path(self, waypoints: List[Pose2d], reversed: bool):
@@ -77,7 +85,7 @@ class PathFollow:
         Send the chassis control inputs for this loop
         """
         if self.path_done():
-            self.chassis.drive(0, 0)
+            pass
         else:
             pos = self.chassis.get_pose()
             goal = self.trajectory.sample(self.current_path_time)
@@ -108,15 +116,24 @@ class PathFollow:
         Returns the amount of time expected to complete the given path
         """
         trajectory = self.new_path(path)
-        return trajectory.totalTime
+        return trajectory.totalTime()
 
     def set_transition_speed(self, speed: float) -> None:
         """
-        A rather hacky way of transitioning at a given speed at runtime between two paths
+        A rather hacky way of transitioning at a given speed at runtime between two paths.
+        Respescts the acceleration constraint of the first two paths.
         """
-        # there is an edge case where this makes us exceed acceleration constraints
-        # TODO handle it
-        self.trajectory_config.setEndVelocity(speed)
-        self.set_path(self.cached_path)
-        self.trajectory_config.setEndVelocity(0)
-        self.trajectory_config.setStartVelocity(speed)
+        if self.trajectory:
+            current_speed = self.chassis.vx
+            current_time = self.current_path_time
+            end_time = self.trajectory.totalTime()
+            delta_t = end_time - current_time
+            max_velocity_change = self.max_acceleration * delta_t
+            max_transition_velocity = current_speed + max_velocity_change
+            constrained_speed = min(speed, max_transition_velocity)
+        else:
+            # We can only break acceleration constaint on a path change
+            # so we don't check the first path
+            constrained_speed = speed
+        self.trajectory_config.setEndVelocity(constrained_speed)
+        self.next_start_speed = constrained_speed
