@@ -5,6 +5,7 @@ from magicbot import AutonomousStateMachine, state
 from components.chassis import Chassis
 from components.indexer import Indexer
 from components.shooter import Shooter
+from components.turret import Turret
 from controllers.shooter import ShooterController
 from components.vision import Vision
 
@@ -28,6 +29,7 @@ class BallPickup(AutonomousStateMachine):
     chassis: Chassis
     indexer: Indexer
     vision: Vision
+    turret: Turret
 
     TARGET_POSITION = geometry.Translation2d(0, 0)
 
@@ -87,6 +89,13 @@ class BallPickup(AutonomousStateMachine):
         self.indexer.set_max_balls(3)
         self.shooter.toggle()  # turns fly wheels off
 
+    def on_enable(self) -> None:
+        self.indexer.lower_intake()
+        self.indexer.enable_intaking()
+        self.turret.slew_to_azimuth(0)
+        # self.has_zeroed = True
+        super().on_enable()
+
     @state(first=True)
     def findPath(self, initial_call, state_tm):
         # wait for vision to know which path its on
@@ -99,6 +108,7 @@ class BallPickup(AutonomousStateMachine):
             ):  # check if its the balls vision which will only return whole numbers
                 if self.vision_data.distance != 0:  # if it knowns which path its on
                     self.path_name = self.path_names[int(self.vision_data.distance)]
+                    print(f"found path {self.path_name}")
                     self.next_state("move")
                 else:
                     print("dosent know which path yet")
@@ -111,6 +121,7 @@ class BallPickup(AutonomousStateMachine):
     def move(self, initial_call, state_tm):
         if initial_call:
             path = self.all_paths[self.path_name]
+            self.chassis.reset_odometry(path.start)
             self.path_follow.new_path(path)
         self.path_follow.run()
         if self.path_follow.path_done():

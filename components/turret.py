@@ -171,7 +171,7 @@ class Turret:
             return
         self.current_state = self.SLEWING
         turret_angle = _robot_to_turret(angle)
-        self.motor._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
+        self._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
