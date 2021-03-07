@@ -30,7 +30,7 @@ class PathFollow:
         self.chassis = chassis
         self.controller = controller.RamseteController()
         self.trajectory_config = trajectory.TrajectoryConfig(
-            maxVelocity=1, maxAcceleration=1
+            maxVelocity=2.5, maxAcceleration=1
         )
         self.gen = trajectory.TrajectoryGenerator()
         self.trajectory_config.setKinematics(self.chassis.kinematics)
@@ -39,6 +39,7 @@ class PathFollow:
                 self.chassis.ff_calculator, self.chassis.kinematics, maxVoltage=10
             )
         )
+        self.trajectory_config.addConstraint(constraint.CentripetalAccelerationConstraint(maxCentripetalAcceleration=2.5))
         self.trajectory: trajectory.Trajectory
         self.start_time: float
 

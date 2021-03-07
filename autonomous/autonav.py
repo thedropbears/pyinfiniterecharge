@@ -25,6 +25,11 @@ class AutoNavBase(AutonomousStateMachine):
         self.path_num = 0
         super().on_enable()
 
+    def done(self) -> None:
+        super().done()
+        self.chassis.disable_brake_mode()
+
+
     @state(first=True)
     def move(self, initial_call) -> None:
         """
@@ -75,20 +80,20 @@ class Slalom(AutoNavBase):
                 [
                     Pose2d(1.056, 0.618, 0),
                     Translation2d(2.188, 0.908),
-                    Translation2d(2.696, 2.269),
-                    Translation2d(4.596, 2.737),
-                    Translation2d(5.757, 2.522),
-                    Translation2d(6.509, 2.120),
-                    Translation2d(7.111, 1.088),
-                    Translation2d(8.151, 0.681),
+                    Translation2d(2.678, 2.127),
+                    Translation2d(3.560, 2.579),
+                    Translation2d(5.600, 2.557),
+                    Translation2d(6.700, 2.120),
+                    Translation2d(7.150, 0.872),
+                    Translation2d(8.056, 0.834),
                     Translation2d(8.464, 1.543),
-                    Translation2d(7.955, 2.522),
+                    Translation2d(8.012, 2.304),
                     Translation2d(7.194, 2.323),
-                    Translation2d(6.531, 0.952),
-                    Translation2d(4.473, 0.572),
-                    Translation2d(2.382, 0.912),
-                    Translation2d(2.277, 2.335),
-                    Pose2d(0.946, 2.346, math.pi),
+                    Translation2d(6.404, 0.834),
+                    Translation2d(4.537, 0.711),
+                    Translation2d(2.755, 0.747),
+                    Translation2d(2.087, 1.769),
+                    Pose2d(1.263, 2.479, math.radians(139.25)),
                 ],
                 reversed=False,
             ),
