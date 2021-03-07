@@ -105,6 +105,7 @@ class Bounce(AutoNavBase):
     MODE_NAME = "Bounce"
 
     def setup(self):
+        path_offset = 0.5
         self.paths = [
             Path(
                 [
@@ -121,25 +122,25 @@ class Bounce(AutoNavBase):
                     Translation2d(3.164, 1.137),
                     Translation2d(3.795, 0.786),
                     Translation2d(4.443, 1.186),
-                    Pose2d(4.557, 3.429, -math.pi / 2),
+                    Pose2d(4.557, 3.529 + path_offset/2, -math.pi / 2),
                 ],
                 reversed=True,
             ),
             Path(
                 [
-                    Pose2d(4.557, 3.429, -math.pi / 2),
-                    Translation2d(4.668, 1.020),
-                    Translation2d(5.873, 0.766),
-                    Translation2d(6.776, 1.068),
-                    Pose2d(6.856, 3.414, math.pi / 2),
+                    Pose2d(4.557, 3.529 + path_offset/3, -math.pi / 2),
+                    Translation2d(4.668, 1.020 + path_offset),
+                    Translation2d(5.673, 0.666 + path_offset),
+                    Translation2d(6.800, 0.768 + path_offset),
+                    Pose2d(6.856, 3.614 + path_offset, math.pi / 2),
                 ],
                 reversed=False,
             ),
             Path(
                 [
-                    Pose2d(6.856, 3.414, math.pi / 2),
-                    Translation2d(7.157, 2.328),
-                    Pose2d(8.352, 2.168, math.pi),
+                    Pose2d(6.856, 3.614 + path_offset, math.pi / 2),
+                    Translation2d(7.157, 2.328 + 1.5 * path_offset),
+                    Pose2d(8.352, 2.168 + 1.5 * path_offset, math.pi),
                 ],
                 reversed=True,
             ),

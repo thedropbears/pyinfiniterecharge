@@ -30,7 +30,7 @@ class PathFollow:
         self.chassis = chassis
         self.controller = controller.RamseteController()
         self.trajectory_config = trajectory.TrajectoryConfig(
-            maxVelocity=2.5, maxAcceleration=1
+            maxVelocity=2.5, maxAcceleration=1.5
         )
         self.gen = trajectory.TrajectoryGenerator()
         self.trajectory_config.setKinematics(self.chassis.kinematics)
