@@ -46,6 +46,10 @@ class AutoNavBase(AutonomousStateMachine):
         else:
             self.next_state("move")
 
+    def done(self) -> None:
+        super().done()
+        self.chassis.disable_brake_mode()
+
 
 class test(AutoNavBase):
     MODE_NAME = "Test"
@@ -153,9 +157,24 @@ class BarrelRacing(AutoNavBase):
 
     def setup(self):
         self.paths = [
-            LoadPath(
-                os.path.join(PATHWEAVER_PATH, "Barrel_Racing.wpilib.json"),
+            Path(
+                [
+                    Pose2d(1.019, 2.139, 0),
+                    Translation2d(4.1, 2.35),
+                    Translation2d(4.72, 1.5),
+                    Translation2d(3.6, 0.7),
+                    Translation2d(3.1, 1.9),
+                    Translation2d(7, 2.6),
+                    Translation2d(6.3, 3.7),
+                    Translation2d(5.2, 3.2),
+                    Translation2d(6.1, 1.25),
+                    Translation2d(7.3, 0.96),
+                    Translation2d(8.2, 1.15),
+                    Translation2d(8, 2),
+                    Translation2d(6, 2.346),
+                    Pose2d(0.946, 2.45, math.pi),
+                ],
                 reversed=False,
-            )
+            ),
         ]
         super().setup()
