@@ -88,6 +88,9 @@ class BallPickup(AutonomousStateMachine):
         self.path_follow: PathFollow = PathFollow(self.chassis)
         self.indexer.set_max_balls(3)
         self.shooter.toggle()  # turns fly wheels off
+        self.path_confidence = 0;
+        self.last_path = 0
+        self.confidence_thresh = 5
 
     def on_enable(self) -> None:
         self.indexer.lower_intake()
@@ -103,19 +106,26 @@ class BallPickup(AutonomousStateMachine):
         # self.vision_data.distance is actually the path num not the distance
         print("vison data", self.vision_data)
         if self.vision_data != None:
+            # check if its the balls vision which will only return whole numbers
             if (
                 self.vision_data.distance % 1 == 0
-            ):  # check if its the balls vision which will only return whole numbers
-                if self.vision_data.distance != 0:  # if it knowns which path its on
+            ):  
+                if self.vision_data.distance == self.last_path:
+                    self.path_confidence += 1
+                else:
+                    self.path_confidence = 0
+
+                if self.path_confidence > self.confidence_thresh and self.vision_data.distance != 0:  # if it knowns which path its on
                     self.path_name = self.path_names[int(self.vision_data.distance)]
                     print(f"found path {self.path_name}")
                     self.next_state("move")
-                else:
-                    print("dosent know which path yet")
+                self.last_path = self.vision_data.distance
+                return None
             else:
                 print("wrong vision data")
         else:
             print("no vision data")
+        self.path_confidence = 0
 
     @state
     def move(self, initial_call, state_tm):
