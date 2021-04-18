@@ -2,6 +2,7 @@ import math
 
 import magicbot
 import rev
+import wpilib
 
 from wpimath.controller import SimpleMotorFeedforwardMeters
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
@@ -24,6 +25,10 @@ POWER_PORT_POSITION = Translation2d(0, 0)
 
 
 class Chassis:
+    #: Conversion from robot field coordinates to dashboard coordinates.
+    DASHBOARD_TARGET_POS = Translation2d(15.98295, 2.404364)
+    DASHBOARD_POSE_ROT = Rotation2d(math.pi)
+
     left_rear: rev.CANSparkMax
     left_front: rev.CANSparkMax
     right_rear: rev.CANSparkMax
@@ -72,6 +77,11 @@ class Chassis:
         # default_position on the field
         self.reset_odometry(Pose2d(-3, 0, Rotation2d(math.pi)))
 
+        self.field = wpilib.Field2d()
+        self.field.setRobotPose(self.get_dashboard_pose())
+
+        wpilib.SmartDashboard.putData(self.field)
+
     def execute(self) -> None:
         # XXX: https://github.com/robotpy/robotpy-wpilib/issues/635
         chassis_speeds = ChassisSpeeds()
@@ -99,6 +109,8 @@ class Chassis:
             self.left_encoder.getPosition(),
             self.right_encoder.getPosition(),
         )
+
+        self.field.setRobotPose(self.get_dashboard_pose())
 
     def drive(self, vx: float, vz: float) -> None:
         """Sets the desired robot velocity.
@@ -143,6 +155,14 @@ class Chassis:
     def get_pose(self) -> Pose2d:
         """Get the current position of the robot on the field."""
         return self.odometry.getPose()
+
+    def get_dashboard_pose(self) -> Pose2d:
+        """Get the current robot pose in dashboard coordinates."""
+        pose = self.get_pose()
+        return Pose2d(
+            pose.translation() + self.DASHBOARD_TARGET_POS,
+            pose.rotation() + self.DASHBOARD_POSE_ROT,
+        )
 
     @magicbot.feedback
     def get_heading(self) -> float:
