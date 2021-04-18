@@ -4,6 +4,7 @@ import math
 
 import ctre
 import magicbot
+import navx
 import rev
 import wpilib
 
@@ -21,7 +22,6 @@ from components.vision import Vision
 from components.led_screen import LEDScreen
 from controllers.shooter import ShooterController
 from utilities import git
-from utilities.nav_x import NavX
 from utilities.scalers import rescale_js, scale_value
 
 GIT_COMMIT = git.describe()
@@ -52,7 +52,7 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis_left_rear = rev.CANSparkMax(6, rev.MotorType.kBrushless)
         self.chassis_right_front = rev.CANSparkMax(7, rev.MotorType.kBrushless)
         self.chassis_right_rear = rev.CANSparkMax(4, rev.MotorType.kBrushless)
-        self.imu = NavX()
+        self.imu = navx.AHRS.create_spi(update_rate_hz=50)
 
         self.hang_winch_motor = ctre.WPI_TalonFX(30)
         self.hang_kracken_hook_latch = wpilib.Solenoid(0)

@@ -2,7 +2,7 @@ import math
 
 import magicbot
 import rev
-import wpilib
+import wpilib.interfaces
 
 from wpimath.controller import SimpleMotorFeedforwardMeters
 from wpimath.geometry import Pose2d, Rotation2d, Translation2d
@@ -11,8 +11,6 @@ from wpimath.kinematics import (
     DifferentialDriveKinematics,
     DifferentialDriveOdometry,
 )
-
-from utilities.nav_x import NavX
 
 GEAR_RATIO = 10.75
 
@@ -34,7 +32,7 @@ class Chassis:
     right_rear: rev.CANSparkMax
     right_front: rev.CANSparkMax
 
-    imu: NavX
+    imu: wpilib.interfaces.Gyro
 
     open_loop = magicbot.tunable(False)
     vx = magicbot.will_reset_to(0.0)
@@ -150,7 +148,7 @@ class Chassis:
 
     def _get_heading(self) -> Rotation2d:
         """Get the current heading of the robot from the IMU, anticlockwise positive."""
-        return Rotation2d(self.imu.getYaw())
+        return self.imu.getRotation2d()
 
     def get_pose(self) -> Pose2d:
         """Get the current position of the robot on the field."""
