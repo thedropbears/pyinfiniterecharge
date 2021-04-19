@@ -44,6 +44,7 @@ class ShooterController(StateMachine):
         self.time_target_lost: Optional[float] = None
         self.disabled_flash: int = 0
         self.fired_count: int = 0
+        self.manual_aiming = False
 
     def execute(self) -> None:
         super().execute()
@@ -97,6 +98,10 @@ class ShooterController(StateMachine):
         """
         The vision system does not have a target, we try to find one using odometry
         """
+
+        if self.manual_aiming:
+            self.next_state("manual_aiming")
+
         if self.target_estimator.is_ready():
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             self.time_target_lost = None
@@ -127,6 +132,11 @@ class ShooterController(StateMachine):
         """
         Aiming towards a vision target and spinning up flywheels
         """
+
+        # swap to manual firing mode if its enabled
+        if self.manual_aiming:
+            self.next_state("manual_aiming")
+
         # collect data only once per loop
         if not self.target_estimator.is_ready():
             self.time_target_lost = time.monotonic()
@@ -158,6 +168,16 @@ class ShooterController(StateMachine):
         Called by robot.py to indicate the fire button has been pressed
         """
         self.fire_command = True
+
+    def toggle_manual(self) -> None:
+        """
+        Toggles manual aiming of the turret
+        """
+        self.manual_aiming = not self.manual_aiming
+
+    @state
+    def manual_aiming(self):
+        
 
     @feedback
     def ready_to_fire(self) -> bool:
