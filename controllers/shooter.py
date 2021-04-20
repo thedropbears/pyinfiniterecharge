@@ -161,7 +161,10 @@ class ShooterController(StateMachine):
             self.shooter.fire()
             self.fired_count += 1
         elif not self.shooter.is_firing():
-            self.next_state("tracking")
+            if self.in_manual_aiming():
+                self.next_state("manual_aiming")
+            else:
+                self.next_state("tracking")
 
     def fire_input(self) -> None:
         """
@@ -177,15 +180,44 @@ class ShooterController(StateMachine):
 
     @state
     def manual_aiming(self):
-        
+        """
+        Handles settings fly wheel speed and firing when in manual aiming mode
+        """
+        target_data = self.target_estimator.get_data()
+
+        # when manually aiming, continuesly set the range based on the lidar
+        if self.turret.is_ready():
+            self.shooter.set_range(target_data.distance)
+
+        if self.ball_ready_to_fire() and self.fire_command:
+            self.next_state("firing")
+
+    def manual_slew(self, angle):
+        """
+        Called by robot.py to manualy control the azimuth of the turret
+        Slews relative to the current position
+        """
+        if self.in_manual_aiming(self):
+            self.turret.slew(angle)
+        else:
+            print("tried to manual slew in automatic mode")
+
+    @feedback
+    def in_manual_aiming(self) -> bool:
+        return self.manual_aiming
 
     @feedback
     def ready_to_fire(self) -> bool:
         return (
-            self.shooter.is_ready()
+            self.ball_ready_to_fire()
             and self.aimed_at_target()
-            and self.indexer.is_ready()
             and self.target_estimator.is_ready()
+        )
+
+    def ball_ready_to_fire(self) -> bool:
+        return (
+            self.shooter.is_ready()
+            and self.indexer.is_ready()
             and self.turret.is_ready()
         )
 

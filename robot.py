@@ -44,6 +44,8 @@ class MyRobot(magicbot.MagicRobot):
     turret: Turret
     led_screen: LEDScreen
 
+    MANUAL_SLEW_SPEED = 0.5/50 # in radians per loop
+
     def createObjects(self):
         """Robot initialization function"""
         self.logger.info("pyinfiniterecharge %s", GIT_COMMIT)
@@ -170,6 +172,11 @@ class MyRobot(magicbot.MagicRobot):
         # Toggles between manual and automatic turret aiming
         if joystick.getRawButtonPressed(9):
             self.shooter_controller.toggle_manual()
+
+        if self.driver_joystick.getRawButton(5):
+            self.shooter_controller.manual_slew(self.MANUAL_SLEW_SPEED)
+        elif self.driver_joystick.getRawButton(6):
+            self.shooter_controller.manual_slew(-self.MANUAL_SLEW_SPEED)
 
 
     def handle_hang_inputs(
