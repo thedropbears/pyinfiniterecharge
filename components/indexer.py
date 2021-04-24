@@ -138,7 +138,6 @@ class Indexer:
                 second_has_ball = True  # Pretend the ball is still in the feeder
             first.overrideLimitSwitchesEnable(second_has_ball)
 
-
         self.intake_arm_piston.set(self.intake_lowered)
 
         if self.intake_clearing:
