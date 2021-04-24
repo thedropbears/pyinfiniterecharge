@@ -176,9 +176,6 @@ class MyRobot(magicbot.MagicRobot):
                 gamepad.getX(GenericHID.Hand.kLeftHand) * self.MANUAL_SLEW_SPEED
             )
 
-        else:
-            self.shooter_controller.manual_turret = False
-
     def handle_hang_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
     ) -> None:
