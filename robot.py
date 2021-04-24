@@ -170,13 +170,17 @@ class MyRobot(magicbot.MagicRobot):
             self.turret.toggle()
 
         # Toggles between manual and automatic turret aiming
-        if joystick.getRawButtonPressed(9):
-            self.shooter_controller.toggle_manual()
+        if gamepad.getXButton():
+            self.shooter_controller.manual_turret()
 
-        if self.driver_joystick.getRawButton(5):
-            self.shooter_controller.manual_slew(self.MANUAL_SLEW_SPEED)
-        elif self.driver_joystick.getRawButton(6):
-            self.shooter_controller.manual_slew(-self.MANUAL_SLEW_SPEED)
+            if self.driver_joystick.getRawButton(5):
+                self.shooter_controller.manual_slew(self.MANUAL_SLEW_SPEED)
+            elif self.driver_joystick.getRawButton(6):
+                self.shooter_controller.manual_slew(-self.MANUAL_SLEW_SPEED)
+
+        else:
+            self.shooter_controller.manual_turret = False
+
 
     def handle_hang_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController

@@ -28,6 +28,7 @@ class ShooterController(StateMachine):
     range_finder: RangeFinder
 
     fire_command = will_reset_to(False)
+    manual_aiming = will_reset_to(False)
 
     MAX_MISALIGNMENT = 0.2  # m from centre of target
 
@@ -44,7 +45,6 @@ class ShooterController(StateMachine):
         self.time_target_lost: Optional[float] = None
         self.disabled_flash: int = 0
         self.fired_count: int = 0
-        self.manual_aiming = False
 
     def execute(self) -> None:
         super().execute()
@@ -172,11 +172,11 @@ class ShooterController(StateMachine):
         """
         self.fire_command = True
 
-    def toggle_manual(self) -> None:
+    def manual_turret(self) -> None:
         """
         Toggles manual aiming of the turret
         """
-        self.manual_aiming = not self.manual_aiming
+        self.manual_aiming = True
 
     @state
     def manual_aiming(self):
