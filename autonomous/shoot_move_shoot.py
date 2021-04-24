@@ -42,6 +42,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
         )
         self.gen = trajectory.TrajectoryGenerator()
         self.trajectory_num = 0
+        self.balls_to_fire = 3
 
     def setup(self):
         self.trajectory_config.setKinematics(self.chassis.kinematics)
@@ -110,6 +111,7 @@ class ShootMoveShootBase(AutonomousStateMachine):
             print(f"Calculated path time: {self.path.totalTime()}")
             self.chassis.drive(0, 0)
             self.next_state("shoot")
+            self.balls_to_fire += self.expected_balls[self.trajectory_num]
             self.trajectory_num += 1
             return
         pos = self.chassis.get_pose()
@@ -130,16 +132,12 @@ class ShootMoveShootBase(AutonomousStateMachine):
             return False
 
     def has_fired_balls(self) -> bool:
-        balls_to_fire = self.expected_balls[self.trajectory_num - 1]
-        if self.trajectory_num == 0:
-            balls_to_fire = 3
         # print(f"Expecting to fire {balls_to_fire} balls")
-        return self.shooter_controller.fired_count >= balls_to_fire
+        return self.shooter_controller.fired_count >= self.balls_to_fire
 
 
 class test(ShootMoveShootBase):
     MODE_NAME = "Test"
-    DEFAULT = True
 
     def setup(self):
         self.start_poses = [to_pose(0, 0, math.pi)]
@@ -154,8 +152,25 @@ class test(ShootMoveShootBase):
         super().setup()
 
 
-class _3Right3(ShootMoveShootBase):
-    MODE_NAME = "3RIGHT3"
+class DefaultAuto(ShootMoveShootBase):
+    MODE_NAME = "DefaultAuto"
+    DEFAULT = True
+
+    def setup(self):
+        self.start_poses = [to_pose(-3.459, -1.7, math.pi)]
+        self.end_poses = [to_pose(-5.459, -1.7, math.pi)]
+        self.waypoints = [[]]
+        self.expected_balls = [0]
+        self.reversed = [False]
+        self.trajectory_config = trajectory.TrajectoryConfig(
+            maxVelocity=2.5, maxAcceleration=1
+        )
+        self.trajectory_max = 1
+        super().setup()
+
+
+class Pickup3(ShootMoveShootBase):
+    MODE_NAME = "Pickup3"
 
     def setup(self):
         self.start_poses = [to_pose(-3.459, -1.7, math.pi)]
@@ -172,66 +187,66 @@ class _3Right3(ShootMoveShootBase):
         super().setup()
 
 
-class _3Right23(ShootMoveShootBase):
-    MODE_NAME = "3RIGHT23"
+# class _3Right23(ShootMoveShootBase):
+#     MODE_NAME = "3RIGHT23"
 
-    def setup(self):
-        # TODO add correct headings
-        # empty waypoints are used for trajectories with only two points
-        self.start_poses = [
-            to_pose(-3.459, -1.7, math.pi),
-            to_pose(-6.165, 0.582, 0),
-            to_pose(-4.698, 2.359, 0),
-        ]
-        self.end_poses = [
-            to_pose(-6.179, 2.981, 0),
-            to_pose(-4.698, 2.359, 0),
-            to_pose(-8.163, 0.705, 0),
-        ]
-        self.waypoints = [
-            [
-                geometry.Translation2d(-4.971, 1.154),
-                geometry.Translation2d(-5.616, 1.978),
-            ],
-            [],
-            [geometry.Translation2d(-5.668, 0.988)],
-        ]
-        self.trajectory_config = trajectory.TrajectoryConfig(
-            maxVelocity=1.5, maxAcceleration=1
-        )
-        self.expected_balls = [5, 0, 3]
-        self.reversed = [False, True, False]
-        self.trajectory_max = 3
-        super().setup()
+#     def setup(self):
+#         # TODO add correct headings
+#         # empty waypoints are used for trajectories with only two points
+#         self.start_poses = [
+#             to_pose(-3.459, -1.7, math.pi),
+#             to_pose(-6.165, 0.582, 0),
+#             to_pose(-4.698, 2.359, 0),
+#         ]
+#         self.end_poses = [
+#             to_pose(-6.179, 2.981, 0),
+#             to_pose(-4.698, 2.359, 0),
+#             to_pose(-8.163, 0.705, 0),
+#         ]
+#         self.waypoints = [
+#             [
+#                 geometry.Translation2d(-4.971, 1.154),
+#                 geometry.Translation2d(-5.616, 1.978),
+#             ],
+#             [],
+#             [geometry.Translation2d(-5.668, 0.988)],
+#         ]
+#         self.trajectory_config = trajectory.TrajectoryConfig(
+#             maxVelocity=1.5, maxAcceleration=1
+#         )
+#         self.expected_balls = [5, 0, 3]
+#         self.reversed = [False, True, False]
+#         self.trajectory_max = 3
+#         super().setup()
 
 
-class _3Right32(ShootMoveShootBase):
-    MODE_NAME = "3RIGHT32"
+# class _3Right32(ShootMoveShootBase):
+#     MODE_NAME = "3RIGHT32"
 
-    def setup(self):
-        # empty waypoints are used for trajectories with only two points
-        self.start_poses = [
-            to_pose(-3.459, -1.7, math.pi),
-            to_pose(-8.163, -1.7, math.pi),
-            to_pose(-4.168, -1.7, math.pi),
-        ]
-        self.end_poses = [
-            to_pose(-8.163, -1.7, math.pi),
-            to_pose(-4.168, -1.7, math.pi),
-            to_pose(-6.062 - 1, 0.248, -1.178),
-        ]
-        self.waypoints = [
-            [
-                geometry.Translation2d(-7.077, -1.7),
-                geometry.Translation2d(-7.992, -1.7),
-            ],
-            [],
-            [],
-        ]
-        self.expected_balls = [3, 0, 2]
-        self.reversed = [False, True, False]
-        self.trajectory_config = trajectory.TrajectoryConfig(
-            maxVelocity=2.5, maxAcceleration=1
-        )
-        self.trajectory_max = 3
-        super().setup()
+#     def setup(self):
+#         # empty waypoints are used for trajectories with only two points
+#         self.start_poses = [
+#             to_pose(-3.459, -1.7, math.pi),
+#             to_pose(-8.163, -1.7, math.pi),
+#             to_pose(-4.168, -1.7, math.pi),
+#         ]
+#         self.end_poses = [
+#             to_pose(-8.163, -1.7, math.pi),
+#             to_pose(-4.168, -1.7, math.pi),
+#             to_pose(-6.062 - 1, 0.248, -1.178),
+#         ]
+#         self.waypoints = [
+#             [
+#                 geometry.Translation2d(-7.077, -1.7),
+#                 geometry.Translation2d(-7.992, -1.7),
+#             ],
+#             [],
+#             [],
+#         ]
+#         self.expected_balls = [3, 0, 2]
+#         self.reversed = [False, True, False]
+#         self.trajectory_config = trajectory.TrajectoryConfig(
+#             maxVelocity=2.5, maxAcceleration=1
+#         )
+#         self.trajectory_max = 3
+#         super().setup()
