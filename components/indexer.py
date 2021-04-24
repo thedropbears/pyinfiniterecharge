@@ -16,7 +16,7 @@ class Indexer:
     intake_left_motor: wpilib.interfaces.SpeedController
     intake_right_motor: wpilib.interfaces.SpeedController
 
-    indexer_speed = tunable(0.6)
+    indexer_speed = tunable(0.8)
     injector_speed = tunable(0.7)
     intake_motor_speed = tunable(1.0)
     shimmy_speed = tunable(1.0)
