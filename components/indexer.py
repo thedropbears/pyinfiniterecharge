@@ -79,12 +79,6 @@ class Indexer:
             self.intake_right_motor.set(0)
             return
 
-        if self.intake_clearing:
-            self.intake_main_motor.set(-self.intake_motor_speed / 2)
-            self.intake_left_motor.set(-self.shimmy_speed / 2)
-            self.intake_right_motor.set(-self.shimmy_speed / 2)
-            return
-
         injector = self.injector_motor
         feeder = self.indexer_motors[-1]
         intake_main_motor = self.intake_main_motor
@@ -144,6 +138,15 @@ class Indexer:
                 second_has_ball = True  # Pretend the ball is still in the feeder
             first.overrideLimitSwitchesEnable(second_has_ball)
 
+
+        self.intake_arm_piston.set(self.intake_lowered)
+
+        if self.intake_clearing:
+            self.intake_main_motor.set(-self.intake_motor_speed / 2)
+            self.intake_left_motor.set(-self.shimmy_speed / 2)
+            self.intake_right_motor.set(-self.shimmy_speed / 2)
+            return
+
         if self.intaking and not intake_main_motor.isFwdLimitSwitchClosed():
             if self.shimmying:
                 if self.left_shimmy:
@@ -166,8 +169,6 @@ class Indexer:
         else:  # nothing to intake
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
-
-        self.intake_arm_piston.set(self.intake_lowered)
 
     def enable_intaking(self) -> None:
         self.intaking = True
