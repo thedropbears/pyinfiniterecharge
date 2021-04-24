@@ -15,9 +15,9 @@ class Shooter:
 
     indexer: Indexer
 
-    ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10)  # TODO add more data points
-    centre_lookup = (28, 30, 42, 48, 55, 64, 68, 70, 82)
-    outer_lookup = (65, 53, 40, 36, 28, 22, 20, 20, 19)
+    ranges = (2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)  # TODO add more data points
+    centre_lookup = (28, 30, 42, 48, 55, 64, 68, 70, 75, 80, 87, 95)
+    outer_lookup = (65, 53, 40, 36, 28, 22, 20, 20, 19, 18, 18, 17)
 
     outer_target = tunable(0)
     centre_target = tunable(0)
@@ -39,16 +39,16 @@ class Shooter:
         self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
         self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 0.104)
+        self.outer_motor.config_kP(0, 0.300)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
         self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.505, kV=0.107)
-        self.centre_motor.config_kP(0, 0.109)
+        self.centre_motor.config_kP(0, 0.250)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
-        self.centre_ff_calculator = SimpleMotorFeedforward(kS=0.51, kV=0.107)
+        self.centre_ff_calculator = SimpleMotorFeedforward(kS=0.5172, kV=0.107)
 
     def on_disable(self) -> None:
         self.inject = False
