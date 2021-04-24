@@ -44,7 +44,7 @@ class MyRobot(magicbot.MagicRobot):
     turret: Turret
     led_screen: LEDScreen
 
-    MANUAL_SLEW_SPEED = 0.5 / 50  # in radians per tick
+    MANUAL_SLEW_SPEED = 2 / 50  # in radians per tick
 
     def createObjects(self):
         """Robot initialization function"""
@@ -172,9 +172,11 @@ class MyRobot(magicbot.MagicRobot):
         # Toggles between manual and automatic turret aiming
         if gamepad.getXButton():
             self.shooter_controller.is_manual_aiming = True
-            self.shooter_controller.manual_slew(
-                gamepad.getX(GenericHID.Hand.kLeftHand) * self.MANUAL_SLEW_SPEED
+            slew_amount = (
+                rescale_js(gamepad.getX(GenericHID.Hand.kLeftHand), 0.1)
+                * -self.MANUAL_SLEW_SPEED
             )
+            self.shooter_controller.manual_slew(slew_amount)
         else:
             self.shooter_controller.is_manual_aiming = False
 
