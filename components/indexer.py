@@ -112,7 +112,7 @@ class Indexer:
                     break
 
         # Turn on all motors and let the limit switches stop it
-        if first_ball <= 0:
+        if first_ball <= 0 and not self.intake_clearing:
             intake_main_motor.set(self.intake_motor_speed)
         else:
             intake_main_motor.set(0)
