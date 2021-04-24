@@ -105,10 +105,19 @@ class Shooter:
         """
         if self.centre_target <= 0 or self.outer_target <= 0:
             return False
+        return self.is_centre_at_speed() and self.is_outer_at_speed()
+
+    @feedback
+    def is_centre_at_speed(self) -> bool:
         return (
             abs(self.centre_target - self.get_centre_velocity())
             <= self.centre_target * self.velocity_tolerance
-            and abs(self.outer_target - self.get_outer_velocity())
+        )
+
+    @feedback
+    def is_outer_at_speed(self) -> bool:
+        return (
+            abs(self.outer_target - self.get_outer_velocity())
             <= self.outer_target * self.velocity_tolerance
         )
 
