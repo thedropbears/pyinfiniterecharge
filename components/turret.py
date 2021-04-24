@@ -124,6 +124,7 @@ class Turret:
     def __init__(self):
         self.disabled = False
         self.disable_when_done = False
+        self.parked = False
 
     def on_enable(self) -> None:
         self.must_finish = False
@@ -148,9 +149,12 @@ class Turret:
                 self._enable_index_interrupts()
 
     def execute(self) -> None:
-        if self.disable_when_done and self.self._motor_is_finished():
+        if self.disable_when_done and self._motor_is_finished():
             self.disabled = True
             self.disable_when_done = False
+            self.motor.stopMotor()
+            self.parked = True
+            return
         if self.disabled:
             self.motor.stopMotor()
             return
@@ -175,7 +179,7 @@ class Turret:
             return
         self.current_state = self.SLEWING
         turret_angle = _robot_to_turret(angle)
-        self.motor._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
+        self._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
@@ -220,7 +224,7 @@ class Turret:
         return self.current_state != self.SCANNING and self._motor_is_finished()
 
     def is_parked(self) -> bool:
-        return self.disabled and self._motor_is_finished()
+        return self.parked
 
     def azimuth_at_time(self, t: float) -> float:
         """Get the stored azimuth (in radians) of the turret at a specified
@@ -248,7 +252,7 @@ class Turret:
 
     def park_and_disable(self) -> None:
         self.disable_when_done = True
-        self._slew_to_counts(self.INDEX_POSITIONS[Index.LEFT])
+        self.slew_to_azimuth(0)
 
     #### Internal methods from here on
 
