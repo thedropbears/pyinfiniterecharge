@@ -123,6 +123,7 @@ class Turret:
 
     def __init__(self):
         self.disabled = False
+        self.disable_when_done = False
 
     def on_enable(self) -> None:
         self.must_finish = False
@@ -147,6 +148,9 @@ class Turret:
                 self._enable_index_interrupts()
 
     def execute(self) -> None:
+        if self.disable_when_done and self.self._motor_is_finished():
+            self.disabled = True
+            self.disable_when_done = False
         if self.disabled:
             self.motor.stopMotor()
             return
@@ -243,7 +247,7 @@ class Turret:
         return self._sensor_to_robot(self.motor.getSelectedSensorPosition())
 
     def park_and_disable(self) -> None:
-        self.disabled = True
+        self.disable_when_done = True
         self._slew_to_counts(self.INDEX_POSITIONS[Index.LEFT])
 
     #### Internal methods from here on
