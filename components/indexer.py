@@ -28,6 +28,7 @@ class Indexer:
 
     def __init__(self):
         self.clearing = False
+        self.intake_clearing = False
 
     def setup(self):
         # All the motors that comprise indexer cells, in order from intake
@@ -111,7 +112,7 @@ class Indexer:
                     break
 
         # Turn on all motors and let the limit switches stop it
-        if first_ball <= 0:
+        if first_ball <= 0 and not self.intake_clearing:
             intake_main_motor.set(self.intake_motor_speed)
         else:
             intake_main_motor.set(0)
@@ -137,6 +138,14 @@ class Indexer:
                 second_has_ball = True  # Pretend the ball is still in the feeder
             first.overrideLimitSwitchesEnable(second_has_ball)
 
+        self.intake_arm_piston.set(self.intake_lowered)
+
+        if self.intake_clearing:
+            self.intake_main_motor.set(-self.intake_motor_speed / 2)
+            self.intake_left_motor.set(-self.shimmy_speed / 2)
+            self.intake_right_motor.set(-self.shimmy_speed / 2)
+            return
+
         if self.intaking and not intake_main_motor.isFwdLimitSwitchClosed():
             if self.shimmying:
                 if self.left_shimmy:
@@ -159,8 +168,6 @@ class Indexer:
         else:  # nothing to intake
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
-
-        self.intake_arm_piston.set(self.intake_lowered)
 
     def enable_intaking(self) -> None:
         self.intaking = True
