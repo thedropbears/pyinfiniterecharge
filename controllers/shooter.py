@@ -178,7 +178,7 @@ class ShooterController(StateMachine):
         """
         Handles settings fly wheel speed and firing when in manual aiming mode
         """
-        target_data = self.target_estimator.get_data()
+        target_data = self.target_estimator.get_lidar_distance()
 
         # when manually aiming, continuesly set the range based on the lidar
         if self.turret.is_ready():

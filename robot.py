@@ -169,7 +169,7 @@ class MyRobot(magicbot.MagicRobot):
             self.shooter.toggle()
             self.turret.toggle()
 
-        # Toggles between manual and automatic turret aiming
+        # Hold to stay in manual aiming mode
         if gamepad.getXButton():
             self.shooter_controller.is_manual_aiming = True
             slew_amount = (
