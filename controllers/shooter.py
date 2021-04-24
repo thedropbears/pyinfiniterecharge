@@ -28,7 +28,7 @@ class ShooterController(StateMachine):
     range_finder: RangeFinder
 
     fire_command = will_reset_to(False)
-    manual_aiming = will_reset_to(False)
+    is_manual_aiming = False
 
     MAX_MISALIGNMENT = 0.2  # m from centre of target
 
@@ -99,8 +99,8 @@ class ShooterController(StateMachine):
         The vision system does not have a target, we try to find one using odometry
         """
 
-        if self.manual_aiming:
-            self.next_state("manual_aiming")
+        if self.is_manual_aiming:
+            self.next_state_now("manual_aiming")
 
         if self.target_estimator.is_ready():
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
@@ -135,7 +135,8 @@ class ShooterController(StateMachine):
 
         # swap to manual firing mode if its enabled
         if self.manual_aiming:
-            self.next_state("manual_aiming")
+            self.next_state_now("manual_aiming")
+            print("runs rest of tracking")
 
         # collect data only once per loop
         if not self.target_estimator.is_ready():
@@ -172,12 +173,6 @@ class ShooterController(StateMachine):
         """
         self.fire_command = True
 
-    def manual_turret(self) -> None:
-        """
-        Toggles manual aiming of the turret
-        """
-        self.manual_aiming = True
-
     @state
     def manual_aiming(self):
         """
@@ -197,14 +192,14 @@ class ShooterController(StateMachine):
         Called by robot.py to manualy control the azimuth of the turret
         Slews relative to the current position
         """
-        if self.in_manual_aiming(self):
+        if self.in_manual_aiming():
             self.turret.slew(angle)
         else:
             print("tried to manual slew in automatic mode")
 
     @feedback
     def in_manual_aiming(self) -> bool:
-        return self.manual_aiming
+        return self.is_manual_aiming
 
     @feedback
     def ready_to_fire(self) -> bool:
