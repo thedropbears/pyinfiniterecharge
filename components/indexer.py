@@ -28,6 +28,7 @@ class Indexer:
 
     def __init__(self):
         self.clearing = False
+        self.intake_clearing = False
 
     def setup(self):
         # All the motors that comprise indexer cells, in order from intake
@@ -76,6 +77,12 @@ class Indexer:
             self.intake_main_motor.set(-self.intake_motor_speed)
             self.intake_left_motor.set(0)
             self.intake_right_motor.set(0)
+            return
+
+        if self.intake_clearing:
+            self.intake_main_motor.set(-self.intake_motor_speed / 2)
+            self.intake_left_motor.set(-self.shimmy_speed / 2)
+            self.intake_right_motor.set(-self.shimmy_speed / 2)
             return
 
         injector = self.injector_motor

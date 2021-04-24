@@ -139,6 +139,12 @@ class MyRobot(magicbot.MagicRobot):
             # Normal operation
             self.indexer.clearing = False
 
+        if gamepad.getBButton():
+            # Reverse only intake to clear an intake jam without losing other balls
+            self.indexer.intake_clearing = True
+        else:
+            self.indexer.intake_clearing = False
+
     def handle_chassis_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
     ) -> None:
