@@ -232,7 +232,7 @@ class Turret:
         time. Returns the oldest data if the requested time is not in history
         @param t: time that we want data for
         """
-        current_time = time.monotonic()
+        current_time = time.time()
         control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
         if control_loops_ago >= len(self.azimuth_history):
             return (
