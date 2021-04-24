@@ -23,17 +23,15 @@ class KrakenController(StateMachine):
     @state(first=True, must_finish=True)
     def disable_shooter(self) -> None:
         self.shooter.disabled = True
-        self.next_state("clear_turret")
+        self.next_state("prepare")
 
     @state(must_finish=True)
-    def clear_turret(self) -> None:
-        self.turret.park_and_disable()
-        if self.turret.is_parked():
-            self.next_state("lower_intake")
-
-    @timed_state(must_finish=True, duration=1, next_state="release_the_kraken")
-    def lower_intake(self) -> None:
-        self.indexer.lower_intake()
+    def prepare(self, state_tm, initial_call) -> None:
+        if initial_call:
+            self.turret.park_and_disable()
+            self.indexer.lower_intake()
+        if self.turret.is_parked() and state_tm > 1:
+            self.next_state("release_the_kraken")
 
     @state(must_finish=True)
     def release_the_kraken(self) -> None:
