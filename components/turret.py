@@ -146,6 +146,9 @@ class Turret:
                 self.index_hit = Index.NO_INDEX
                 self._enable_index_interrupts()
 
+    def on_disable(self) -> None:
+        self.motor.stopMotor()
+
     def execute(self) -> None:
         if self.disabled:
             self.motor.stopMotor()
