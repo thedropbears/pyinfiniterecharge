@@ -1,4 +1,3 @@
-from numpy.core.numeric import outer
 import wpilib
 from wpimath.controller import SimpleMotorFeedforward
 import ctre
