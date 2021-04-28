@@ -68,8 +68,6 @@ class ShootMoveShootBase(AutonomousStateMachine):
 
     def on_enable(self) -> None:
         self.chassis.reset_odometry(self.start_poses[0])
-        self.indexer.lower_intake()
-        self.indexer.enable_intaking()
         self.trajectory_num = 0
         # self.has_zeroed = True
         super().on_enable()
@@ -83,12 +81,16 @@ class ShootMoveShootBase(AutonomousStateMachine):
             if self.trajectory_num == 0:
                 self.shooter.set_range(3)
             self.shooter_controller.fired_count = 0
+            self.indexer.raise_intake()
+            self.indexer.disable_intaking()
         self.shooter_controller.engage()
         self.shooter_controller.fire_input()
         if self.has_fired_balls():
             if self.trajectory_num >= len(self.paths):
                 self.done()
             else:
+                self.indexer.lower_intake()
+                self.indexer.enable_intaking()
                 self.next_state("move")
 
     @state
