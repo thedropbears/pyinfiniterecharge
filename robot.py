@@ -158,7 +158,7 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis.drive(vx, vz)
         if joystick.getRawButtonPressed(3):
             self.chassis.reset_odometry(
-                Pose2d(-3, 0, Rotation2d(math.pi))
+                geometry.Pose2d(-3, 0, geometry.Rotation2d(math.pi))
             )  # the starting position on the field
             self.target_estimator.reset()
 
