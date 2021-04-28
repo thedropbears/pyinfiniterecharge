@@ -97,6 +97,10 @@ class MyRobot(magicbot.MagicRobot):
         self.indexer.shimmying = False
         self.indexer.auto_retract = False
 
+    def disabledInit(self) -> None:
+        self.chassis.drive(0, 0)
+        super().disabledInit()
+
     def disabledPeriodic(self) -> None:
         self.vision.execute()
 
