@@ -1,3 +1,4 @@
+from numpy.core.numeric import outer
 import wpilib
 from wpimath.controller import SimpleMotorFeedforward
 import ctre
@@ -36,8 +37,10 @@ class Shooter:
         self.outer_motor.setInverted(True)
         self.centre_motor.setInverted(False)
 
-        self.outer_motor.setNeutralMode(ctre.NeutralMode.Coast)
-        self.centre_motor.setNeutralMode(ctre.NeutralMode.Coast)
+        for motor in self.outer_motor, self.centre_motor:
+            motor.configVelocityMeasurementPeriod(1)
+            motor.configVelocityMeasurementWindow(1)
+            motor.setNeutralMode(ctre.NeutralMode.Coast)
 
         self.outer_motor.config_kP(0, 0.300)
         self.outer_motor.config_kI(0, 0)
