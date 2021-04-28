@@ -41,16 +41,16 @@ class Shooter:
             motor.configVelocityMeasurementWindow(1)
             motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 0.300)
+        self.outer_motor.config_kP(0, 1.3554)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
-        self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.505, kV=0.107)
-        self.centre_motor.config_kP(0, 0.250)
+        self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.39069, kV=0.10715)
+        self.centre_motor.config_kP(0, 1.4417)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
-        self.centre_ff_calculator = SimpleMotorFeedforward(kS=0.5172, kV=0.107)
+        self.centre_ff_calculator = SimpleMotorFeedforward(kS=0.41315, kV=0.1069)
 
     def on_disable(self) -> None:
         self.inject = False
