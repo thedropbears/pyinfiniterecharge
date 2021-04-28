@@ -152,9 +152,7 @@ class Turret:
         if self.disable_when_done and self._motor_is_finished():
             self.disabled = True
             self.disable_when_done = False
-            self.motor.stopMotor()
             self.parked = True
-            return
         if self.disabled:
             self.motor.stopMotor()
             return
