@@ -56,6 +56,7 @@ class Indexer:
         # stage of the indexer and the injector is longer than others
         # and the injector motors are slower
         self.transfer_to_injector = False
+        self.transfer_to_feeder = False
         self.left_shimmy = True
 
         self.shimmy_count = 0
@@ -101,6 +102,10 @@ class Indexer:
         elif feeder.isFwdLimitSwitchClosed():
             # Transferring
             self.transfer_to_injector = True
+        if feeder.isFwdLimitSwitchClosed():
+            self.transfer_to_feeder = False
+        elif self.indexer_motors[-2].isFwdLimitSwitchClosed():
+            self.transfer_to_feeder = True
 
         # Find the location of the closest ball to the intake,
         # counting from the intake (0).  Only run the motors from
@@ -193,6 +198,7 @@ class Indexer:
         balls = (
             sum(motor.isFwdLimitSwitchClosed() for motor in self.all_motors)
             + self.transfer_to_injector
+            + self.transfer_to_feeder
         )
         return balls
 
