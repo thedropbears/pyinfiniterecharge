@@ -157,8 +157,7 @@ class MyRobot(magicbot.MagicRobot):
         vz = 3 * throttle * rescale_js(-joystick.getTwist(), 0.1)
         self.chassis.drive(vx, vz)
         if joystick.getRawButtonPressed(3):
-            # TODO reset heading
-            pass
+            self.chassis.reset_heading()
 
     def handle_shooter_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController

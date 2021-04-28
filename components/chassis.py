@@ -150,6 +150,9 @@ class Chassis:
         """Get the current heading of the robot from the IMU, anticlockwise positive."""
         return self.imu.getRotation2d()
 
+    def reset_heading(self) -> None:
+        self.imu.reset()
+
     def get_pose(self) -> Pose2d:
         """Get the current position of the robot on the field."""
         return self.odometry.getPose()
