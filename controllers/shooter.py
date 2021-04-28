@@ -28,7 +28,7 @@ class ShooterController(StateMachine):
     range_finder: RangeFinder
 
     fire_command = will_reset_to(False)
-    is_manual_aiming = False
+    is_manual_aiming = will_reset_to(False)
 
     MAX_MISALIGNMENT = 0.2  # m from centre of target
 
@@ -74,13 +74,16 @@ class ShooterController(StateMachine):
         else:
             self.led_screen.set_middle_row(255, 0, 0)
 
-        if self.target_estimator.is_ready():
-            if self.aimed_at_target():
-                self.led_screen.set_top_row(0, 255, 0)
+
+            if self.target_estimator.is_ready():
+                if self.aimed_at_target():
+                    self.led_screen.set_top_row(0, 255, 0)
+                else:
+                    self.led_screen.set_top_row(255, 128, 0)
+            elif self.is_manual_aiming:
+                self.led_screen.set_top_row(0, 0, 255)
             else:
-                self.led_screen.set_top_row(255, 128, 0)
-        else:
-            self.led_screen.set_top_row(255, 0, 0)
+                self.led_screen.set_top_row(255, 0, 0)
 
     @state(first=True)
     def startup(self, initial_call) -> None:

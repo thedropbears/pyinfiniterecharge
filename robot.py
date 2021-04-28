@@ -44,7 +44,7 @@ class MyRobot(magicbot.MagicRobot):
     turret: Turret
     led_screen: LEDScreen
 
-    MANUAL_SLEW_SPEED = 2 / 50  # in radians per tick
+    MANUAL_SLEW_SPEED = 5 / 50  # in radians per tick
 
     def createObjects(self):
         """Robot initialization function"""
@@ -177,8 +177,6 @@ class MyRobot(magicbot.MagicRobot):
                 * -self.MANUAL_SLEW_SPEED
             )
             self.shooter_controller.manual_slew(slew_amount)
-        else:
-            self.shooter_controller.is_manual_aiming = False
 
     def handle_hang_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
