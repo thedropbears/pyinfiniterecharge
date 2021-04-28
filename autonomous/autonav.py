@@ -1,7 +1,7 @@
 import math
 from typing import List
 
-from wpilib.geometry import Pose2d, Translation2d
+from wpimath.geometry import Pose2d, Translation2d
 from magicbot import AutonomousStateMachine, state
 
 from components.chassis import Chassis
@@ -15,7 +15,7 @@ class AutoNavBase(AutonomousStateMachine):
     def __init__(self) -> None:
         super().__init__()
         self.path_num = 0
-        self.paths: List(Path)
+        self.paths: List[Path]
 
     def setup(self) -> None:
         self.path_follow: PathFollow = PathFollow(self.chassis)

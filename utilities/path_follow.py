@@ -1,10 +1,10 @@
 from typing import List
 
 from wpilib import controller
-from wpilib import trajectory
+from wpimath import trajectory
 from wpilib import Timer
-from wpilib.trajectory import constraint
-from wpilib.geometry import Pose2d, Translation2d
+from wpimath.trajectory import constraint
+from wpimath.geometry import Pose2d, Translation2d
 
 from components.chassis import Chassis
 
