@@ -28,6 +28,7 @@ class ShooterController(StateMachine):
     range_finder: RangeFinder
 
     fire_command = will_reset_to(False)
+    is_manual_aiming = will_reset_to(False)
 
     MAX_MISALIGNMENT = 0.2  # m from centre of target
 
@@ -73,13 +74,15 @@ class ShooterController(StateMachine):
         else:
             self.led_screen.set_middle_row(255, 0, 0)
 
-        if self.target_estimator.is_ready():
-            if self.aimed_at_target():
-                self.led_screen.set_top_row(0, 255, 0)
+            if self.target_estimator.is_ready():
+                if self.aimed_at_target():
+                    self.led_screen.set_top_row(0, 255, 0)
+                else:
+                    self.led_screen.set_top_row(255, 128, 0)
+            elif self.is_manual_aiming:
+                self.led_screen.set_top_row(0, 0, 255)
             else:
-                self.led_screen.set_top_row(255, 128, 0)
-        else:
-            self.led_screen.set_top_row(255, 0, 0)
+                self.led_screen.set_top_row(255, 0, 0)
 
     @state(first=True)
     def startup(self, initial_call) -> None:
@@ -97,6 +100,10 @@ class ShooterController(StateMachine):
         """
         The vision system does not have a target, we try to find one using odometry
         """
+
+        if self.is_manual_aiming:
+            self.next_state_now("manual_aiming")
+
         if self.target_estimator.is_ready():
             # print(f"searching -> tracking {self.vision.get_vision_data()}")
             self.time_target_lost = None
@@ -127,6 +134,12 @@ class ShooterController(StateMachine):
         """
         Aiming towards a vision target and spinning up flywheels
         """
+
+        # swap to manual firing mode if its enabled
+        if self.is_manual_aiming:
+            self.next_state_now("manual_aiming")
+            return
+
         # collect data only once per loop
         if not self.target_estimator.is_ready():
             self.time_target_lost = time.monotonic()
@@ -151,7 +164,10 @@ class ShooterController(StateMachine):
             self.shooter.fire()
             self.fired_count += 1
         elif not self.shooter.is_firing():
-            self.next_state("tracking")
+            if self.is_manual_aiming:
+                self.next_state("manual_aiming")
+            else:
+                self.next_state("tracking")
 
     def fire_input(self) -> None:
         """
@@ -159,13 +175,49 @@ class ShooterController(StateMachine):
         """
         self.fire_command = True
 
+    @state
+    def manual_aiming(self):
+        """
+        Handles settings fly wheel speed and firing when in manual aiming mode
+        """
+        if not self.is_manual_aiming:
+            self.next_state("tracking")
+            return
+        target_data = self.target_estimator.get_lidar_distance()
+
+        # when manually aiming, continuesly set the range based on the lidar
+        if self.turret.is_ready():
+            self.shooter.set_range(target_data)
+
+        if self.ball_ready_to_fire() and self.fire_command:
+            self.next_state("firing")
+
+    def manual_slew(self, angle):
+        """
+        Called by robot.py to manualy control the azimuth of the turret
+        Slews relative to the current position
+        """
+        if self.is_manual_aiming:
+            self.turret.slew(angle)
+        else:
+            print("tried to manual slew in automatic mode")
+
+    @feedback
+    def in_manual_aiming(self) -> bool:
+        return self.is_manual_aiming
+
     @feedback
     def ready_to_fire(self) -> bool:
         return (
-            self.shooter.is_ready()
+            self.ball_ready_to_fire()
             and self.aimed_at_target()
-            and self.indexer.is_ready()
             and self.target_estimator.is_ready()
+        )
+
+    def ball_ready_to_fire(self) -> bool:
+        return (
+            self.shooter.is_ready()
+            and self.indexer.is_ready()
             and self.turret.is_ready()
         )
 

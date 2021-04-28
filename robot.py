@@ -46,6 +46,8 @@ class MyRobot(magicbot.MagicRobot):
     turret: Turret
     led_screen: LEDScreen
 
+    MANUAL_SLEW_SPEED = 5 / 50  # in radians per tick
+
     def createObjects(self):
         """Robot initialization function"""
         self.logger.info("pyinfiniterecharge %s", GIT_COMMIT)
@@ -168,6 +170,15 @@ class MyRobot(magicbot.MagicRobot):
             # Make this toggle to allow re-enabling turret in case it was accidentally disabled
             self.shooter.toggle()
             self.turret.toggle()
+
+        # Hold to stay in manual aiming mode
+        if gamepad.getXButton():
+            self.shooter_controller.is_manual_aiming = True
+            slew_amount = (
+                rescale_js(gamepad.getX(GenericHID.Hand.kLeftHand), 0.1)
+                * -self.MANUAL_SLEW_SPEED
+            )
+            self.shooter_controller.manual_slew(slew_amount)
 
     def handle_hang_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController

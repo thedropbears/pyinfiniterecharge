@@ -79,6 +79,9 @@ class TargetEstimator:
             distance = self.vision_range
         return VisionData(distance, self.angle_to_target, time.monotonic())
 
+    def get_lidar_distance(self) -> float:
+        return self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
+
     def execute(self) -> None:
         # Each timestep we need to adjust our estimate for turret movement.
         # We also check for new vision data.
