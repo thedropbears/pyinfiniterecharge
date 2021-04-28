@@ -65,6 +65,13 @@ class Indexer:
 
     def on_enable(self) -> None:
         self.shimmy_count = 0
+
+    def on_disable(self) -> None:
+        for motor in self.all_motors:
+            motor.stopMotor()
+        self.intake_left_motor.stopMotor()
+        self.intake_right_motor.stopMotor()
+
         self.intaking = False
         self.intake_lowered = False
         self.clearing = False

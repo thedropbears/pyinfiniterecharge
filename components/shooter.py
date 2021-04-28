@@ -50,6 +50,10 @@ class Shooter:
         self.centre_motor.config_kF(0, 0)
         self.centre_ff_calculator = SimpleMotorFeedforward(kS=0.51, kV=0.107)
 
+    def on_disable(self) -> None:
+        self.inject = False
+        self.loading_piston.set(wpilib.DoubleSolenoid.Value.kOff)
+
     def execute(self) -> None:
         if self.disabled:
             self.centre_motor.stopMotor()
