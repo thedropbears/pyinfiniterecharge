@@ -37,16 +37,16 @@ class Shooter:
         self.centre_motor.setInverted(False)
 
         for motor in self.outer_motor, self.centre_motor:
-            motor.configVelocityMeasurementPeriod(1)
-            motor.configVelocityMeasurementWindow(1)
+            motor.configVelocityMeasurementPeriod(ctre.VelocityMeasPeriod.Period_1Ms)
+            motor.configVelocityMeasurementWindow(16)
             motor.setNeutralMode(ctre.NeutralMode.Coast)
 
-        self.outer_motor.config_kP(0, 1.3554)
+        self.outer_motor.config_kP(0, 0.55691)
         self.outer_motor.config_kI(0, 0)
         self.outer_motor.config_kD(0, 0)
         self.outer_motor.config_kF(0, 0)
         self.outer_ff_calculator = SimpleMotorFeedforward(kS=0.39069, kV=0.10715)
-        self.centre_motor.config_kP(0, 1.4417)
+        self.centre_motor.config_kP(0, 0.56755)
         self.centre_motor.config_kI(0, 0)
         self.centre_motor.config_kD(0, 0)
         self.centre_motor.config_kF(0, 0)
