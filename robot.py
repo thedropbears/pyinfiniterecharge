@@ -158,6 +158,7 @@ class MyRobot(magicbot.MagicRobot):
         self.chassis.drive(vx, vz)
         if joystick.getRawButtonPressed(3):
             self.chassis.reset_heading()
+            self.target_estimator.reset()
 
     def handle_shooter_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
