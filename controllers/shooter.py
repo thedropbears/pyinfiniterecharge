@@ -74,7 +74,6 @@ class ShooterController(StateMachine):
         else:
             self.led_screen.set_middle_row(255, 0, 0)
 
-
             if self.target_estimator.is_ready():
                 if self.aimed_at_target():
                     self.led_screen.set_top_row(0, 255, 0)
