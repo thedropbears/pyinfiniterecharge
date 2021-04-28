@@ -123,6 +123,8 @@ class Turret:
 
     def __init__(self):
         self.disabled = False
+        self.disable_when_done = False
+        self.parked = False
 
     def on_enable(self) -> None:
         self.must_finish = False
@@ -150,6 +152,10 @@ class Turret:
         self.motor.stopMotor()
 
     def execute(self) -> None:
+        if self.disable_when_done and self._motor_is_finished():
+            self.disabled = True
+            self.disable_when_done = False
+            self.parked = True
         if self.disabled:
             self.motor.stopMotor()
             return
@@ -170,15 +176,15 @@ class Turret:
 
     # Slew to the given absolute angle in radians in the robot coordinate system.
     def slew_to_azimuth(self, angle: float) -> None:
-        if self.must_finish:
+        if self.must_finish or self.disabled:
             return
         self.current_state = self.SLEWING
         turret_angle = _robot_to_turret(angle)
-        self.motor._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
+        self._slew_to_counts(int(turret_angle * self.COUNTS_PER_TURRET_RADIAN))
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
-        if self.must_finish:
+        if self.must_finish or self.disabled:
             return
         self.current_state = self.SLEWING
         current_pos = self.motor.getSelectedSensorPosition()
@@ -202,7 +208,7 @@ class Turret:
         rather than starting over.
         """
 
-        if self.must_finish:
+        if self.must_finish or self.disabled:
             return
         # If we aren't already scanning, reset scan size
         if self.current_state != self.SCANNING:
@@ -217,6 +223,9 @@ class Turret:
 
     def is_ready(self) -> bool:
         return self.current_state != self.SCANNING and self._motor_is_finished()
+
+    def is_parked(self) -> bool:
+        return self.parked
 
     def azimuth_at_time(self, t: float) -> float:
         """Get the stored azimuth (in radians) of the turret at a specified
@@ -241,6 +250,10 @@ class Turret:
     def get_azimuth(self) -> float:
         """Get the current azimuth in radians"""
         return self._sensor_to_robot(self.motor.getSelectedSensorPosition())
+
+    def park_and_disable(self) -> None:
+        self.disable_when_done = True
+        self.slew_to_azimuth(0)
 
     #### Internal methods from here on
 
