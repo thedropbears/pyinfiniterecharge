@@ -14,12 +14,6 @@ class KrakenController(StateMachine):
     shooter: Shooter
     turret: Turret
 
-    def __init__(self) -> None:
-        super().__init__()
-
-    def execute(self) -> None:
-        super().execute()
-
     @state(first=True, must_finish=True)
     def disable_shooter(self) -> None:
         self.shooter.disabled = True
