@@ -97,15 +97,18 @@ class MyRobot(magicbot.MagicRobot):
         self.indexer.shimmying = False
         self.indexer.auto_retract = False
 
+    def disabledInit(self) -> None:
+        self.chassis.drive(0, 0)
+        self.chassis.disable_brake_mode()
+        super().disabledInit()
+
     def disabledPeriodic(self) -> None:
         self.vision.execute()
 
     def teleopInit(self) -> None:
         """Initialise things for driver control."""
         if not self.has_zeroed:
-            self.chassis.reset_odometry(
-                geometry.Pose2d(-3, 0, geometry.Rotation2d(math.pi))
-            )
+            self.chassis.reset_odometry(geometry.Pose2d(3, 2.3, geometry.Rotation2d(0)))
             self.has_zeroed = True
         self.chassis.disable_closed_loop()
         self.chassis.disable_brake_mode()
@@ -188,6 +191,7 @@ class MyRobot(magicbot.MagicRobot):
         )
 
     track_target = magicbot.tunable(False)
+    run_turret = magicbot.tunable(False)
 
     def testPeriodic(self):
 
@@ -225,9 +229,12 @@ class MyRobot(magicbot.MagicRobot):
         slew_increment = math.radians(5)  # radians
         if self.driver_joystick.getRawButtonPressed(5):
             self.turret.slew(slew_increment)
-            self.turret.execute()
+            self.run_turret = True
         elif self.driver_joystick.getRawButtonPressed(6):
             self.turret.slew(-slew_increment)
+            self.run_turret = True
+
+        if self.run_turret:
             self.turret.execute()
 
         if self.driver_joystick.getRawButtonPressed(7):

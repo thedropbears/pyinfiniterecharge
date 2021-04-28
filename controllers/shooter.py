@@ -49,6 +49,10 @@ class ShooterController(StateMachine):
         super().execute()
         self.update_LED()
 
+    def on_disable(self):
+        self.stop()
+        return super().on_disable()
+
     def update_LED(self) -> None:
         # Flash if turret and shooter are disabled
         if self.shooter.disabled:
@@ -116,11 +120,16 @@ class ShooterController(StateMachine):
                     self.time_of_last_scan is None
                     or (time_now - self.time_of_last_scan) > self.MIN_SCAN_PERIOD
                 ):
-                    self.turret.scan(-self.chassis.get_heading())
+                    self.turret.scan(-self.chassis.get_heading() + math.pi)
                     self.time_of_last_scan = time_now
             # TODO test this
             # target_angle = self.chassis.angle_to_target()
             # self.turret.scan(target_angle)
+
+    def stop(self) -> None:
+        self.done()
+        self.shooter.stop()
+        self.turret.slew(0)
 
     @state
     def tracking(self) -> None:

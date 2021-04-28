@@ -80,9 +80,10 @@ class Turret:
     HALL_EFFECT_CLOSED = False
     HALL_EFFECT_HALF_WIDTH_COUNTS = 100  # TODO: Check this on the robot
 
-    # Limit to prevent turret from rotating too far. Note that this allows for
-    # a total coverage > 360 degrees.
-    MAX_TURRET_COUNT = int(math.radians(190) * COUNTS_PER_TURRET_RADIAN)
+    # Signed limits to prevent turret from rotating too far. Note that this allows
+    # for a total coverage > 360 degrees.
+    MAX_TURRET_COUNT = int(0.3 * COUNTS_PER_TURRET_RADIAN)  # measured values
+    MIN_TURRET_COUNT = int((-3.0 - math.pi) * COUNTS_PER_TURRET_RADIAN)
 
     # PID values
     # Open loop tests give a turret speed of ~930counts/100ms at 25% throttle
@@ -94,10 +95,10 @@ class Turret:
     # Double until oscillation occurs
     # Set kD to 10*kP
     pidF = 0.2
-    pidP = 1.0
-    pidI = 0.005
+    pidP = 2.0
+    pidI = 0.007
     pidIZone = 300
-    pidD = 4.0
+    pidD = 8.0
     SLEW_CRUISE_VELOCITY = 4000
     SCAN_CRUISE_VELOCITY = 1500
     CRUISE_ACCELERATION = int(SLEW_CRUISE_VELOCITY / 0.15)
@@ -123,6 +124,7 @@ class Turret:
 
     def __init__(self):
         self.disabled = False
+        self.must_finish = False
 
     def on_enable(self) -> None:
         self.must_finish = False
@@ -155,7 +157,10 @@ class Turret:
             return
         if not self.index_found and self.index_hit != Index.NO_INDEX:
             self._handle_index(self.index_hit)
-        if self.current_state == self.SCANNING:
+        if not self.index_found:
+            self.slew(math.pi)
+            self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
+        elif self.current_state == self.SCANNING:
             self.motor.configMotionCruiseVelocity(self.SCAN_CRUISE_VELOCITY, 0)
             self._do_scanning()
         else:
@@ -178,12 +183,12 @@ class Turret:
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
-        if self.must_finish:
+        if self.must_finish or not self.index_found:
             return
         self.current_state = self.SLEWING
         current_pos = self.motor.getSelectedSensorPosition()
         target = current_pos + int(angle * self.COUNTS_PER_TURRET_RADIAN)
-        if target < -self.MAX_TURRET_COUNT:
+        if target < self.MIN_TURRET_COUNT:
             target += self.COUNTS_PER_TURRET_REV
             self.must_finish = True
             self.turnaround_direction = self.POSITIVE
@@ -271,8 +276,8 @@ class Turret:
     def _slew_to_counts(self, counts: int) -> None:
         # Callers should ensure that the target is in range, but this is
         # defense in depth to not damage the robot.
-        if counts < -self.MAX_TURRET_COUNT:
-            counts = -self.MAX_TURRET_COUNT
+        if counts < self.MIN_TURRET_COUNT:
+            counts = self.MIN_TURRET_COUNT
         if counts > self.MAX_TURRET_COUNT:
             counts = self.MAX_TURRET_COUNT
         self.current_target_counts = counts
@@ -356,16 +361,16 @@ class Turret:
         self.right_index.disableInterrupts()
 
     def _centre_isr(self, _: wpilib.InterruptableSensorBase.WaitResult) -> None:
-        self.index_hit = Index.CENTRE
         self.index_count = self.motor.getSelectedSensorPosition()
+        self.index_hit = Index.CENTRE
 
     def _left_isr(self, _: wpilib.InterruptableSensorBase.WaitResult) -> None:
-        self.index_hit = Index.LEFT
         self.index_count = self.motor.getSelectedSensorPosition()
+        self.index_hit = Index.LEFT
 
     def _right_isr(self, _: wpilib.InterruptableSensorBase.WaitResult) -> None:
-        self.index_hit = Index.RIGHT
         self.index_count = self.motor.getSelectedSensorPosition()
+        self.index_hit = Index.RIGHT
 
     def _get_current_index(self) -> Index:
         if self.centre_index.get() == self.HALL_EFFECT_CLOSED:
@@ -413,8 +418,8 @@ class Turret:
             self.azimuth_history[i] = entry - delta
             # update old measurements
         if self.current_state == self.SLEWING:
-            print("state is SLEWING, so adjusting slew target")
-            self._slew_to_counts(self.current_target_counts - delta)
+            print("state is SLEWING, so stopping")
+            self._slew_to_counts(counts)
         print(f"moved command from {self.current_target_counts} by {delta}")
 
     def _sensor_to_robot(self, counts: int) -> float:
