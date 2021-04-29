@@ -157,7 +157,9 @@ class MyRobot(magicbot.MagicRobot):
         vz = 3 * throttle * rescale_js(-joystick.getTwist(), 0.1)
         self.chassis.drive(vx, vz)
         if joystick.getRawButtonPressed(3):
-            self.chassis.reset_heading()
+            self.chassis.reset_odometry(
+                Pose2d(-3, 0, Rotation2d(math.pi))
+            )  # the starting position on the field
             self.target_estimator.reset()
 
     def handle_shooter_inputs(
