@@ -175,7 +175,7 @@ class Turret:
 
     # Slew to the given absolute angle in radians in the robot coordinate system.
     def slew_to_azimuth(self, angle: float) -> None:
-        if self.must_finish or self.disabled:
+        if self.must_finish or self.disabled or self.disable_when_done:
             return
         self.current_state = self.SLEWING
         turret_angle = _robot_to_turret(angle)
@@ -183,7 +183,7 @@ class Turret:
 
     # Slew the given angle (in radians) from the current position
     def slew(self, angle: float) -> None:
-        if self.must_finish or self.disabled:
+        if self.must_finish or self.disabled or self.disable_when_done:
             return
         self.current_state = self.SLEWING
         current_pos = self.motor.getSelectedSensorPosition()
@@ -207,7 +207,7 @@ class Turret:
         rather than starting over.
         """
 
-        if self.must_finish or self.disabled:
+        if self.must_finish or self.disabled or self.disable_when_done:
             return
         # If we aren't already scanning, reset scan size
         if self.current_state != self.SCANNING:
@@ -251,8 +251,8 @@ class Turret:
         return self._sensor_to_robot(self.motor.getSelectedSensorPosition())
 
     def park_and_disable(self) -> None:
-        self.disable_when_done = True
         self.slew_to_azimuth(0)
+        self.disable_when_done = True
 
     #### Internal methods from here on
 
