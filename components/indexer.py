@@ -78,6 +78,8 @@ class Indexer:
         self.clearing = False
 
     def execute(self) -> None:
+        self.intake_arm_piston.set(self.intake_lowered)
+
         if self.clearing:
             # Run everything backwards to try to clear a jam
             for motor in self.indexer_motors:
@@ -149,8 +151,6 @@ class Indexer:
             if second is feeder and self.transfer_to_injector:
                 second_has_ball = True  # Pretend the ball is still in the feeder
             first.overrideLimitSwitchesEnable(second_has_ball)
-
-        self.intake_arm_piston.set(self.intake_lowered)
 
         if self.intake_clearing:
             self.intake_main_motor.set(-self.intake_motor_speed / 2)
