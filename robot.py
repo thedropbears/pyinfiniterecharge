@@ -26,6 +26,7 @@ from utilities import git
 from utilities.scalers import rescale_js, scale_value
 
 GIT_COMMIT = git.describe()
+Hand = GenericHID.Hand
 
 
 class MyRobot(magicbot.MagicRobot):
@@ -165,7 +166,7 @@ class MyRobot(magicbot.MagicRobot):
     ) -> None:
         if joystick.getTrigger():
             self.shooter_controller.fire_input()
-        if gamepad.getBackButton() and gamepad.getRawButtonPressed(5):
+        if gamepad.getBackButton() and gamepad.getBumperPressed(Hand.kLeftHand):
             # Disable turret in case of catastrophic malfunction
             # Make this toggle to allow re-enabling turret in case it was accidentally disabled
             self.shooter.toggle()
@@ -173,21 +174,18 @@ class MyRobot(magicbot.MagicRobot):
 
         # Hold to stay in manual aiming mode
         if gamepad.getXButton():
-            self.shooter_controller.is_manual_aiming = True
-            slew_amount = (
-                rescale_js(gamepad.getX(GenericHID.Hand.kLeftHand), 0.1)
-                * -self.MANUAL_SLEW_SPEED
+            self.shooter_controller.manual_slew(
+                rescale_js(gamepad.getX(Hand.kLeftHand), 0.1) * -self.MANUAL_SLEW_SPEED
             )
-            self.shooter_controller.manual_slew(slew_amount)
 
     def handle_hang_inputs(
         self, joystick: wpilib.Joystick, gamepad: wpilib.XboxController
     ) -> None:
-        if gamepad.getStartButton() and gamepad.getBumper(GenericHID.Hand.kRightHand):
+        if gamepad.getStartButton() and gamepad.getBumper(Hand.kRightHand):
             self.kraken_controller.engage()
         if self.hang.fire_hook and (
-            gamepad.getTriggerAxis(GenericHID.Hand.kLeftHand) > 0.9
-            or gamepad.getTriggerAxis(GenericHID.Hand.kRightHand) > 0.9
+            gamepad.getTriggerAxis(Hand.kLeftHand) > 0.9
+            or gamepad.getTriggerAxis(Hand.kRightHand) > 0.9
         ):
             self.hang.winch()
 
