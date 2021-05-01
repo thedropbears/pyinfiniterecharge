@@ -1,10 +1,10 @@
-import time
 import math
 
 from networktables import NetworkTables, NetworkTable
 from typing import Optional
 from dataclasses import dataclass
 from magicbot import feedback
+from wpilib import Timer
 
 
 @dataclass
@@ -32,7 +32,7 @@ class VisionComms:
         self.latency_entry.setDouble(value)
 
     def __init__(self, table: NetworkTable) -> None:
-        self.last_pong = time.time()
+        self.last_pong = Timer.getFPGATimestamp()
 
         self.table = table
         self.ping_time_entry = self.table.getEntry("ping")
@@ -44,7 +44,7 @@ class VisionComms:
 
     def ping(self) -> None:
         """Send a ping to the RasPi to determine the connection latency."""
-        self.ping_time_entry.setDouble(time.time())
+        self.ping_time_entry.setDouble(Timer.getFPGATimestamp())
 
     def pong(self) -> None:
         """Receive a pong from the RasPi to determine the connection latency."""
@@ -102,6 +102,6 @@ class Vision:
     @feedback
     def system_lag_calculation(self) -> float:
         if self.vision_data is not None:
-            return time.time() - self.vision_data.timestamp
+            return Timer.getFPGATimestamp() - self.vision_data.timestamp
         else:
             return math.inf

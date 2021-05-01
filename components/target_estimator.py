@@ -6,11 +6,11 @@ from components.vision import Vision, VisionData
 from utilities.functions import constrain_angle
 
 import math
-import time
 
 from typing import Optional
 
 from magicbot import feedback
+from wpilib import Timer
 
 
 def _test_for_downrange(heading: float, azimuth: float) -> bool:
@@ -77,7 +77,7 @@ class TargetEstimator:
             distance = self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
         else:
             distance = self.vision_range
-        return VisionData(distance, self.angle_to_target, time.time())
+        return VisionData(distance, self.angle_to_target, Timer.getFPGATimestamp())
 
     def execute(self) -> None:
         # Each timestep we need to adjust our estimate for turret movement.

@@ -1,5 +1,4 @@
 import math
-import time
 from collections import deque
 from enum import Enum
 from typing import Optional
@@ -232,7 +231,7 @@ class Turret:
         time. Returns the oldest data if the requested time is not in history
         @param t: time that we want data for
         """
-        current_time = time.time()
+        current_time = wpilib.Timer.getFPGATimestamp()
         control_loops_ago = int((current_time - t) / self.control_loop_wait_time)
         if control_loops_ago >= len(self.azimuth_history):
             return (
