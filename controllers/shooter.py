@@ -1,9 +1,9 @@
 import math
-import time
 
 from typing import Optional
 
 from magicbot import feedback, StateMachine, state, will_reset_to
+from wpilib import Timer
 
 from components.chassis import Chassis
 from components.indexer import Indexer
@@ -110,7 +110,7 @@ class ShooterController(StateMachine):
             self.next_state("tracking")
         else:
             # Scan starting straight downrange.
-            time_now = time.monotonic()
+            time_now = Timer.getFPGATimestamp()
             # Start a scan only if it's been a minimum time since we lost the target
             if (
                 self.time_target_lost is None
@@ -142,7 +142,7 @@ class ShooterController(StateMachine):
 
         # collect data only once per loop
         if not self.target_estimator.is_ready():
-            self.time_target_lost = time.monotonic()
+            self.time_target_lost = Timer.getFPGATimestamp()
             self.next_state("searching")
             # print(f"tracking -> searching {self.vision.get_vision_data()}")
         else:

@@ -6,11 +6,11 @@ from components.vision import Vision, VisionData
 from utilities.functions import constrain_angle
 
 import math
-import time
 
 from typing import Optional
 
 from magicbot import feedback
+from wpilib import Timer
 
 
 def _test_for_downrange(heading: float, azimuth: float) -> bool:
@@ -77,7 +77,7 @@ class TargetEstimator:
             distance = self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
         else:
             distance = self.vision_range
-        return VisionData(distance, self.angle_to_target, time.monotonic())
+        return VisionData(distance, self.angle_to_target, Timer.getFPGATimestamp())
 
     def get_lidar_distance(self) -> float:
         return self.range_finder.get_distance() - self.CAMERA_TO_LIDAR
