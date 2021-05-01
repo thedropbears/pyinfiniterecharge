@@ -183,11 +183,11 @@ class ShooterController(StateMachine):
         if not self.is_manual_aiming:
             self.next_state("tracking")
             return
-        target_data = self.target_estimator.get_lidar_distance()
+        target_dist = self.target_estimator.get_lidar_distance()
 
-        # when manually aiming, continuesly set the range based on the lidar
+        # when manually aiming, continuously set the range based on the lidar
         if self.turret.is_ready():
-            self.shooter.set_range(target_data)
+            self.shooter.set_range(target_dist)
 
         if self.ball_ready_to_fire() and self.fire_command:
             self.next_state("firing")
@@ -197,10 +197,8 @@ class ShooterController(StateMachine):
         Called by robot.py to manualy control the azimuth of the turret
         Slews relative to the current position
         """
-        if self.is_manual_aiming:
-            self.turret.slew(angle)
-        else:
-            print("tried to manual slew in automatic mode")
+        self.is_manual_aiming = True
+        self.turret.slew(angle)
 
     @feedback
     def in_manual_aiming(self) -> bool:
