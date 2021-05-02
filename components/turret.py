@@ -117,7 +117,7 @@ class Turret:
 
     def setup(self) -> None:
         sendable_reg = wpilib.SendableRegistry.getInstance()
-        for dev in (self.centre_index, self.right_index, self.left_index):
+        for dev in (self.centre_index, self.right_index, self.left_index, self.motor):
             sendable_reg.setSubsystem(dev, "Turret")
 
         self._setup_motor()
