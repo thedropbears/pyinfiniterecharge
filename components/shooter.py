@@ -41,6 +41,7 @@ class Shooter:
         self.centre_motor.setInverted(False)
 
         for motor in self.outer_motor, self.centre_motor:
+            sendable_reg.setSubsystem(dev, "Shooter")
             motor.configVelocityMeasurementPeriod(ctre.VelocityMeasPeriod.Period_1Ms)
             motor.configVelocityMeasurementWindow(16)
             motor.setNeutralMode(ctre.NeutralMode.Coast)
