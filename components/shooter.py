@@ -33,10 +33,15 @@ class Shooter:
         self.disabled = False
 
     def setup(self) -> None:
+        sendable_reg = wpilib.SendableRegistry.getInstance()
+        for dev in (self.loading_piston, self.piston_switch):
+            sendable_reg.setSubsystem(dev, "Shooter")
+
         self.outer_motor.setInverted(True)
         self.centre_motor.setInverted(False)
 
         for motor in self.outer_motor, self.centre_motor:
+            sendable_reg.setSubsystem(dev, "Shooter")
             motor.configVelocityMeasurementPeriod(ctre.VelocityMeasPeriod.Period_1Ms)
             motor.configVelocityMeasurementWindow(16)
             motor.setNeutralMode(ctre.NeutralMode.Coast)
