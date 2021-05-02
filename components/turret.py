@@ -259,6 +259,8 @@ class Turret:
     #### Motor control, slewing, scanning
 
     def _setup_motor(self) -> None:
+        self.motor.configFactoryDefault()
+
         # Positive motion is counterclockwise from above.
         self.motor.setInverted(ctre.InvertType.InvertMotorOutput)
         # set the peak and nominal outputs
@@ -266,10 +268,6 @@ class Turret:
         self.motor.configNominalOutputReverse(0, 10)
         self.motor.configPeakOutputForward(1.0, 10)
         self.motor.configPeakOutputReverse(-1.0, 10)
-        # Set relevant frame periods to be at least as fast as periodic rate
-        self.motor.setStatusFramePeriod(
-            ctre.StatusFrameEnhanced.Status_13_Base_PIDF0, 10, 10
-        )
         self.motor.config_kF(0, self.pidF, 10)
         self.motor.config_kP(0, self.pidP, 10)
         self.motor.config_IntegralZone(0, self.pidIZone, 10)
